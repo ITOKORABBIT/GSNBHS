@@ -1,0 +1,41 @@
+{
+  "_note": "此檔案建議由 串接精靈.html 匯出；若手動修改，請確認文字編碼維持 UTF-8。",
+  "_version": "2.0",
+  "_generated_at": "",
+  "_source_project": "E:\\00. PROJECT\\舊社里里民小幫手",
+
+  "folder_path": "",
+  "district": "",
+  "village": "",
+  "village_name": "",
+  "system_name": "里民小幫手",
+  "code": "",
+  "case_prefix": "",
+
+  "github_user": "ITOKORABBIT",
+  "repo_name": "",
+  "pages_url": "",
+  "base_url": "",
+
+  "sheet_id": "",
+  "drive_root_folder_id": "",
+  "nbh_folder_id": "",
+  "stor_folder_id": "",
+  "bulletin_folder_id": "",
+
+  "script_url": "",
+  "google_client_id": "",
+  "api_key": "",
+
+  "report_webhook_url": "",
+  "store_notify_webhook_url": "",
+
+  "line_official_account_name": "",
+  "line_basic_id": "",
+  "line_channel_id": "",
+  "line_channel_secret": "",
+  "line_channel_access_token": "",
+  "line_group_id": "",
+
+  "admin_emails": []
+}

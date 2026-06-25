@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>頁面不存在</title>
+  <style>body{margin:0;font-family:'Noto Sans TC',sans-serif;background:#f8fafc;color:#334155;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:24px}h1{margin:0;font-size:28px;}p{margin:12px 0 0;color:#64748b;}</style>
+</head>
+<body>
+  <script>
+    var path = location.pathname || '';
+    var file = path.split('/').filter(Boolean).pop() || '';
+    if (/^survey[0-9A-Za-z_-]*\.html$/i.test(file) && file.toLowerCase() !== 'survey.html') {
+      var query = location.search || '';
+      var separator = query ? '&' : '?';
+      window.location.replace('/survey' + query + separator + 'surveyFileName=' + encodeURIComponent(file));
+    } else {
+      document.body.innerHTML = '<div><h1>找不到頁面</h1><p>您欲訪問的頁面不存在。</p></div>';
+    }
+  </script>
+</body>
+</html>

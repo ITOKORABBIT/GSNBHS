@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美食地圖 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+
+:root{
+  --bg:        #EDF5FF;
+  --card:      #FFFFFF;
+  --border:    #B8D4EE;
+  --divider:   #CCE2F5;
+  --lbl:       #456280;
+  --val:       #182C44;
+  --muted:     #80AACB;
+  --heading:   #0E2038;
+  --primary:       #4A92C4;
+  --primary-light: #E3F2FF;
+  --primary-dark:  #3070A0;
+  --shadow-sm: 0 1px 3px rgba(20,60,100,.07);
+  --shadow-md: 0 2px 8px rgba(20,60,100,.09), 0 1px 2px rgba(20,60,100,.05);
+  --radius: 10px;
+  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body{
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--val);
+  font-size: 15px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page header ── */
+.page-header{
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  height: 54px;
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-title{
+  flex: 1;
+  font-size: 16px; font-weight: 700;
+  color: var(--heading);
+  text-align: center;
+}
+.header-subtitle{
+  font-size: 12px; font-weight: 400;
+  color: var(--lbl); margin-top: 1px;
+}
+.apply-btn{
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 13px;
+  border-radius: 8px; border: none;
+  background: #F2C843;
+  font-size: 13px; font-weight: 600;
+  color: #5A3E00; transition: background .15s; white-space: nowrap;
+}
+.apply-btn:hover{ background: #DEB030; }
+
+/* ── Filter bar ── */
+.filter-wrap{
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 54px; z-index: 90;
+}
+.filter-bar{
+  padding: 8px 16px;
+  display: flex; gap: 8px; align-items: center;
+  flex-wrap: wrap;
+}
+.search-wrap{
+  flex: 1; min-width: 180px;
+  position: relative;
+  display: flex; align-items: center;
+}
+.search-wrap svg{
+  position: absolute; left: 10px;
+  color: var(--muted); pointer-events: none;
+}
+.search-input{
+  width: 100%; padding: 7px 10px 7px 34px;
+  border-radius: 7px; border: 1px solid var(--border);
+  background: var(--bg); font-family: var(--font); font-size: 13px;
+  color: var(--val); outline: none; transition: border-color .15s;
+}
+.search-input:focus{ border-color: var(--primary); }
+
+/* ── Category chips ── */
+.cate-chips{
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 16px 10px;
+}
+.cate-chip{
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 11px; border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+  border: 1.5px solid transparent;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+  background: var(--bg); color: var(--lbl); border-color: var(--border);
+}
+.cate-chip.active{ border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+/* ── Result bar ── */
+.result-bar{
+  padding: 10px 16px 4px;
+  font-size: 12px; color: var(--lbl);
+}
+.result-bar strong{ color: var(--primary); }
+
+/* ── Card grid ── */
+.card-grid{
+  padding: 4px 12px 100px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+/* ── Store card ── */
+.store-card{
+  position: relative;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  border-left: 4px solid var(--primary);
+  transition: transform .15s, box-shadow .15s;
+}
+.store-card:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-thumb{
+  width: 100%; aspect-ratio: 16/9;
+  background: var(--divider);
+  overflow: hidden; flex-shrink: 0; position: relative;
+}
+.card-thumb img{
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .3s;
+}
+.store-card:hover .card-thumb img{ transform: scale(1.04); }
+.card-thumb-placeholder{
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #DCEEFF 0%, #C8E2F8 100%);
+}
+.thumb-view-badge{
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px; border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(226,217,207,.9);
+  color: var(--lbl); font-size: 11px; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.thumb-view-badge svg{ width: 12px; height: 12px; opacity: .72; }
+
+.card-body{
+  padding: 9px 11px 11px;
+  flex: 1; display: flex; flex-direction: column;
+}
+.card-top{ display: flex; align-items: center; gap: 5px; margin-bottom: 5px; flex-wrap: wrap; }
+.cate-badge{
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 5px;
+  font-size: 11px; font-weight: 700;
+}
+.brand-tag{
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 999px;
+  background: #FFF3E0; color: #B75D00;
+  font-size: 11px; font-weight: 700;
+}
+.card-name{
+  font-size: 14px; font-weight: 700;
+  color: var(--heading); line-height: 1.35;
+  margin-bottom: 7px;
+}
+.card-phone{
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; line-height: 1.45; color: var(--lbl);
+  margin-bottom: 7px;
+}
+.card-phone svg{ width: 11px; height: 11px; flex-shrink: 0; }
+.card-address{
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; line-height: 1.45; color: var(--lbl);
+  margin-bottom: 7px;
+  min-width: 0;
+}
+.card-address svg{ width: 11px; height: 11px; flex-shrink: 0; }
+.card-address-text{
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card-meta{ display: flex; flex-wrap: wrap; gap: 6px; }
+.card-desc{
+  font-size: 12px; color: var(--lbl);
+  line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-offer-divider{ height: 1px; background: var(--divider); margin-top: 10px; margin-bottom: 8px; }
+.card-offer-label{
+  display: inline-flex; align-items: center; align-self: flex-start;
+  padding: 2px 7px; border-radius: 999px;
+  background: var(--primary-light); color: var(--primary-dark);
+  font-size: 11px; font-weight: 700; margin-bottom: 5px;
+}
+
+/* ── 區塊標題 ── */
+.section-header {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 2px 1px;
+}
+.section-header-label {
+  font-size: 12px; font-weight: 700; color: var(--lbl);
+  display: flex; align-items: center; gap: 6px;
+}
+.section-header-line { flex: 1; height: 1px; background: var(--divider); }
+
+/* ── Empty / Loading ── */
+.state-wrap{
+  grid-column: 1 / -1;
+  text-align: center; padding: 60px 24px;
+  color: var(--lbl);
+}
+.state-wrap svg{ margin: 0 auto 16px; opacity: .4; }
+.state-wrap h3{ font-size: 16px; color: var(--heading); margin-bottom: 6px; }
+.state-wrap p{ font-size: 13px; }
+
+.skel{
+  background: linear-gradient(90deg,var(--divider) 25%,#b4d0ea 50%,var(--divider) 75%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 5px;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+}
+
+@media(max-width: 480px){
+  .card-grid{ grid-template-columns: 1fr; padding: 4px 10px 80px; }
+
+  /* 手機改橫向緊湊列：縮圖左 90px、文字右，一頁可見 6~7 筆 */
+  .store-card{ flex-direction: row; }
+  .card-thumb{ width: 90px; height: 90px; flex-shrink: 0; aspect-ratio: auto; }
+  .card-body{ padding: 7px 10px; min-width: 0; }
+  .card-top{ margin-bottom: 3px; }
+  .card-name{ font-size: 13px; margin-bottom: 4px; }
+  .card-phone, .card-address{ margin-bottom: 4px; }
+  .card-desc{ -webkit-line-clamp: 1; }
+  .card-offer-divider{ margin-top: 7px; margin-bottom: 6px; }
+}
+
+/* ── 瀏覽統計 ── */
+.stats-row{
+  padding:2px 16px 8px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--lbl);
+}
+.stats-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 11px;border-radius:999px;border:none;
+  background:var(--primary-light);font-size:12px;font-weight:700;
+  color:var(--primary-dark);cursor:pointer;transition:background .15s;
+}
+.stats-btn:hover{background:var(--divider)}
+.vm-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(14,32,56,.38);z-index:500;
+  align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(5px);
+}
+.vm-backdrop.open{display:flex}
+.vm-box{
+  background:#fff;border-radius:16px;
+  width:min(100%,360px);max-height:80vh;overflow:auto;
+  box-shadow:0 12px 40px rgba(20,60,100,.18);
+}
+.vm-head{
+  padding:16px 16px 12px;border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.vm-title{font-size:15px;font-weight:700;color:var(--heading)}
+.vm-close{
+  width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);transition:background .15s;
+}
+.vm-close:hover{background:var(--divider)}
+.vm-body{padding:10px 16px 16px}
+.vm-empty{text-align:center;color:var(--muted);padding:24px 0;font-size:13px}
+.rank-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--divider);
+}
+.rank-row:last-child{border-bottom:none}
+.rank-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:11px;font-weight:700;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.rank-num.r1{background:#e9a21b}
+.rank-num.r2{background:#8a8a8a}
+.rank-num.r3{background:#a06432}
+.rank-name{flex:1;font-size:13px;color:var(--val);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-cnt{font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:2px}
+</style>
+</head>
+<body>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+  <div style="width:60px"></div>
+  <div class="header-title">
+    <div>美食地圖</div>
+    <div class="header-subtitle" id="headerSubtitle">舊社里・里民小幫手</div>
+  </div>
+  <div style="width:60px" aria-hidden="true"></div>
+</div>
+
+<!-- ── Filter bar ── -->
+<div class="filter-wrap">
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="搜尋商店名稱、優惠、地址…" oninput="applyFilters()">
+    </div>
+  </div>
+  <div class="cate-chips" id="cateChips">
+    <span class="cate-chip active" data-cate="all" onclick="selectCate(this)">全部類別</span>
+  </div>
+</div>
+
+<!-- ── Result bar ── -->
+<div class="result-bar" id="resultBar">載入中…</div>
+
+<div class="stats-row" id="statsRow" style="display:none">
+  <span style="display:inline-flex;align-items:center;gap:4px">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+    <span id="pageViewCount">–</span> 次瀏覽
+  </span>
+  <button class="stats-btn" onclick="openVmModal()">🔥 熱門排行</button>
+</div>
+<div class="vm-backdrop" id="vmBackdrop" onclick="closeVmModal(event)">
+  <div class="vm-box">
+    <div class="vm-head">
+      <div class="vm-title">🔥 最多點閱 TOP 5</div>
+      <button class="vm-close" onclick="closeVmModalDirect()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="vm-body" id="vmBody"></div>
+  </div>
+</div>
+
+<!-- ── Card grid ── -->
+<div class="card-grid" id="cardGrid">
+  <div class="skel-card" style="height:220px">
+    <div class="skel" style="height:130px;border-radius:0"></div>
+    <div style="padding:12px 14px">
+      <div class="skel" style="height:12px;width:40%;margin-bottom:8px"></div>
+      <div class="skel" style="height:15px;width:80%;margin-bottom:6px"></div>
+      <div class="skel" style="height:12px;width:60%"></div>
+    </div>
+  </div>
+  <div class="skel-card" style="height:220px">
+    <div class="skel" style="height:130px;border-radius:0"></div>
+    <div style="padding:12px 14px">
+      <div class="skel" style="height:12px;width:50%;margin-bottom:8px"></div>
+      <div class="skel" style="height:15px;width:75%;margin-bottom:6px"></div>
+      <div class="skel" style="height:12px;width:65%"></div>
+    </div>
+  </div>
+  <div class="skel-card" style="height:220px">
+    <div class="skel" style="height:130px;border-radius:0"></div>
+    <div style="padding:12px 14px">
+      <div class="skel" style="height:12px;width:45%;margin-bottom:8px"></div>
+      <div class="skel" style="height:15px;width:85%;margin-bottom:6px"></div>
+      <div class="skel" style="height:12px;width:55%"></div>
+    </div>
+  </div>
+</div>
+
+<script src="storeconfig.js"></script>
+<script src="utils.js"></script>
+<script>
+var CATE_COLOR = {
+  '食': { bg:'#FFF3E0', txt:'#B75D00' },
+  '里內日常小吃':     { bg:'#FFF3E0', txt:'#B75D00' },
+  '家庭好友聚餐':     { bg:'#FFEBD5', txt:'#A04500' },
+  '大坑名產貴賓招待': { bg:'#FFF0D5', txt:'#8B5500' },
+  '衣': { bg:'#F3EBFF', txt:'#6B28A8' },
+  '住': { bg:'#EBF3FF', txt:'#1A56A8' },
+  '行': { bg:'#E0F7FA', txt:'#006B6B' },
+  '育': { bg:'#EAF3EB', txt:'#2F6836' },
+  '樂': { bg:'#FEE2E2', txt:'#991B1B' },
+  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
+};
+var FOOD_CATES = ['里內日常小吃', '家庭好友聚餐', '大坑名產貴賓招待'];
+
+function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
+var storeBrandTagDefs = [];
+var BRAND_TAG_PALETTE = {
+  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
+  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
+  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+};
+function brandTagStyle(tag) {
+  var def = storeBrandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };
+  var color = BRAND_TAG_PALETTE[def.color] || BRAND_TAG_PALETTE.gold;
+  return 'background:' + color.bg + ';color:' + color.txt + ';border-color:' + color.bd;
+}
+function loadStoreBrandTagDefs() {
+  apiCall('getPublicStoreTaxonomy').then(function(json){
+    storeBrandTagDefs = json.success && json.taxonomy && Array.isArray(json.taxonomy.brandTagDefs) ? json.taxonomy.brandTagDefs : [];
+    if (allStores.length) applyFilters();
+  }).catch(function(){});
+}
+
+function cateBadge(cat) {
+  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
+}
+
+var allStores = [];
+var currentCate = 'all';
+var vcData = {};
+var vcNamesMap = {};
+var EYE_SVG = '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+function fmtNum(n) {
+  return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function loadViewStats() {
+  apiCall('getViewStats', { page: 'storelist' })
+    .then(function(json) {
+      if (!json.success) return;
+      vcData = json.cardCounts || {};
+      document.getElementById('statsRow').style.display = 'flex';
+      document.getElementById('pageViewCount').textContent = fmtNum(json.pageCount);
+      updateViewBadges();
+    })
+    .catch(function() {});
+}
+
+function recordCardView(id) {
+  apiCall('recordCardView', { page: 'storelist', itemId: id }).catch(function() {});
+}
+
+function openVmModal() {
+  var entries = Object.keys(vcData).map(function(id) {
+    return { id: id, name: vcNamesMap[id] || id, count: vcData[id] };
+  });
+  entries.sort(function(a, b) { return b.count - a.count; });
+  var top5 = entries.slice(0, 5);
+  var cls = ['r1', 'r2', 'r3', '', ''];
+  var html = top5.length
+    ? top5.map(function(item, i) {
+        return '<div class="rank-row">' +
+          '<div class="rank-num ' + (cls[i] || '') + '">' + (i + 1) + '</div>' +
+          '<div class="rank-name">' + esc(item.name) + '</div>' +
+          '<div class="rank-cnt">' + EYE_SVG + ' ' + fmtNum(item.count) + '</div>' +
+          '</div>';
+      }).join('')
+    : '<div class="vm-empty">尚無點閱資料</div>';
+  document.getElementById('vmBody').innerHTML = html;
+  document.getElementById('vmBackdrop').classList.add('open');
+}
+
+function closeVmModal(e) {
+  if (e.target === document.getElementById('vmBackdrop')) closeVmModalDirect();
+}
+function closeVmModalDirect() {
+  document.getElementById('vmBackdrop').classList.remove('open');
+}
+
+function apiCall(action, extra) {
+  var payload = Object.assign({ action: action }, extra || {});
+  var storeApiActions = { getPublicStores: true, getPublicStore: true, getPublicStoreTaxonomy: true, getViewStats: true, recordCardView: true };
+  var endpoint = (CONFIG.STORE_API_URL && storeApiActions[action]) ? CONFIG.STORE_API_URL : CONFIG.SCRIPT_URL;
+  return fetch(endpoint, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(t){ return JSON.parse(t); });
+}
+
+function applySnapshot(stores) {
+  allStores = stores;
+  allStores.forEach(function(d) {
+    vcNamesMap[d.storeId] = d.pubName || d.storeId;
+  });
+  buildCateChips();
+  applyFilters();
+  document.getElementById('headerSubtitle').textContent =
+    CONFIG.VILLAGE_NAME + '・' + CONFIG.SYSTEM_NAME;
+}
+
+function loadStores() {
+  // 先從 sessionStorage 即時渲染（返回時不等 GAS）
+  try {
+    var cached = JSON.parse(sessionStorage.getItem('pub_stores_cache') || 'null');
+    if (cached && Array.isArray(cached) && cached.length) {
+      applySnapshot(cached);
+      loadViewStats();
+    }
+  } catch(e) {}
+
+  // 背景更新最新資料
+  apiCall('getPublicStores')
+    .then(function(json){
+      if (!json.success) {
+        if (!allStores.length) showError(json.error || '無法取得資料');
+        return;
+      }
+      try { sessionStorage.setItem('pub_stores_cache', JSON.stringify(json.stores || [])); } catch(e) {}
+      applySnapshot(json.stores || []);
+      loadViewStats();
+    })
+    .catch(function(){
+      if (!allStores.length) showError('資料載入失敗，請稍後再試');
+    });
+}
+
+function buildCateChips() {
+  var cats = {};
+  allStores.forEach(function(d){ if (d.pubCate) cats[d.pubCate] = true; });
+  var keys = Object.keys(cats).sort(function(a,b){
+    var order = ['里內日常小吃','家庭好友聚餐','大坑名產貴賓招待','衣','住','行','育','樂','其他'];
+    var ia = order.indexOf(a), ib = order.indexOf(b);
+    if (ia === -1) ia = 999; if (ib === -1) ib = 999;
+    return ia - ib;
+  });
+  var wrap = document.getElementById('cateChips');
+  var html = '<span class="cate-chip active" data-cate="all" onclick="selectCate(this)">全部類別</span>';
+  keys.forEach(function(c){
+    var col = CATE_COLOR[c] || { bg:'#F0EEEC', txt:'#7A6E66' };
+    html += '<span class="cate-chip" data-cate="' + esc(c) + '" onclick="selectCate(this)"' +
+      ' style="--chip-bg:' + col.bg + ';--chip-txt:' + col.txt + '">' + esc(c) + '</span>';
+  });
+  wrap.innerHTML = html;
+}
+
+function selectCate(el) {
+  currentCate = el.dataset.cate;
+  document.querySelectorAll('.cate-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  applyFilters();
+}
+
+function categoryWeight(d) {
+  var idx = FOOD_CATES.indexOf(d.pubCate || '');
+  if (idx !== -1) return idx + 1;
+  return 4;
+}
+
+function applyFilters() {
+  var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  var filtered = allStores.filter(function(d){
+    if (currentCate !== 'all' && (d.pubCate || '') !== currentCate) return false;
+    if (q) {
+      var hay = [d.pubName, d.pubCate, brandTags(d).join(' '), d.pubAddr, d.pubDesc, d.pubOffer].join(' ').toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  filtered.sort(function(a, b) {
+    var wa = categoryWeight(a), wb = categoryWeight(b);
+    if (wa !== wb) return wa - wb;
+    var ha = a.sortOrder > 0, hb = b.sortOrder > 0;
+    if (ha !== hb) return ha ? 1 : -1;
+    if (!ha) return b.storeId.localeCompare(a.storeId);
+    return a.sortOrder - b.sortOrder;
+  });
+
+  renderGrid(filtered);
+  document.getElementById('resultBar').innerHTML =
+    '共 <strong>' + filtered.length + '</strong> 家商店' +
+    (allStores.length !== filtered.length ? '・全部 ' + allStores.length + ' 家' : '');
+}
+
+function sectionHeader(label) {
+  return '<div class="section-header"><span class="section-header-label">' + label + '</span>' +
+    '<div class="section-header-line"></div></div>';
+}
+
+function renderGrid(stores) {
+  var grid = document.getElementById('cardGrid');
+  if (!stores.length) {
+    grid.innerHTML = '<div class="state-wrap">' +
+      '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' +
+      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+      '<h3>沒有符合的商店</h3><p>請嘗試調整搜尋條件</p></div>';
+    return;
+  }
+
+  var groups = FOOD_CATES.map(function(c){ return { key: c, label: c, stores: [] }; });
+  groups.push({ key: 'other', label: '其他各行各業', stores: [] });
+
+  stores.forEach(function(d) {
+    var idx = FOOD_CATES.indexOf(d.pubCate || '');
+    groups[idx === -1 ? 3 : idx].stores.push(d);
+  });
+
+  var html = '';
+  groups.forEach(function(group) {
+    if (!group.stores.length) return;
+    html += sectionHeader(group.label + ' <span style="color:var(--muted);font-weight:600"> ' + group.stores.length + ' 間</span>');
+    group.stores.forEach(function(d) {
+      html += renderCard(d);
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function imgFallback(img) {
+  var wrap = img.parentNode;
+  var badge = wrap.querySelector('.thumb-view-badge');
+  wrap.innerHTML = '<div class="card-thumb-placeholder">' +
+    '<svg width="32" height="32" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".5" viewBox="0 0 24 24">' +
+    '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>' +
+    (badge ? badge.outerHTML : '');
+}
+
+function renderCard(d) {
+  var thumb = d.photo1
+    ? '<div class="card-thumb"><img src="' + esc(d.photo1) + '" alt="" loading="lazy" onerror="imgFallback(this)">' + viewBadgeHtml(d.storeId) + '</div>'
+    : '<div class="card-thumb"><div class="card-thumb-placeholder">' +
+      '<svg width="32" height="32" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".5" viewBox="0 0 24 24">' +
+      '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>' +
+      viewBadgeHtml(d.storeId) + '</div>';
+
+  var html = '<div class="store-card" onclick="openStore(\'' + esc(d.storeId) + '\')" style="cursor:pointer">';
+  html += thumb;
+  html += '<div class="card-body">';
+  html += '<div class="card-name">' + esc(d.pubName || '（未命名）') + '</div>';
+  if (d.pubPhone) {
+    html += '<div class="card-phone">' +
+      '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
+      '<a href="tel:' + esc(d.pubPhone) + '" onclick="event.stopPropagation()" style="color:var(--primary);text-decoration:none">' + esc(d.pubPhone) + '</a></div>';
+  }
+  if (d.pubAddr) {
+    html += '<div class="card-address">' +
+      '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+      (d.pubMapUrl
+        ? '<a href="' + esc(d.pubMapUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="card-address-text" style="color:var(--primary);text-decoration:none">' + esc(d.pubAddr) + '</a>'
+        : '<span class="card-address-text">' + esc(d.pubAddr) + '</span>') +
+      '</div>';
+  }
+  html += '<div class="card-meta">';
+  if (d.pubCate) html += cateBadge(d.pubCate);
+  brandTags(d).forEach(function(tag){ html += '<span class="brand-tag" style="' + brandTagStyle(tag) + '">' + esc(tag) + '</span>'; });
+  html += '</div>';
+  html += '<div class="card-offer-divider"></div>';
+  if (d.pubOffer) html += '<div class="card-offer-label">優惠活動</div><div class="card-desc">' + esc(d.pubOffer) + '</div>';
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function viewBadgeHtml(storeId) {
+  return '<span class="thumb-view-badge" id="vc-' + esc(storeId) + '">' + EYE_SVG + '<span>' + fmtNum(vcData[storeId] || 0) + '</span></span>';
+}
+
+function updateViewBadges() {
+  Object.keys(vcData).forEach(function(id) {
+    var el = document.getElementById('vc-' + id);
+    if (el) el.innerHTML = EYE_SVG + '<span>' + fmtNum(vcData[id] || 0) + '</span>';
+  });
+}
+
+function showError(msg) {
+  document.getElementById('cardGrid').innerHTML =
+    '<div class="state-wrap">' +
+    '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<h3>載入失敗</h3><p>' + esc(msg) + '</p></div>';
+  document.getElementById('resultBar').textContent = '載入失敗';
+}
+
+function openStore(id) {
+  recordCardView(id);
+  vcData[id] = (vcData[id] || 0) + 1;
+  for (var i = 0; i < allStores.length; i++) {
+    if (allStores[i].storeId === id) {
+      try { sessionStorage.setItem('store_preview_' + id, JSON.stringify(allStores[i])); } catch(e) {}
+      break;
+    }
+  }
+  window.location.href = 'storeopendetail.html?id=' + encodeURIComponent(id);
+}
+
+loadStoreBrandTagDefs();
+loadStores();
+setInterval(function(){ loadStores(); }, 60000);
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

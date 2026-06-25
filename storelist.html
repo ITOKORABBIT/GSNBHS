@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美食地圖清單 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+
+:root{
+  --bg:        #F5F2EE;
+  --card:      #FFFFFF;
+  --border:    #E2D9CF;
+  --divider:   #EDE7DF;
+  --lbl:       #8C7B6A;
+  --val:       #2C2018;
+  --muted:     #B8A898;
+  --heading:   #1E160E;
+  --primary:       #3B82F6;
+  --primary-light: #EFF6FF;
+  --primary-dark:  #2563EB;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.07);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --radius: 10px;
+  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body{ font-family: var(--font); background: var(--bg); color: var(--val); font-size: 15px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── Login screen ── */
+#loginScreen{
+  position: fixed; inset: 0; z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  padding: 28px 16px;
+  background:
+    radial-gradient(circle at top left, rgba(59,130,246,.10), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(37,99,235,.08), transparent 28%),
+    var(--bg);
+}
+.login-card{
+  width: min(100%, 420px);
+  background: rgba(255,255,255,.92);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(30,22,14,.08);
+  padding: 28px 24px;
+}
+.login-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:999px;
+  background: var(--primary-light); color: var(--primary-dark);
+  font-size: 12px; font-weight: 700; margin-bottom: 16px;
+}
+.login-title{ font-size: 28px; font-weight: 800; color: var(--heading); margin-bottom: 8px; }
+.login-sub{ font-size: 14px; color: var(--lbl); line-height: 1.75; margin-bottom: 20px; }
+#loginBtnWrap{ display:flex; justify-content:center; }
+.login-error{
+  margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  background: #FFF1EF; color: #B95353; font-size: 13px; display: none;
+}
+
+/* ── Page header ── */
+.page-header{
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 0 16px; height: 54px;
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-title{ flex: 1; font-size: 16px; font-weight: 700; color: var(--heading); text-align: center; }
+.header-subtitle{ font-size: 12px; font-weight: 400; color: var(--lbl); margin-top: 1px; }
+.stats-toggle-btn{
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 13px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg);
+  font-size: 13px; font-weight: 600; color: var(--lbl);
+  transition: all .15s; white-space: nowrap;
+}
+.stats-toggle-btn:hover{ background: var(--divider); border-color: var(--muted); }
+.stats-toggle-btn.active{ background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+.apply-btn{
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 13px; border-radius: 8px; border: none;
+  background: var(--primary); font-size: 13px; font-weight: 600; color: #fff;
+  transition: background .15s; white-space: nowrap;
+}
+.apply-btn:hover{ background: var(--primary-dark); }
+
+/* ── Filter bar ── */
+.filter-wrap{ background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 54px; z-index: 90; }
+.filter-bar{ padding: 8px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.search-wrap{ flex: 1; min-width: 180px; position: relative; display: flex; align-items: center; }
+.search-wrap svg{ position: absolute; left: 10px; color: var(--muted); pointer-events: none; }
+.search-input{
+  width: 100%; padding: 7px 10px 7px 34px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--bg);
+  font-family: var(--font); font-size: 13px; color: var(--val); outline: none; transition: border-color .15s;
+}
+.search-input:focus{ border-color: var(--primary); }
+.taxonomy-btn{
+  display:flex; align-items:center; gap:6px; padding:7px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--card); color:var(--primary-dark);
+  font-size:13px; font-weight:700; white-space:nowrap;
+}
+.taxonomy-btn:hover{ background:var(--primary-light); border-color:var(--primary); }
+
+/* ── Dropdown ── */
+.dropdown{ position: relative; }
+.dropdown-btn{
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 600;
+  color: var(--lbl); transition: all .15s; white-space: nowrap;
+}
+.dropdown-btn:hover{ background: var(--divider); }
+.dropdown-btn.active{ background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+.dropdown-btn .chevron{ transition: transform .2s; flex-shrink: 0; }
+.dropdown-btn.open .chevron{ transform: rotate(180deg); }
+.dropdown-panel{
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.13); z-index: 300; min-width: 160px;
+  display: none; overflow: hidden;
+}
+.dropdown-panel.open{ display: block; }
+.dropdown-list{ max-height: 230px; overflow-y: auto; padding: 4px 0; }
+.dropdown-item{ padding: 8px 14px; font-size: 13px; color: var(--val); cursor: pointer; transition: background .1s; display: flex; align-items: center; gap: 9px; }
+.dropdown-item:hover{ background: var(--bg); }
+.dropdown-item.selected{ color: var(--primary); font-weight: 700; background: var(--primary-light); }
+.item-dot{ width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Result summary ── */
+.result-bar{ padding: 10px 16px 4px; font-size: 12px; color: var(--lbl); display: flex; align-items: center; gap: 6px; }
+.result-bar strong{ color: var(--primary); }
+
+/* ── Card grid ── */
+.card-grid{ padding: 4px 12px 80px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+
+/* ── Store card ── */
+.store-card{
+  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm); overflow: hidden; cursor: pointer;
+  transition: transform .15s, box-shadow .15s; display: flex; flex-direction: column;
+}
+.store-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.store-card.status-public  { border-left: 3px solid #2F6836; }
+.store-card.status-pending { border-left: 3px solid #B75D00; }
+.store-card.status-reject  { border-left: 3px solid #B8A898; }
+
+.card-thumb{ width: 100%; aspect-ratio: 16/9; background: var(--divider); overflow: hidden; flex-shrink: 0; position: relative; }
+.card-thumb img{ width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.store-card:hover .card-thumb img{ transform: scale(1.04); }
+.card-thumb-placeholder{
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #F0EBE4 0%, #EDE7DF 100%);
+}
+.no-photo-content{ display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.no-photo-emoji{ font-size: 26px; line-height: 1; filter: grayscale(.3); }
+.no-photo-text{ font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: .3px; }
+.thumb-view-badge{
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px; border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(226,217,207,.9);
+  color: var(--lbl); font-size: 11px; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.thumb-view-badge svg{ width: 12px; height: 12px; opacity: .72; }
+
+.card-body{ padding: 11px 12px 13px; flex: 1; display: flex; flex-direction: column; }
+.card-top{ display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.card-id{ font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: .4px; }
+.card-date{ font-size: 11px; color: var(--muted); font-weight: 500; }
+.badge{ display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .2px; }
+.badge-pending { background: #FFF3E0; color: #B75D00; }
+.badge-public  { background: #EAF3EB; color: #2F6836; }
+.badge-reject  { background: #F0EEEC; color: #7A6E66; }
+.card-title{ font-size: 14px; font-weight: 700; color: var(--heading); line-height: 1.4; margin-bottom: 7px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-phone{ display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 1.45; color: var(--lbl); margin-bottom: 7px; }
+.card-phone svg{ width: 11px; height: 11px; flex-shrink: 0; }
+.card-address{ font-size: 12px; line-height: 1.45; color: var(--lbl); margin-bottom: 7px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.card-meta{ display: flex; flex-wrap: wrap; gap: 6px; }
+.cate-badge{ display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+.brand-tag{ display: inline-flex; align-items: center; font-size: 11px; color: #B75D00; background: #FFF3E0; border: 1px solid #F5D7A2; padding: 2px 8px; border-radius: 999px; font-weight: 700; }
+.meta-tag{ display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--lbl); background: var(--bg); border: 1px solid var(--divider); padding: 2px 8px; border-radius: 5px; }
+.card-offer-divider{ height: 1px; background: var(--divider); margin-top: 10px; margin-bottom: 8px; }
+.card-offer-label{ display: inline-flex; align-items: center; align-self: flex-start; padding: 2px 7px; border-radius: 999px; background: var(--primary-light); color: var(--primary-dark); font-size: 11px; font-weight: 700; margin-bottom: 5px; }
+.card-desc{ font-size: 12px; color: var(--lbl); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card-footer{ margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); }
+
+/* ── Group header ── */
+.group-header{ grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 8px 2px 4px; }
+.group-label{ font-size: 12px; font-weight: 700; color: var(--lbl); }
+.group-count{ font-size: 11px; color: var(--muted); background: var(--bg); border: 1px solid var(--divider); padding: 1px 7px; border-radius: 999px; }
+.group-line{ flex: 1; height: 1px; background: var(--divider); }
+
+/* ── State wrap ── */
+.state-wrap{ grid-column: 1 / -1; text-align: center; padding: 60px 24px; color: var(--lbl); }
+.state-wrap svg{ margin: 0 auto 16px; opacity: .4; }
+.state-wrap h3{ font-size: 16px; color: var(--heading); margin-bottom: 6px; }
+.state-wrap p{ font-size: 13px; }
+
+/* ── Stats sidebar ── */
+.sidebar-backdrop{
+  position: fixed; inset: 0; background: rgba(30,22,14,.24);
+  opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 210;
+}
+.sidebar-backdrop.open{ opacity: 1; pointer-events: auto; }
+.stats-sidebar{
+  position: fixed; top: 0; left: 0; height: 100vh; width: 320px; max-width: calc(100vw - 24px);
+  background: var(--card); border-right: 1px solid var(--border); box-shadow: 6px 0 24px rgba(0,0,0,.12);
+  transform: translateX(-100%); transition: transform .22s ease; z-index: 220; display: flex; flex-direction: column;
+}
+.stats-sidebar.open{ transform: translateX(0); }
+.sidebar-header{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:16px 16px 12px; border-bottom:1px solid var(--divider);
+}
+.sidebar-header h2{ font-size:18px; color:var(--heading); }
+.sidebar-close{
+  width:30px; height:30px; border:none; border-radius:999px; background:var(--bg); color:var(--lbl); font-size:22px; line-height:1;
+}
+.sidebar-body{ padding:14px 16px 18px; overflow-y:auto; }
+.stats-grid{
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:16px;
+}
+.stats-box{
+  padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--bg);
+}
+.stats-box-label{ font-size:12px; color:var(--lbl); margin-bottom:6px; font-weight:700; }
+.stats-box-value{ font-size:24px; font-weight:800; color:var(--heading); }
+.stats-box-note{ font-size:11px; color:var(--muted); margin-top:4px; }
+.stat-section{ margin-top:16px; }
+.stat-section:first-child{ margin-top:0; }
+.stat-title{ font-size:12px; font-weight:700; color:var(--lbl); letter-spacing:.5px; text-transform:uppercase; margin-bottom:10px; }
+.stat-list{ display:flex; flex-direction:column; gap:8px; }
+.stat-row{ display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center; font-size:12px; color:var(--val); }
+.stat-dot{ width:8px; height:8px; border-radius:999px; }
+.stat-track{ height:7px; border-radius:999px; background:var(--divider); overflow:hidden; }
+.stat-fill{ height:100%; border-radius:999px; background:var(--primary); }
+.chart-section{ margin-top:16px; }
+.chart-title{ font-size:12px; font-weight:700; color:var(--lbl); letter-spacing:.5px; text-transform:uppercase; margin-bottom:10px; }
+.chart-wrap{ position:relative; width:100%; height:200px; }
+
+/* ── Skeleton ── */
+.skel{ background: linear-gradient(90deg,var(--divider) 25%,#ece6de 50%,var(--divider) 75%); background-size: 300% 100%; animation: shimmer 1.4s infinite; border-radius: 5px; }
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{ background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+
+/* ── Sortable group ── */
+.group-cards{ grid-column: 1/-1; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.sortable-ghost{ opacity: .4; }
+.sortable-drag{ box-shadow: 0 8px 24px rgba(0,0,0,.18) !important; }
+
+/* ── 刪除按鈕 ── */
+.del-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 6px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); transition: all .15s;
+  cursor: pointer; flex-shrink: 0; padding: 0; margin-left: auto;
+}
+.del-btn svg { width: 13px; height: 13px; display: block; }
+.del-btn:hover { background: #FFF1F1; border-color: #E57373; color: #C62828; }
+
+/* ── taxonomy manager ── */
+.taxonomy-overlay{
+  position:fixed; inset:0; z-index:420; display:none; align-items:center; justify-content:center;
+  padding:18px; background:rgba(30,22,14,.42);
+}
+.taxonomy-overlay.open{ display:flex; }
+.taxonomy-modal{
+  width:min(100%,620px); max-height:min(88vh,760px); overflow:hidden;
+  display:flex; flex-direction:column; background:var(--card); border:1px solid var(--border);
+  border-radius:16px; box-shadow:0 18px 48px rgba(30,22,14,.18);
+}
+.taxonomy-head,.taxonomy-foot{ display:flex; align-items:center; gap:10px; padding:14px 16px; }
+.taxonomy-head{ border-bottom:1px solid var(--divider); }
+.taxonomy-head h2{ flex:1; font-size:16px; color:var(--heading); }
+.taxonomy-close{
+  width:30px; height:30px; border:1px solid var(--border); border-radius:8px;
+  background:var(--bg); color:var(--lbl); font-size:18px; line-height:1;
+}
+.taxonomy-body{ overflow:auto; padding:16px; display:grid; gap:16px; }
+.taxonomy-section{ display:grid; gap:9px; }
+.taxonomy-label{ font-size:13px; font-weight:700; color:var(--heading); }
+.taxonomy-note{ font-size:12px; line-height:1.55; color:var(--lbl); }
+.taxonomy-input-row{ display:flex; gap:8px; }
+.taxonomy-input-row input{
+  flex:1; min-width:0; border:1px solid var(--border); border-radius:8px;
+  background:var(--bg); color:var(--val); font:inherit; padding:9px 11px; outline:none;
+}
+.taxonomy-input-row input:focus{ border-color:var(--primary); }
+.taxonomy-add,.taxonomy-save,.taxonomy-cancel{
+  border-radius:8px; padding:8px 12px; font:inherit; font-size:13px; font-weight:700;
+}
+.taxonomy-add,.taxonomy-save{ border:0; background:var(--primary); color:#fff; }
+.taxonomy-add:hover,.taxonomy-save:hover{ background:var(--primary-dark); }
+.taxonomy-cancel{ border:1px solid var(--border); background:var(--bg); color:var(--lbl); }
+.taxonomy-values{ display:flex; flex-wrap:wrap; gap:7px; min-height:34px; }
+.taxonomy-chip{
+  display:inline-flex; align-items:center; gap:5px; padding:6px 9px;
+  border:1px solid var(--border); border-radius:999px; background:var(--bg);
+  color:var(--val); font-size:12px; font-weight:700;
+}
+.taxonomy-chip.is-derived{ background:#EAF3EB; border-color:#CFE2D3; color:#2F6836; }
+.taxonomy-chip button{
+  width:16px; height:16px; border:0; border-radius:50%; background:var(--divider);
+  color:var(--lbl); line-height:1; font-size:12px;
+}
+.taxonomy-empty{ color:var(--muted); font-size:12px; padding:7px 2px; }
+.taxonomy-tag-editor{ display:grid; gap:8px; width:100%; }
+.taxonomy-tag-row{
+  display:grid; grid-template-columns:minmax(120px,1fr) auto auto; gap:8px; align-items:center;
+  padding:9px; border:1px solid var(--divider); border-radius:10px; background:var(--bg);
+}
+.taxonomy-tag-row input{
+  width:100%; min-width:0; border:1px solid var(--border); border-radius:8px;
+  background:#fff; color:var(--val); font:inherit; padding:8px 10px;
+}
+.taxonomy-swatches{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.taxonomy-swatch{
+  width:20px; height:20px; border:2px solid transparent; border-radius:50%;
+  box-shadow:0 0 0 1px var(--border); padding:0;
+}
+.taxonomy-swatch.selected{ border-color:var(--heading); }
+.taxonomy-swatch[data-color="gold"]{ background:#F7D68D; }
+.taxonomy-swatch[data-color="mint"]{ background:#BFE4C5; }
+.taxonomy-swatch[data-color="blue"]{ background:#BED7FF; }
+.taxonomy-swatch[data-color="rose"]{ background:#F7C1CF; }
+.taxonomy-swatch[data-color="violet"]{ background:#DCCBFF; }
+.taxonomy-swatch[data-color="stone"]{ background:#D8D0C8; }
+.taxonomy-remove-tag{
+  width:28px; height:28px; border:1px solid var(--border); border-radius:8px;
+  background:#fff; color:var(--lbl); font-size:16px; line-height:1;
+}
+.taxonomy-foot{ justify-content:flex-end; border-top:1px solid var(--divider); }
+
+/* ── RWD ── */
+@media(max-width: 480px){
+  .card-grid{ grid-template-columns: 1fr; padding: 4px 10px 80px; }
+  .stats-sidebar{ width:100%; max-width:100%; border-right:none; }
+  .group-cards{ grid-template-columns: 1fr; }
+}
+
+/* ── Multi-select / bulk status ── */
+.select-mode-btn{
+  display:flex; align-items:center; gap:5px; padding:7px 13px; border-radius:8px;
+  border:1px solid var(--border); background:var(--bg);
+  font-size:13px; font-weight:600; color:var(--lbl); transition:all .15s; white-space:nowrap;
+}
+.select-mode-btn:hover{ background:var(--divider); border-color:var(--muted); }
+.select-mode-btn.active{ background:#FFF3E0; border-color:#B75D00; color:#B75D00; }
+.store-card.selected{ outline:2px solid var(--primary); outline-offset:-2px; }
+.store-card.selected .card-thumb::after{
+  content:''; position:absolute; inset:0; background:rgba(59,130,246,.12); pointer-events:none;
+}
+.card-check{
+  position:absolute; top:8px; left:8px; z-index:5; width:22px; height:22px;
+  border-radius:6px; background:rgba(255,255,255,.95); border:2px solid rgba(180,170,160,.7);
+  display:none; align-items:center; justify-content:center; transition:all .15s;
+}
+.select-mode .card-check{ display:flex; }
+.store-card.selected .card-check{ background:var(--primary); border-color:var(--primary); }
+.card-check-icon{ display:none; width:13px; height:13px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+.store-card.selected .card-check-icon{ display:block; }
+.bulk-bar{
+  position:fixed; bottom:0; left:0; right:0; z-index:200;
+  background:var(--card); border-top:1px solid var(--border);
+  padding:10px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  box-shadow:0 -4px 20px rgba(0,0,0,.09);
+  transform:translateY(100%); transition:transform .22s ease;
+}
+.bulk-bar.visible{ transform:translateY(0); }
+.bulk-count{ font-size:14px; font-weight:700; color:var(--heading); flex:1; min-width:80px; }
+.bulk-sel-all{ font-size:13px; color:var(--primary); font-weight:600; cursor:pointer; white-space:nowrap; user-select:none; }
+.bulk-sel-all:hover{ text-decoration:underline; }
+.bulk-status-sel{
+  padding:8px 10px; border-radius:8px; border:1px solid var(--border);
+  background:var(--bg); font-family:var(--font); font-size:13px; color:var(--val); outline:none; cursor:pointer;
+}
+.bulk-apply-btn{
+  padding:8px 18px; border-radius:8px; border:none;
+  background:var(--primary); color:#fff; font-family:var(--font);
+  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background .15s;
+}
+.bulk-apply-btn:hover:not(:disabled){ background:var(--primary-dark); }
+.bulk-apply-btn:disabled{ opacity:.45; cursor:not-allowed; }
+.bulk-cancel-btn{
+  padding:8px 12px; border-radius:8px; border:1px solid var(--border);
+  background:transparent; font-family:var(--font); font-size:13px; color:var(--lbl); cursor:pointer;
+}
+.bulk-cancel-btn:hover{ background:var(--bg); }
+/* Toast */
+.toast-wrap{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:500; display:flex; flex-direction:column; gap:6px; pointer-events:none; }
+.toast-msg{
+  background:#1e2a38; color:#fff; padding:10px 18px; border-radius:10px;
+  font-size:13px; font-weight:600; box-shadow:0 4px 16px rgba(0,0,0,.22);
+  animation:toastIn .2s ease, toastOut .3s ease 2.5s forwards;
+  white-space:nowrap;
+}
+@keyframes toastIn{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastOut{ to{opacity:0;transform:translateY(-6px)} }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-badge">美食地圖管理入口</div>
+    <div class="login-title">商店管理</div>
+    <div class="login-sub">請使用已授權的 Google 帳號登入後，直接在這裡管理美食地圖商家資料。</div>
+    <div id="loginBtnWrap"></div>
+    <div class="login-error" id="loginError">此帳號沒有管理員權限，請聯絡系統管理員。</div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none">
+<div class="sidebar-backdrop" id="backdrop" onclick="closeSidebar()"></div>
+
+<div class="stats-sidebar" id="statsSidebar">
+  <div class="sidebar-header">
+    <h2>📊 商店統計</h2>
+    <button class="sidebar-close" onclick="closeSidebar()" aria-label="關閉">&#215;</button>
+  </div>
+  <div class="sidebar-body" id="sidebarBody">
+    <div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">載入中…</div>
+  </div>
+</div>
+
+<div class="page-header">
+  <button class="stats-toggle-btn" id="statsToggleBtn" onclick="toggleSidebar()">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+    統計
+  </button>
+  <div class="header-title">
+    <div>美食地圖清單</div>
+    <div class="header-subtitle" id="headerSubtitle">舊社里・里民小幫手</div>
+  </div>
+  <button class="taxonomy-btn" type="button" onclick="openTaxonomyModal()">
+    管理類別與標籤
+  </button>
+  <button class="select-mode-btn" id="selectModeBtn" onclick="toggleSelectMode()" title="多選批次改狀態">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg>
+    多選
+  </button>
+  <button class="apply-btn" onclick="window.location.href='store.html'">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    申請
+  </button>
+</div>
+
+<div class="filter-wrap">
+<div class="filter-bar">
+
+  <!-- Status dropdown -->
+  <div class="dropdown" id="statusDropdown">
+    <button class="dropdown-btn" id="statusBtn" onclick="toggleDropdown('statusDropdown')">
+      <span id="statusLabel">商店狀態</span>
+      <svg class="chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dropdown-panel" id="statusPanel">
+      <div class="dropdown-list" id="statusList">
+        <div class="dropdown-item selected" data-value="all"   onclick="selectStatus(this)"><span class="item-dot" style="background:#B8A898"></span>全部狀態</div>
+        <div class="dropdown-item" data-value="申請審核中"        onclick="selectStatus(this)"><span class="item-dot" style="background:#B75D00"></span>申請審核中</div>
+        <div class="dropdown-item" data-value="已公開"          onclick="selectStatus(this)"><span class="item-dot" style="background:#2F6836"></span>已公開</div>
+        <div class="dropdown-item" data-value="不通過"          onclick="selectStatus(this)"><span class="item-dot" style="background:#7A6E66"></span>不通過</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category dropdown -->
+  <div class="dropdown" id="categoryDropdown">
+    <button class="dropdown-btn" id="categoryBtn" onclick="toggleDropdown('categoryDropdown')">
+      <span id="categoryLabel">商家類別</span>
+      <svg class="chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dropdown-panel" id="categoryPanel">
+      <div class="dropdown-list" id="categoryList">
+        <div class="dropdown-item selected" data-value="all" onclick="selectCategory(this)">全部類別</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="search-input" id="searchInput" placeholder="搜尋…" oninput="applyFilters()">
+  </div>
+
+</div>
+</div>
+
+<div class="result-bar" id="resultBar">載入中…</div>
+
+<div class="card-grid" id="cardGrid">
+  <div class="skel-card" style="height:220px"><div class="skel" style="height:130px;border-radius:0"></div><div style="padding:12px 14px"><div class="skel" style="height:12px;width:50%;margin-bottom:8px"></div><div class="skel" style="height:15px;width:85%;margin-bottom:6px"></div><div class="skel" style="height:12px;width:65%"></div></div></div>
+  <div class="skel-card" style="height:220px"><div class="skel" style="height:130px;border-radius:0"></div><div style="padding:12px 14px"><div class="skel" style="height:12px;width:40%;margin-bottom:8px"></div><div class="skel" style="height:15px;width:90%;margin-bottom:6px"></div><div class="skel" style="height:12px;width:70%"></div></div></div>
+  <div class="skel-card" style="height:220px"><div class="skel" style="height:130px;border-radius:0"></div><div style="padding:12px 14px"><div class="skel" style="height:12px;width:55%;margin-bottom:8px"></div><div class="skel" style="height:15px;width:75%;margin-bottom:6px"></div><div class="skel" style="height:12px;width:60%"></div></div></div>
+</div>
+
+<div class="taxonomy-overlay" id="taxonomyOverlay" onclick="if(event.target===this)closeTaxonomyModal()">
+  <div class="taxonomy-modal" role="dialog" aria-modal="true" aria-labelledby="taxonomyTitle">
+    <div class="taxonomy-head">
+      <h2 id="taxonomyTitle">管理類別與標籤</h2>
+      <button class="taxonomy-close" type="button" onclick="closeTaxonomyModal()" aria-label="關閉">&#215;</button>
+    </div>
+    <div class="taxonomy-body">
+      <div class="taxonomy-section">
+        <div class="taxonomy-label">商家類別</div>
+        <div class="taxonomy-input-row">
+          <input type="text" id="taxonomyCategoryInput" maxlength="18" placeholder="新增類別">
+          <button class="taxonomy-add" type="button" onclick="addTaxonomyValue('categories')">新增</button>
+        </div>
+        <div class="taxonomy-values" id="taxonomyCategories"></div>
+      </div>
+      <div class="taxonomy-section">
+        <div class="taxonomy-label">品牌標籤</div>
+        <div class="taxonomy-input-row">
+          <input type="text" id="taxonomyBrandTagInput" maxlength="6" placeholder="新增核可標籤">
+          <button class="taxonomy-add" type="button" onclick="addTaxonomyValue('brandTags')">新增</button>
+        </div>
+        <div class="taxonomy-values" id="taxonomyBrandTags"></div>
+        <div class="taxonomy-note">這裡會一起顯示已公開店家用過的標籤；有 &#215; 的是管理員直接核可標籤，可在這裡移除。</div>
+      </div>
+    </div>
+    <div class="taxonomy-foot">
+      <button class="taxonomy-cancel" type="button" onclick="closeTaxonomyModal()">取消</button>
+      <button class="taxonomy-save" id="taxonomySaveBtn" type="button" onclick="saveTaxonomy()">儲存</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── Bulk action bar ── -->
+<div class="bulk-bar" id="bulkBar">
+  <div class="bulk-count" id="bulkCount">已選 0 間</div>
+  <span class="bulk-sel-all" id="bulkSelAllBtn" onclick="bulkSelectAll()">全選</span>
+  <select class="bulk-status-sel" id="bulkStatusSel" onchange="updateBulkBar()">
+    <option value="">選擇狀態…</option>
+    <option value="已公開">✅ 已公開</option>
+    <option value="申請審核中">🕐 申請審核中</option>
+    <option value="不通過">❌ 不通過</option>
+  </select>
+  <button class="bulk-apply-btn" id="bulkApplyBtn" onclick="applyBulkStatus()" disabled>套用</button>
+  <button class="bulk-cancel-btn" onclick="toggleSelectMode()">取消</button>
+</div>
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="storeconfig.js"></script>
+<script src="utils.js"></script>
+<script>
+(function(){
+  if (/Line\//i.test(navigator.userAgent)) {
+    var url = new URL(location.href);
+    if (!url.searchParams.has('openExternalBrowser')) {
+      url.searchParams.set('openExternalBrowser', '1');
+      location.replace(url.toString());
+    }
+  }
+})();
+
+function showLogin(message) {
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  var el = document.getElementById('loginError');
+  if (message) {
+    el.textContent = message;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+function enterApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  var redirect = new URLSearchParams(location.search).get('redirect') || '';
+  if (redirect) {
+    try {
+      var url = new URL(redirect, location.origin);
+      if (url.origin === location.origin && url.pathname !== location.pathname) {
+        location.href = redirect;
+        return;
+      }
+    } catch (e) {}
+  }
+  renderCachedStores();
+  loadStoreBrandTagDefs();
+  loadAll();
+}
+function initGoogle() {
+  var sess = getSession();
+  if (sess) { enterApp(); return; }
+  showLogin();
+  if (!CONFIG.GOOGLE_CLIENT_ID) return;
+  if (typeof google === 'undefined') { setTimeout(initGoogle, 300); return; }
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: onGoogleSignIn,
+    auto_select: true
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('loginBtnWrap'),
+    { type: 'standard', theme: 'filled_blue', size: 'large', text: 'signin_with', locale: 'zh-TW', width: 280 }
+  );
+  google.accounts.id.prompt();
+}
+function onGoogleSignIn(resp) {
+  document.getElementById('loginError').style.display = 'none';
+  fetch(CONFIG.STORE_API_URL || CONFIG.SCRIPT_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'login', id_token: resp.credential })
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(t){ return JSON.parse(t); })
+  .then(function(json){
+    if (!json.success) { showLogin(json.error || '此帳號沒有管理員權限，請聯絡系統管理員。'); return; }
+    setSession(json.sessionToken, json.email, json.name || '', '', resp.credential);
+    enterApp();
+  })
+  .catch(function(){ showLogin('登入失敗，請稍後再試。'); });
+}
+
+// ── API ──
+function apiCall(action, extra) {
+  var sess = getSession();
+  var payload = Object.assign({ action: action }, extra || {});
+  if (sess) payload.sessionToken = sess.sessionToken;
+  var storeApiActions = { getStores: true, getStore: true, getStoreTaxonomy: true, updateStore: true, updateStoreTaxonomy: true, reorderStores: true, deleteStore: true, getViewStats: true };
+  if (sess && sess.id_token && storeApiActions[action]) payload.id_token = sess.id_token;
+  var endpoint = (CONFIG.STORE_API_URL && storeApiActions[action]) ? CONFIG.STORE_API_URL : CONFIG.SCRIPT_URL;
+  return fetch(endpoint, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(t){ return JSON.parse(t); })
+  .then(function(json){
+    if (json.code === 401) {
+      clearSession();
+      if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+      showLogin('登入已失效，請重新登入。');
+    }
+    return json;
+  });
+}
+
+// ── STATE ──
+var allStores = [];
+var currentStatusFilter   = 'all';
+var currentCategoryFilter = 'all';
+var STORES_CACHE_KEY = 'hpnbhs_admin_stores_cache_v1';
+var sidebarOpen = false;
+var chartsDrawn = false;
+var chartInstances = [];
+var sortableInstances = [];
+// ── Multi-select state ──
+var selectMode = false;
+var selectedIds = {};
+var vcData = {};
+var EYE_SVG = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var managedTaxonomy = { categories: [], brandTags: [] };
+var effectiveTaxonomy = { categories: [], brandTags: [], brandTagDefs: [] };
+var BRAND_TAG_COLORS = ['gold','mint','blue','rose','violet','stone'];
+var storeBrandTagDefs = [];
+var BRAND_TAG_PALETTE = {
+  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
+  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
+  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+};
+var FOOD_CATES = ['里內日常小吃', '家庭好友聚餐', '大坑名產貴賓招待'];
+var CATEGORY_GROUPS = FOOD_CATES.concat(['其他各行各業']);
+var CATEGORY_SORT_OFFSET = {
+  '里內日常小吃': 0,
+  '家庭好友聚餐': 10000,
+  '大坑名產貴賓招待': 20000,
+  '其他各行各業': 30000
+};
+
+// ── CATEGORY COLORS ──
+var CATE_COLOR = {
+  '食': { bg:'#FFF3E0', txt:'#B75D00' },
+  '里內日常小吃': { bg:'#FFF3E0', txt:'#B75D00' },
+  '家庭好友聚餐': { bg:'#FFEBD5', txt:'#A04500' },
+  '大坑名產貴賓招待': { bg:'#FFF0D5', txt:'#8B5500' },
+  '衣': { bg:'#F3EBFF', txt:'#6B28A8' },
+  '住': { bg:'#EBF3FF', txt:'#1A56A8' },
+  '行': { bg:'#E0F7FA', txt:'#006B6B' },
+  '育': { bg:'#EAF3EB', txt:'#2F6836' },
+  '樂': { bg:'#FEE2E2', txt:'#991B1B' },
+  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
+};
+function cateBadge(cat) {
+  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
+}
+
+function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
+function brandTagStyle(tag) {
+  var def = storeBrandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };
+  var color = BRAND_TAG_PALETTE[def.color] || BRAND_TAG_PALETTE.gold;
+  return 'background:' + color.bg + ';color:' + color.txt + ';border-color:' + color.bd;
+}
+function badgeCls(s){ if (s==='已公開') return 'badge-public'; if (s==='不通過') return 'badge-reject'; return 'badge-pending'; }
+function cardStatusCls(s){ if (s==='已公開') return 'status-public'; if (s==='不通過') return 'status-reject'; return 'status-pending'; }
+function storeIdNum(id){ if (!id) return 0; var m = String(id).match(/(\d+)/); return m ? parseInt(m[1],10) : 0; }
+function categoryGroupKey(d) {
+  return FOOD_CATES.indexOf(d.category || '') !== -1 ? d.category : '其他各行各業';
+}
+function categoryWeight(d) {
+  var idx = CATEGORY_GROUPS.indexOf(categoryGroupKey(d));
+  return idx === -1 ? CATEGORY_GROUPS.length : idx;
+}
+
+function taxonomyInput(kind) {
+  return document.getElementById(kind === 'categories' ? 'taxonomyCategoryInput' : 'taxonomyBrandTagInput');
+}
+function taxonomyText(value) { return String(value || '').trim(); }
+function taxonomyValues(kind) { return Array.isArray(managedTaxonomy[kind]) ? managedTaxonomy[kind] : []; }
+function renderTaxonomyValues() {
+  [['categories','taxonomyCategories'],['brandTags','taxonomyBrandTags']].forEach(function(pair){
+    var kind = pair[0], el = document.getElementById(pair[1]);
+    if (!el) return;
+    if (kind === 'brandTags') {
+      var defs = taxonomyBrandTagDefs();
+      el.innerHTML = defs.length ? '<div class="taxonomy-tag-editor">' + defs.map(function(def, idx){
+        return '<div class="taxonomy-tag-row">'
+          + '<input type="text" maxlength="6" value="' + esc(def.name) + '" aria-label="品牌標籤名稱" onchange="renameTaxonomyBrandTag(' + idx + ',this.value)">'
+          + '<div class="taxonomy-swatches">' + BRAND_TAG_COLORS.map(function(color){
+            return '<button type="button" class="taxonomy-swatch' + (def.color === color ? ' selected' : '') + '" data-color="' + color
+              + '" aria-label="標籤色彩 ' + color + '" onclick="setTaxonomyBrandTagColor(' + idx + ',\'' + color + '\')"></button>';
+          }).join('') + '</div>'
+          + '<button type="button" class="taxonomy-remove-tag" aria-label="移除 ' + esc(def.name) + '" onclick="removeTaxonomyBrandTag(' + idx + ')">&#215;</button>'
+          + '</div>';
+      }).join('') + '</div>' : '<span class="taxonomy-empty">尚未設定</span>';
+      return;
+    }
+    var values = taxonomyValues(kind);
+    el.innerHTML = values.length ? values.map(function(value){
+      return '<span class="taxonomy-chip">' + esc(value)
+        + '<button type="button" aria-label="移除 ' + esc(value) + '" onclick="removeTaxonomyValue(\'' + kind + '\',\'' + jsText(value) + '\')">&#215;</button></span>';
+    }).join('') : '<span class="taxonomy-empty">尚未設定</span>';
+  });
+}
+function jsText(value) { return taxonomyText(value).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function addTaxonomyValue(kind) {
+  var input = taxonomyInput(kind);
+  var value = taxonomyText(input ? input.value : '');
+  if (!value) return;
+  if (kind === 'brandTags' && (/^\d+$/.test(value) || value.length > 6)) { alert('品牌標籤最多 6 個字，且不能只有數字'); return; }
+  if (kind === 'categories' && value.length > 18) { alert('商家類別最多 18 個字'); return; }
+  if (kind === 'brandTags') {
+    if (!taxonomyBrandTagDefs().some(function(def){ return def.name === value; })) effectiveTaxonomy.brandTagDefs.push({ name:value, color:'gold' });
+    syncManagedBrandTagDefs();
+  } else if (taxonomyValues(kind).indexOf(value) === -1) {
+    managedTaxonomy[kind].push(value);
+  }
+  if (input) input.value = '';
+  renderTaxonomyValues();
+}
+function removeTaxonomyValue(kind, value) {
+  managedTaxonomy[kind] = taxonomyValues(kind).filter(function(item){ return item !== value; });
+  renderTaxonomyValues();
+}
+function taxonomyBrandTagDefs() {
+  return Array.isArray(effectiveTaxonomy.brandTagDefs) ? effectiveTaxonomy.brandTagDefs : [];
+}
+function syncManagedBrandTagDefs() {
+  managedTaxonomy.brandTagDefs = taxonomyBrandTagDefs().map(function(def){ return { name:taxonomyText(def.name), color:def.color || 'gold' }; }).filter(function(def){ return def.name; });
+  managedTaxonomy.brandTags = managedTaxonomy.brandTagDefs.map(function(def){ return def.name; });
+}
+function renameTaxonomyBrandTag(idx, value) {
+  value = taxonomyText(value);
+  if (!value || value.length > 6 || /^\d+$/.test(value)) { alert('品牌標籤最多 6 個字，且不能只有數字'); renderTaxonomyValues(); return; }
+  taxonomyBrandTagDefs()[idx].name = value;
+  syncManagedBrandTagDefs();
+  renderTaxonomyValues();
+}
+function setTaxonomyBrandTagColor(idx, color) {
+  if (BRAND_TAG_COLORS.indexOf(color) === -1) return;
+  taxonomyBrandTagDefs()[idx].color = color;
+  syncManagedBrandTagDefs();
+  renderTaxonomyValues();
+}
+function removeTaxonomyBrandTag(idx) {
+  effectiveTaxonomy.brandTagDefs.splice(idx, 1);
+  syncManagedBrandTagDefs();
+  renderTaxonomyValues();
+}
+function openTaxonomyModal() {
+  var overlay = document.getElementById('taxonomyOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  apiCall('getStoreTaxonomy')
+    .then(function(json){
+      if (!json.success) throw new Error(json.error || '讀取失敗');
+      managedTaxonomy = {
+        categories: Array.isArray(json.taxonomy && json.taxonomy.categories) ? json.taxonomy.categories.slice() : [],
+        brandTags: Array.isArray(json.taxonomy && json.taxonomy.brandTags) ? json.taxonomy.brandTags.slice() : []
+      };
+      effectiveTaxonomy = {
+        categories: Array.isArray(json.effectiveTaxonomy && json.effectiveTaxonomy.categories) ? json.effectiveTaxonomy.categories.slice() : managedTaxonomy.categories.slice(),
+        brandTags: Array.isArray(json.effectiveTaxonomy && json.effectiveTaxonomy.brandTags) ? json.effectiveTaxonomy.brandTags.slice() : managedTaxonomy.brandTags.slice(),
+        brandTagDefs: Array.isArray(json.effectiveTaxonomy && json.effectiveTaxonomy.brandTagDefs) ? json.effectiveTaxonomy.brandTagDefs.map(function(def){ return { name:def.name, sourceName:def.name, color:def.color || 'gold' }; }) : []
+      };
+      syncManagedBrandTagDefs();
+      renderTaxonomyValues();
+    })
+    .catch(function(err){ alert('類別與標籤載入失敗：' + err.message); });
+}
+function closeTaxonomyModal() {
+  document.getElementById('taxonomyOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function saveTaxonomy() {
+  var btn = document.getElementById('taxonomySaveBtn');
+  btn.disabled = true;
+  btn.textContent = '儲存中…';
+  var brandTagRenames = taxonomyBrandTagDefs().map(function(def){
+    return def.sourceName && def.sourceName !== def.name ? { from: def.sourceName, to: def.name } : null;
+  }).filter(Boolean);
+  apiCall('updateStoreTaxonomy', { taxonomy: managedTaxonomy, brandTagRenames: brandTagRenames })
+    .then(function(json){
+      if (!json.success) throw new Error(json.error || '儲存失敗');
+      managedTaxonomy = json.taxonomy || managedTaxonomy;
+      effectiveTaxonomy = json.effectiveTaxonomy || effectiveTaxonomy;
+      closeTaxonomyModal();
+      alert('類別與標籤已更新');
+    })
+    .catch(function(err){ alert('儲存失敗：' + err.message); })
+    .finally(function(){ btn.disabled = false; btn.textContent = '儲存'; });
+}
+
+// ── LOAD ──
+function saveStoresCache() {
+  try {
+    sessionStorage.setItem(STORES_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), stores: allStores || [] }));
+  } catch(e) {}
+}
+
+function renderCachedStores() {
+  try {
+    var raw = sessionStorage.getItem(STORES_CACHE_KEY);
+    if (!raw) return false;
+    var cache = JSON.parse(raw);
+    if (!cache || !Array.isArray(cache.stores)) return false;
+    allStores = cache.stores;
+    buildCategoryChips();
+    applyFilters();
+    loadViewStats();
+    document.getElementById('headerSubtitle').textContent = CONFIG.VILLAGE_NAME + '・背景同步中';
+    return true;
+  } catch(e) {
+    sessionStorage.removeItem(STORES_CACHE_KEY);
+    return false;
+  }
+}
+
+function loadAll() {
+  apiCall('getStores')
+    .then(function(json){
+      if (!json.success) { showError(json.error || '無法取得資料'); return; }
+      allStores = json.stores || [];
+      saveStoresCache();
+      buildCategoryChips();
+      applyFilters();
+      loadViewStats();
+      var today = new Date();
+      document.getElementById('headerSubtitle').textContent =
+        CONFIG.VILLAGE_NAME + '・' + today.getFullYear() + '/' + (today.getMonth()+1) + '/' + today.getDate();
+      if (sidebarOpen) {
+        chartsDrawn = false;
+        renderStats();
+      }
+    })
+    .catch(function(){ showError('資料載入失敗，請稍後再試'); });
+}
+function loadViewStats() {
+  apiCall('getViewStats', { page: 'storelist' })
+    .then(function(json) {
+      if (!json.success) return;
+      vcData = json.cardCounts || {};
+      updateViewBadges();
+    })
+    .catch(function() {});
+}
+function loadStoreBrandTagDefs() {
+  if (!CONFIG.STORE_API_URL) return;
+  fetch(CONFIG.STORE_API_URL, {
+    method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body:JSON.stringify({ action:'getPublicStoreTaxonomy' })
+  }).then(function(res){ return res.json(); }).then(function(json){
+    storeBrandTagDefs = json.success && json.taxonomy && Array.isArray(json.taxonomy.brandTagDefs) ? json.taxonomy.brandTagDefs : [];
+    if (allStores.length) applyFilters();
+  }).catch(function(){});
+}
+
+// ── DROPDOWN ──
+function toggleDropdown(id) {
+  var panel = document.getElementById(id).querySelector('.dropdown-panel');
+  var btn   = document.getElementById(id).querySelector('.dropdown-btn');
+  var wasOpen = panel.classList.contains('open');
+  closeAllDropdowns();
+  if (!wasOpen) { panel.classList.add('open'); btn.classList.add('open'); }
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-panel').forEach(function(p){ p.classList.remove('open'); });
+  document.querySelectorAll('.dropdown-btn').forEach(function(b){ b.classList.remove('open'); });
+}
+document.addEventListener('click', function(e){ if (!e.target.closest('.dropdown')) closeAllDropdowns(); });
+
+function selectStatus(el) {
+  currentStatusFilter = el.dataset.value;
+  document.querySelectorAll('#statusList .dropdown-item').forEach(function(i){ i.classList.remove('selected'); });
+  el.classList.add('selected');
+  document.getElementById('statusLabel').textContent = currentStatusFilter === 'all' ? '商店狀態' : el.textContent.trim();
+  document.getElementById('statusBtn').classList.toggle('active', currentStatusFilter !== 'all');
+  closeAllDropdowns(); applyFilters();
+}
+function selectCategory(el) {
+  currentCategoryFilter = el.dataset.value;
+  document.querySelectorAll('#categoryList .dropdown-item').forEach(function(i){ i.classList.remove('selected'); });
+  el.classList.add('selected');
+  document.getElementById('categoryLabel').textContent = currentCategoryFilter === 'all' ? '商家類別' : el.textContent.trim();
+  document.getElementById('categoryBtn').classList.toggle('active', currentCategoryFilter !== 'all');
+  closeAllDropdowns(); applyFilters();
+}
+function buildCategoryChips() {
+  var cats = {};
+  allStores.forEach(function(d){ if (d.category) cats[d.category] = true; });
+  var keys = Object.keys(cats).sort();
+  var list = document.getElementById('categoryList');
+  var html = '<div class="dropdown-item selected" data-value="all" onclick="selectCategory(this)">全部類別</div>';
+  keys.forEach(function(c){ html += '<div class="dropdown-item" data-value="' + esc(c) + '" onclick="selectCategory(this)">' + esc(c) + '</div>'; });
+  list.innerHTML = html;
+}
+
+// ── FILTER & RENDER ──
+function applyFilters() {
+  var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  var sf = currentStatusFilter;
+  var cf = currentCategoryFilter;
+
+  var filtered = allStores.filter(function(d){
+    if (cf !== 'all' && (d.category || '') !== cf) return false;
+    if (sf !== 'all' && d.status !== sf) return false;
+    if (q) {
+      var hay = [d.storeId, d.storeName, brandTags(d).join(' '), d.addr, d.category, d.desc, d.offer, d.name, d.phone].join(' ').toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  filtered.sort(function(a, b){
+    var wa = categoryWeight(a), wb = categoryWeight(b);
+    if (wa !== wb) return wa - wb;
+    var hasA = a.sortOrder > 0, hasB = b.sortOrder > 0;
+    if (hasA !== hasB) return hasA ? 1 : -1;
+    if (!hasA) return storeIdNum(b.storeId) - storeIdNum(a.storeId);
+    return a.sortOrder - b.sortOrder;
+  });
+
+  renderGrid(filtered);
+  if (selectMode) updateBulkBar();
+
+  var bar = document.getElementById('resultBar');
+  var isFiltered = sf !== 'all' || cf !== 'all' || q;
+  var tags = '';
+  if (sf !== 'all') tags += ' <span style="background:var(--primary-light);color:var(--primary);padding:1px 6px;border-radius:4px;font-size:11px">' + sf + '</span>';
+  if (cf !== 'all') tags += ' <span style="background:#FFF3E0;color:#B75D00;padding:1px 6px;border-radius:4px;font-size:11px">' + cf + '</span>';
+  if (q)           tags += ' <span style="background:#F3EBFF;color:#6B28A8;padding:1px 6px;border-radius:4px;font-size:11px">「' + esc(q) + '」</span>';
+  bar.innerHTML =
+    '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ' +
+    '共 <strong>' + filtered.length + '</strong> 間' + (isFiltered ? tags : '・共 ' + allStores.length + ' 間美食地圖商家');
+}
+
+function renderGrid(stores) {
+  sortableInstances.forEach(function(s){ try{ s.destroy(); }catch(e){} });
+  sortableInstances = [];
+  var grid = document.getElementById('cardGrid');
+  if (selectMode) { grid.classList.add('select-mode'); } else { grid.classList.remove('select-mode'); }
+  if (!stores.length) {
+    grid.innerHTML = '<div class="state-wrap"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>沒有符合的商店</h3><p>請嘗試調整搜尋條件或篩選項目</p></div>';
+    return;
+  }
+  var groups = {};
+  CATEGORY_GROUPS.forEach(function(p){ groups[p] = []; });
+  stores.forEach(function(d){
+    var p = categoryGroupKey(d);
+    if (!groups[p]) groups[p] = [];
+    groups[p].push(d);
+  });
+  var html = '';
+  CATEGORY_GROUPS.forEach(function(groupKey){
+    var grp = groups[groupKey];
+    if (!grp.length) return;
+    html += '<div class="group-header"><span class="group-label">' + esc(groupKey) + '</span><span class="group-count">' + grp.length + ' 間</span><div class="group-line"></div></div>';
+    html += '<div class="group-cards" data-group-key="' + esc(groupKey) + '">';
+    grp.forEach(function(d){ html += renderCard(d); });
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+  CATEGORY_GROUPS.forEach(function(groupKey){
+    var el = grid.querySelector('.group-cards[data-group-key="' + groupKey + '"]');
+    if (!el) return;
+    (function(key, container){
+      var inst = Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        delay: 200,
+        delayOnTouchOnly: true,
+        onEnd: function(){ onSortEnd(key, container); }
+      });
+      sortableInstances.push(inst);
+    })(groupKey, el);
+  });
+}
+
+function renderCard(d) {
+  var hasPhoto = !!d.photo1;
+  var checkHtml = '<div class="card-check"><svg class="card-check-icon" viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>';
+  var thumb = hasPhoto
+    ? '<div class="card-thumb">' + checkHtml + '<img src="' + esc(d.photo1) + '" alt="" loading="lazy" onerror="imgFallback(this)">' + viewBadgeHtml(d.storeId) + '</div>'
+    : '<div class="card-thumb">' + checkHtml + '<div class="card-thumb-placeholder"><div class="no-photo-content"><span class="no-photo-emoji">🏪</span><span class="no-photo-text">尚無照片</span></div></div>' + viewBadgeHtml(d.storeId) + '</div>';
+
+  var dateStr = '';
+  if (d.applyTime) {
+    var dd = new Date(d.applyTime);
+    if (!isNaN(dd.getTime())) { dateStr = (dd.getMonth()+1) + '/' + dd.getDate(); }
+    else { dateStr = String(d.applyTime).slice(0,10); }
+  }
+
+  var isSelected = selectMode && !!selectedIds[d.storeId];
+  var clickHandler = selectMode
+    ? 'toggleSelect(\'' + esc(d.storeId) + '\')'
+    : 'openStore(\'' + esc(d.storeId) + '\')';
+  var html = '<div class="store-card ' + cardStatusCls(d.status) + (isSelected ? ' selected' : '') + '" data-store-id="' + esc(d.storeId) + '" onclick="' + clickHandler + '">';
+  html += thumb;
+  var delBtn = selectMode ? '' : '<button class="del-btn" title="刪除商店" aria-label="刪除商店" onclick="event.stopPropagation();confirmDeleteStore(\'' + esc(d.storeId) + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>';
+  html += '<div class="card-body">';
+  html += '<div class="card-top"><span class="card-id">#' + esc(d.storeId) + '</span><span class="card-date">' + dateStr + '</span><span class="badge ' + badgeCls(d.status) + '">' + esc(d.status) + '</span>' + delBtn + '</div>';
+  html += '<div class="card-title">' + esc(d.storeName || d.pubName || '（無名稱）') + '</div>';
+  var dispPhone = d.storePhone || d.pubPhone;
+  var dispAddr  = d.addr       || d.pubAddr;
+  if (dispPhone) html += '<div class="card-phone"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' + esc(dispPhone) + '</div>';
+  if (dispAddr) html += '<div class="card-address">' + esc(dispAddr.length > 18 ? dispAddr.slice(0,18)+'…' : dispAddr) + '</div>';
+  html += '<div class="card-meta">';
+  var dispCate = d.category || d.pubCate;
+  if (dispCate) html += cateBadge(dispCate);
+  brandTags(d).forEach(function(tag){ html += '<span class="brand-tag" style="' + brandTagStyle(tag) + '">' + esc(tag) + '</span>'; });
+  html += '</div>';
+  html += '<div class="card-offer-divider"></div>';
+  if (d.offer) html += '<div class="card-offer-label">優惠活動</div><div class="card-desc">' + esc(d.offer) + '</div>';
+  html += '</div></div>';
+  return html;
+}
+
+function imgFallback(img) {
+  var wrap = img.parentNode;
+  var badge = wrap.querySelector('.thumb-view-badge');
+  wrap.innerHTML = '<div class="card-thumb-placeholder"><div class="no-photo-content"><span class="no-photo-emoji">🏪</span><span class="no-photo-text">尚無照片</span></div></div>' + (badge ? badge.outerHTML : '');
+}
+
+function fmtNum(n) {
+  n = Number(n || 0);
+  return n.toLocaleString ? n.toLocaleString('zh-TW') : String(n);
+}
+
+function viewBadgeHtml(storeId) {
+  return '<span class="thumb-view-badge" id="vc-' + esc(storeId) + '">' + EYE_SVG + '<span>' + fmtNum(vcData[storeId] || 0) + '</span></span>';
+}
+
+function updateViewBadges() {
+  Object.keys(vcData).forEach(function(id) {
+    var el = document.getElementById('vc-' + id);
+    if (el) el.innerHTML = EYE_SVG + '<span>' + fmtNum(vcData[id] || 0) + '</span>';
+  });
+}
+
+function onSortEnd(groupKey, el) {
+  var cards = el.querySelectorAll('[data-store-id]');
+  var offset = CATEGORY_SORT_OFFSET[groupKey] || 0;
+  var orders = [];
+  for (var i = 0; i < cards.length; i++) {
+    var sid = cards[i].getAttribute('data-store-id');
+    var sortVal = offset + (i + 1) * 10;
+    orders.push({ storeId: sid, sortOrder: sortVal });
+    for (var j = 0; j < allStores.length; j++) {
+      if (allStores[j].storeId === sid) { allStores[j].sortOrder = sortVal; break; }
+    }
+  }
+  apiCall('reorderStores', { orders: orders })
+    .catch(function(){ console.error('reorderStores failed'); });
+}
+
+function openStore(id) {
+  for (var i = 0; i < allStores.length; i++) {
+    if (allStores[i].storeId === id) {
+      try { sessionStorage.setItem('store_preview_' + id, JSON.stringify(allStores[i])); } catch(e) {}
+      break;
+    }
+  }
+  window.location.href = 'storedetail.html?id=' + encodeURIComponent(id);
+}
+
+function toggleSidebar() {
+  if (sidebarOpen) closeSidebar();
+  else openSidebar();
+}
+function openSidebar() {
+  sidebarOpen = true;
+  document.getElementById('statsSidebar').classList.add('open');
+  document.getElementById('backdrop').classList.add('open');
+  document.getElementById('statsToggleBtn').classList.add('active');
+  if (!chartsDrawn && allStores.length) renderStats();
+}
+function closeSidebar() {
+  sidebarOpen = false;
+  document.getElementById('statsSidebar').classList.remove('open');
+  document.getElementById('backdrop').classList.remove('open');
+  document.getElementById('statsToggleBtn').classList.remove('active');
+}
+function renderStatRows(items, colorMap) {
+  if (!items.length) return '<div style="font-size:12px;color:var(--muted)">暫無資料</div>';
+  var max = 0;
+  items.forEach(function(item){ if (item.count > max) max = item.count; });
+  return '<div class="stat-list">' + items.map(function(item){
+    var width = max ? Math.max(8, Math.round(item.count / max * 100)) : 0;
+    var color = colorMap && colorMap[item.label] ? colorMap[item.label] : 'var(--primary)';
+    return '<div class="stat-row">' +
+      '<span class="stat-dot" style="background:' + color + '"></span>' +
+      '<div><div style="margin-bottom:4px">' + esc(item.label) + '</div><div class="stat-track"><div class="stat-fill" style="width:' + width + '%;background:' + color + '"></div></div></div>' +
+      '<strong>' + item.count + '</strong>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+function renderStats() {
+  var total = allStores.length;
+  var publicCount = allStores.filter(function(d){ return d.status === '已公開'; }).length;
+  var pendingCount = allStores.filter(function(d){ return d.status === '申請審核中'; }).length;
+  var rejectCount = allStores.filter(function(d){ return d.status === '不通過'; }).length;
+  var foodCount = allStores.filter(function(d){ return FOOD_CATES.indexOf(d.category || '') !== -1; }).length;
+  var otherCount = total - foodCount;
+
+  var statusCounts = {};
+  var categoryCounts = {};
+  allStores.forEach(function(d){
+    var status = d.status || '未設定';
+    var cate = d.category || '未分類';
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
+    categoryCounts[cate] = (categoryCounts[cate] || 0) + 1;
+  });
+  var statusItems = Object.keys(statusCounts).map(function(key){ return { label:key, count:statusCounts[key] }; }).sort(function(a,b){ return b.count - a.count; });
+  var categoryItems = Object.keys(categoryCounts).map(function(key){ return { label:key, count:categoryCounts[key] }; }).sort(function(a,b){ return b.count - a.count; }).slice(0, 6);
+
+  var html = '';
+  html += '<div class="stats-grid">';
+  html += '<div class="stats-box"><div class="stats-box-label">商店總數</div><div class="stats-box-value">' + total + '</div><div class="stats-box-note">目前資料筆數</div></div>';
+  html += '<div class="stats-box"><div class="stats-box-label">已公開</div><div class="stats-box-value">' + publicCount + '</div><div class="stats-box-note">已對外顯示</div></div>';
+  html += '<div class="stats-box"><div class="stats-box-label">待審核</div><div class="stats-box-value">' + pendingCount + '</div><div class="stats-box-note">待處理申請</div></div>';
+  html += '<div class="stats-box"><div class="stats-box-label">美食 / 其他</div><div class="stats-box-value">' + foodCount + '</div><div class="stats-box-note">其他行業 ' + otherCount + ' 間</div></div>';
+  html += '</div>';
+
+  html += '<div class="stat-section"><div class="stat-title">狀態分布</div>' + renderStatRows(statusItems, {
+    '申請審核中':'#B75D00','已公開':'#2F6836','不通過':'#7A6E66','未設定':'#B8A898'
+  }) + '</div>';
+  html += '<div class="stat-section"><div class="stat-title">熱門類別</div>' + renderStatRows(categoryItems, null) + '</div>';
+  html += '<div class="chart-section"><div class="chart-title">商店狀態圖表</div><div class="chart-wrap"><canvas id="storeStatusChart"></canvas></div></div>';
+  document.getElementById('sidebarBody').innerHTML = html;
+
+  chartInstances.forEach(function(c){ try{ c.destroy(); }catch(e){} });
+  chartInstances = [];
+  var ctx = document.getElementById('storeStatusChart');
+  if (ctx && statusItems.length) {
+    var colors = statusItems.map(function(item){
+      if (item.label === '申請審核中') return '#DDAA4B';
+      if (item.label === '已公開') return '#5B9B7B';
+      if (item.label === '不通過') return '#A89B90';
+      return '#C8B9A8';
+    });
+    var chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: statusItems.map(function(item){ return item.label; }),
+        datasets: [{ data: statusItems.map(function(item){ return item.count; }), backgroundColor: colors, borderWidth: 0 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, color: '#8C7B6A', font: { size: 11 } } } }
+      }
+    });
+    chartInstances.push(chart);
+  }
+  chartsDrawn = true;
+}
+
+function confirmDeleteStore(storeId) {
+  if (!confirm('確定刪除商店 #' + storeId + '？\n此操作無法復原。')) return;
+  apiCall('deleteStore', { storeId: storeId })
+    .then(function(json) {
+      if (!json.success) { alert('刪除失敗：' + (json.error || '')); return; }
+      var idx = allStores.findIndex(function(s){ return s.storeId === storeId; });
+      if (idx !== -1) allStores.splice(idx, 1);
+      saveStoresCache();
+      applyFilters();
+    })
+    .catch(function() { alert('網路錯誤，請稍後再試'); });
+}
+
+function showError(msg) {
+  document.getElementById('cardGrid').innerHTML =
+    '<div class="state-wrap"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><h3>載入失敗</h3><p>' + esc(msg) + '</p></div>';
+  document.getElementById('resultBar').textContent = '載入失敗';
+}
+
+// ── AUTO REFRESH ──
+var _refreshing = false;
+function silentRefresh() {
+  if (_refreshing) return;
+  _refreshing = true;
+  apiCall('getStores')
+    .then(function(json){
+      if (!json.success) return;
+      var fresh = json.stores || [];
+      var changed = fresh.length !== allStores.length ||
+        (fresh.length && allStores.length && fresh[0].storeId !== allStores[0].storeId);
+      if (changed) { allStores = fresh; saveStoresCache(); buildCategoryChips(); applyFilters(); }
+    })
+    .catch(function(){})
+    .finally(function(){ _refreshing = false; });
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  if (getSession()) { enterApp(); return; }
+  var tries = 0;
+  var t = setInterval(function(){
+    if (typeof google !== 'undefined' || ++tries > 30) { clearInterval(t); initGoogle(); }
+  }, 200);
+});
+setInterval(silentRefresh, 60000);
+['click','keydown','mousedown','touchstart','scroll'].forEach(function(eventName){
+  window.addEventListener(eventName, function(){ touchSession(); }, { passive: true });
+});
+
+// ── Multi-select & bulk status ──
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  selectedIds = {};
+  var btn = document.getElementById('selectModeBtn');
+  if (selectMode) {
+    btn.classList.add('active');
+    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 退出多選';
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 多選';
+  }
+  updateBulkBar();
+  applyFilters(); // re-render cards with/without checkboxes
+}
+
+function toggleSelect(storeId) {
+  if (selectedIds[storeId]) {
+    delete selectedIds[storeId];
+  } else {
+    selectedIds[storeId] = true;
+  }
+  var card = document.querySelector('[data-store-id="' + storeId + '"]');
+  if (card) card.classList.toggle('selected', !!selectedIds[storeId]);
+  updateBulkBar();
+}
+
+function getVisibleStoreIds() {
+  var cards = document.querySelectorAll('#cardGrid [data-store-id]');
+  return Array.prototype.map.call(cards, function(c){ return c.getAttribute('data-store-id'); }).filter(Boolean);
+}
+
+function bulkSelectAll() {
+  var visible = getVisibleStoreIds();
+  var allSel = visible.length > 0 && visible.every(function(id){ return !!selectedIds[id]; });
+  if (allSel) {
+    selectedIds = {};
+    document.querySelectorAll('#cardGrid .store-card').forEach(function(c){ c.classList.remove('selected'); });
+  } else {
+    visible.forEach(function(id){ selectedIds[id] = true; });
+    document.querySelectorAll('#cardGrid [data-store-id]').forEach(function(c){ c.classList.add('selected'); });
+  }
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  var bar = document.getElementById('bulkBar');
+  var count = Object.keys(selectedIds).length;
+  if (selectMode) { bar.classList.add('visible'); } else { bar.classList.remove('visible'); }
+  document.getElementById('bulkCount').textContent = '已選 ' + count + ' 間';
+  var statusVal = document.getElementById('bulkStatusSel').value;
+  document.getElementById('bulkApplyBtn').disabled = count === 0 || !statusVal;
+  var visible = getVisibleStoreIds();
+  var allSel = visible.length > 0 && visible.every(function(id){ return !!selectedIds[id]; });
+  document.getElementById('bulkSelAllBtn').textContent = allSel ? '全不選' : '全選';
+}
+
+function applyBulkStatus() {
+  var status = document.getElementById('bulkStatusSel').value;
+  if (!status) return;
+  var ids = Object.keys(selectedIds);
+  if (!ids.length) return;
+  var applyBtn = document.getElementById('bulkApplyBtn');
+  applyBtn.disabled = true;
+  applyBtn.textContent = '套用中…';
+  var done = 0;
+  var errors = 0;
+  function onDone(ok) {
+    if (!ok) errors++;
+    done++;
+    if (done < ids.length) return;
+    // All done
+    if (errors === 0) {
+      showToast('✅ 已將 ' + ids.length + ' 間商店更新為「' + status + '」');
+    } else {
+      showToast('⚠️ ' + (ids.length - errors) + ' 成功，' + errors + ' 失敗');
+    }
+    applyBtn.textContent = '套用';
+    toggleSelectMode();
+  }
+  ids.forEach(function(storeId) {
+    apiCall('updateStore', { storeId: storeId, status: status })
+      .then(function(json) {
+        if (json.success) {
+          for (var i = 0; i < allStores.length; i++) {
+            if (allStores[i].storeId === storeId) { allStores[i].status = status; break; }
+          }
+        }
+        onDone(json.success);
+      })
+      .catch(function() { onDone(false); });
+  });
+}
+
+function showToast(msg) {
+  var wrap = document.getElementById('toastWrap');
+  var el = document.createElement('div');
+  el.className = 'toast-msg';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 3000);
+}
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

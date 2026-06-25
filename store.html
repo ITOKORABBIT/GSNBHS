@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特約商家申請 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-50:  #EFF6FF;
+  --blue-100: #DBEAFE;
+  --blue-200: #BFDBFE;
+  --blue-300: #93C5FD;
+  --blue-400: #60A5FA;
+  --blue-500: #3B82F6;
+  --blue-600: #2563EB;
+  --blue-700: #1D4ED8;
+  --blue-800: #1E3A8A;
+
+  --ink-900: #1E3050;
+  --ink-700: #384E68;
+  --ink-500: #5A7090;
+  --ink-300: #9AB0C8;
+  --ink-200: #C5D9EE;
+  --ink-100: #E4F0FA;
+
+  --warn:     #D97757;
+  --warn-bg:  #FDF1EC;
+
+  --shadow-sm: 0 1px 2px rgba(30, 64, 100, 0.04);
+  --shadow-md: 0 4px 16px rgba(30, 64, 100, 0.06), 0 1px 3px rgba(30, 64, 100, 0.04);
+  --shadow-lg: 0 8px 24px rgba(30, 64, 100, 0.10);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--blue-50);
+  color: var(--ink-900);
+  font-size: 16px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon {
+  width: 18px; height: 18px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.header {
+  background: linear-gradient(135deg, #93C5FD 0%, #60A5FA 55%, #3B82F6 100%);
+  padding: 44px 24px 56px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; top: -40%; right: -20%;
+  width: 80%; height: 180%;
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+.header::after {
+  content: '';
+  position: absolute; bottom: -40%; left: -20%;
+  width: 70%; height: 160%;
+  background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+.header-icon {
+  width: 44px; height: 44px;
+  margin: 0 auto 12px; display: block;
+  color: #ffffff; stroke-width: 2; position: relative;
+  filter: drop-shadow(0 2px 4px rgba(30,64,100,0.18));
+}
+.header h1 {
+  font-size: 24px; font-weight: 700; color: #ffffff;
+  letter-spacing: 0.8px; position: relative;
+  text-shadow: 0 1px 2px rgba(30,64,100,0.12);
+}
+.header .subtitle {
+  font-size: 14px; color: rgba(255,255,255,0.92);
+  margin-top: 8px; font-weight: 400; letter-spacing: 0.3px; position: relative;
+}
+
+.form-container {
+  max-width: 640px; margin: -32px auto 40px;
+  padding: 0 16px 48px; position: relative; z-index: 1;
+}
+
+.card {
+  background: #ffffff; border-radius: 18px;
+  padding: 28px 26px; margin-bottom: 16px;
+  box-shadow: var(--shadow-md); border: 1px solid var(--ink-100);
+  animation: fadeUp 0.45s ease-out both;
+}
+.card:nth-child(2) { animation-delay: 0.08s; }
+.card:nth-child(3) { animation-delay: 0.16s; }
+.card:nth-child(4) { animation-delay: 0.24s; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+  font-size: 17px; font-weight: 700; color: var(--blue-800);
+  margin: 0 0 22px;
+  display: flex; align-items: center; gap: 12px; letter-spacing: 0.3px;
+}
+.section-title .title-bar {
+  display: inline-block; width: 4px; height: 18px;
+  background: linear-gradient(180deg, var(--blue-400), var(--blue-600));
+  border-radius: 2px; flex-shrink: 0;
+}
+
+.field-group { margin-bottom: 20px; }
+.field-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: var(--ink-700);
+  margin-bottom: 8px; letter-spacing: 0.2px;
+}
+.field-label .icon { color: var(--blue-500); }
+.field-label .required { color: var(--warn); margin-left: 2px; font-size: 14px; font-weight: 700; }
+
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  width: 100%; padding: 12px 15px;
+  border: 1.5px solid var(--ink-200); border-radius: 11px;
+  font-size: 15px; font-family: inherit; color: var(--ink-900);
+  background: var(--blue-50); transition: all 0.2s ease; outline: none;
+}
+input:hover, textarea:hover, select:hover { border-color: var(--blue-300); }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  background: #ffffff;
+}
+input::placeholder, textarea::placeholder { color: var(--ink-300); font-size: 14px; }
+textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+textarea.rich-textarea { min-height: 150px; }
+select {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%233B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 42px;
+}
+
+.field-hint {
+  font-size: 12px; color: var(--ink-500); margin-top: 6px;
+  line-height: 1.6; display: flex; align-items: flex-start; gap: 6px;
+}
+.field-hint .icon { width: 14px; height: 14px; margin-top: 2px; color: var(--blue-500); }
+.field-hint.hint-box {
+  color: var(--ink-500); background: #F5F7F6;
+  padding: 9px 12px; border-radius: 8px; font-size: 12px;
+  border-left: 3px solid var(--ink-200);
+}
+.field-hint.hint-box .icon { color: var(--ink-300); }
+.brand-tag-picker {
+  border: 1.5px solid var(--ink-200); border-radius: 12px;
+  background: var(--blue-50); padding: 12px;
+}
+.brand-tag-selected, .brand-tag-options {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.brand-tag-selected { min-height: 32px; margin-bottom: 10px; }
+.brand-tag-chip, .brand-tag-option {
+  border: 1px solid var(--blue-200); border-radius: 999px;
+  background: #fff; color: var(--blue-700); font-family: inherit;
+  font-size: 13px; font-weight: 600; line-height: 1;
+}
+.brand-tag-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 10px; background: var(--blue-100);
+}
+.brand-tag-chip button {
+  border: 0; background: transparent; color: inherit;
+  font: inherit; line-height: 1; padding: 0;
+}
+.brand-tag-option { padding: 9px 11px; cursor: pointer; }
+.brand-tag-option.selected { background: var(--blue-500); border-color: var(--blue-500); color: #fff; }
+.brand-tag-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.brand-tag-input-row input { flex: 1; }
+.brand-tag-add {
+  border: 0; border-radius: 10px; padding: 0 14px;
+  background: var(--blue-500); color: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+}
+.brand-tag-empty { color: var(--ink-500); font-size: 13px; padding: 5px 2px; }
+
+/* ── 多選照片上傳 widget ── */
+.photo-upload-area { display: flex; flex-direction: column; gap: 8px; }
+.photo-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.photo-preview-item {
+  border: 1.5px solid var(--ink-200); border-radius: 12px; aspect-ratio: 4/3;
+  position: relative; background: var(--blue-50); overflow: hidden;
+  cursor: grab; user-select: none;
+}
+.photo-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.photo-preview-item .item-remove {
+  position: absolute; top: 6px; right: 6px; z-index: 3;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,.92); border: 1px solid rgba(59,130,246,.2);
+  color: var(--blue-700); font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10); transition: background .15s, transform .15s;
+}
+.photo-preview-item .item-remove:hover { background: #fff; transform: scale(1.1); }
+.photo-preview-item .drag-hint {
+  position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+  font-size: 10px; color: rgba(255,255,255,.9);
+  background: rgba(0,0,0,.30); padding: 2px 7px; border-radius: 4px;
+  pointer-events: none; white-space: nowrap;
+}
+.photo-add-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 14px 12px; border: 2px dashed var(--ink-200); border-radius: 14px;
+  background: var(--blue-50); color: var(--ink-400);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: border-color .2s, background .2s, color .2s;
+}
+.photo-add-btn:hover { border-color: var(--blue-400); background: var(--blue-100); color: var(--blue-700); }
+.photo-add-btn svg { flex-shrink: 0; color: var(--blue-400); }
+.photo-add-btn.hidden { display: none; }
+.photo-preview-item.is-sorting { opacity: .35; }
+.sort-ghost { border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.sort-placeholder { border: 2px dashed var(--blue-400); border-radius: 12px; background: rgba(59,130,246,.07); aspect-ratio: 4/3; }
+
+.submit-btn {
+  width: 100%; padding: 16px 24px;
+  background: linear-gradient(135deg, #F2C843 0%, #E0B030 100%);
+  color: #5A3E00; border: none; border-radius: 14px;
+  font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.25s ease; margin-top: 12px;
+  box-shadow: 0 4px 14px rgba(224, 176, 48, 0.42); letter-spacing: 1px;
+}
+.submit-btn .icon { width: 18px; height: 18px; }
+.submit-btn:hover {
+  background: linear-gradient(135deg, #E0B030 0%, #CC9A18 100%);
+  box-shadow: 0 6px 20px rgba(204, 154, 24, 0.52); transform: translateY(-1px);
+}
+.submit-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(224,176,48,0.32); }
+.submit-btn:disabled { background: var(--ink-300); color: #fff; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.success-msg { display: none; text-align: center; animation: fadeUp 0.5s ease-out; }
+.success-msg .card { padding: 56px 28px; }
+.success-msg .check-wrap {
+  width: 84px; height: 84px; margin: 0 auto 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-100), var(--blue-200));
+  display: flex; align-items: center; justify-content: center;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+.success-msg .check-wrap .icon { width: 42px; height: 42px; color: var(--blue-600); stroke-width: 2.5; }
+@keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+.success-msg h2 { font-size: 22px; font-weight: 700; color: var(--blue-800); margin-bottom: 10px; letter-spacing: 0.5px; }
+.success-msg p { font-size: 15px; color: var(--ink-500); margin-bottom: 28px; line-height: 1.6; }
+.success-msg button {
+  padding: 13px 36px;
+  background: linear-gradient(135deg, var(--blue-500), var(--blue-600));
+  color: #fff; border: none; border-radius: 11px;
+  font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: all 0.2s ease; box-shadow: 0 3px 10px rgba(59,130,246,0.30); letter-spacing: 0.5px;
+}
+.success-msg button:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(59,130,246,0.42); }
+
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-text { color: var(--warn); font-size: 12px; margin-top: 5px; display: none; font-weight: 500; }
+input.invalid, textarea.invalid, select.invalid { border-color: var(--warn); background: var(--warn-bg); }
+
+.footer { text-align: center; padding: 18px; font-size: 12px; color: var(--ink-300); letter-spacing: 0.5px; }
+
+/* ── 方案選擇 ── */
+.plan-options { display: flex; flex-direction: column; gap: 10px; }
+.plan-option { position: relative; cursor: pointer; display: block; }
+.plan-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.plan-card {
+  border: 2px solid var(--ink-200); border-radius: 14px;
+  padding: 14px 16px; transition: all 0.2s ease;
+  background: var(--blue-50); position: relative; overflow: hidden;
+}
+.plan-card:hover { border-color: var(--blue-300); background: #fff; transform: translateY(-1px); }
+.plan-option input:checked + .plan-card { border-color: var(--blue-500); background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.plan-option--premium input:checked + .plan-card { border-color: #D97706; box-shadow: 0 0 0 3px rgba(217,119,6,.12); }
+.plan-option--free input:checked + .plan-card { border-color: var(--ink-300); box-shadow: 0 0 0 3px rgba(100,130,160,.10); }
+.plan-card-top { display: flex; align-items: flex-start; gap: 10px; }
+.plan-icon { font-size: 20px; line-height: 1; }
+.plan-name { font-size: 15px; font-weight: 700; color: var(--ink-900); }
+.plan-price {
+  margin-left: auto; font-size: 15px; font-weight: 700;
+  display: inline-flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  min-width: 102px; text-align: right;
+}
+.plan-price-current {
+  font-weight: 800; line-height: 1.2;
+}
+.plan-price-old {
+  font-size: 12px; font-weight: 600; opacity: .72; line-height: 1;
+  text-decoration: line-through; text-decoration-thickness: 1.5px;
+}
+.plan-price-free { color: var(--ink-500); }
+.plan-price-std { color: var(--blue-600); }
+.plan-price-premium { color: #B45309; }
+.plan-benefits { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--ink-100); display: flex; flex-direction: column; gap: 5px; }
+.plan-benefit { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--ink-700); line-height: 1.5; }
+.pbc { width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 9px; color: #fff; }
+.pbc-free { background: var(--ink-300); }
+.pbc-std { background: var(--blue-500); }
+.pbc-premium { background: #D97706; }
+.plan-recommended {
+  position: static;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 4px 9px; border-radius: 999px; letter-spacing: .4px; line-height: 1;
+  box-shadow: 0 6px 14px rgba(217,119,6,.18);
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .plan-card-top { gap: 8px; }
+  .plan-price { min-width: 84px; }
+  .plan-recommended { padding: 4px 8px; font-size: 9px; }
+}
+.plan-trial-note {
+  margin-top: 12px; padding: 10px 14px;
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border: 1.5px solid #93C5FD; border-radius: 10px;
+  font-size: 12px; color: var(--blue-700);
+  display: flex; align-items: flex-start; gap: 8px; line-height: 1.6;
+}
+
+/* ── 方案確認 Overlay ── */
+.plan-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(15,30,50,.72);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.plan-overlay.open { display: flex; }
+.poc {
+  background: #fff; border-radius: 20px;
+  max-width: 380px; width: 100%;
+  box-shadow: 0 24px 64px rgba(15,30,50,.24);
+  animation: fadeUp .28s ease-out;
+  overflow: hidden;
+}
+.poc-head { padding: 24px 24px 16px; text-align: center; }
+.poc-emoji { font-size: 44px; margin-bottom: 10px; }
+.poc-title { font-size: 19px; font-weight: 700; color: var(--ink-900); margin-bottom: 6px; }
+.poc-sub { font-size: 13px; color: var(--ink-500); line-height: 1.6; }
+.poc-body { padding: 0 24px 20px; }
+.poc-plan-label {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; font-size: 15px; font-weight: 700;
+  padding: 10px 16px; border-radius: 10px; margin-bottom: 12px;
+}
+.poc-plan-label.std { background: #EFF6FF; color: var(--blue-700); }
+.poc-plan-label.premium { background: #FFFBEB; color: #B45309; }
+.poc-free-banner {
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  color: #fff; text-align: center; font-size: 13px; font-weight: 700;
+  padding: 9px 16px; border-radius: 10px; margin-bottom: 14px; letter-spacing: .3px;
+}
+.poc-features { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+.poc-feature { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-700); }
+.poc-foot { padding: 0 24px 22px; display: flex; flex-direction: column; gap: 8px; }
+.poc-confirm-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #F2C843, #E0B030);
+  color: #5A3E00; border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; letter-spacing: .5px; transition: all .2s;
+}
+.poc-confirm-btn:hover { background: linear-gradient(135deg, #E0B030, #CC9A18); transform: translateY(-1px); }
+.poc-back-btn {
+  width: 100%; padding: 10px; background: transparent;
+  border: 1.5px solid var(--ink-200); border-radius: 10px;
+  font-size: 13px; color: var(--ink-500); cursor: pointer;
+  font-family: inherit; transition: all .15s;
+}
+.poc-back-btn:hover { background: var(--blue-50); }
+
+/* ── 送出進度 Overlay ── */
+.submit-progress-overlay {
+  position: fixed; inset: 0; z-index: 650;
+  background: rgba(15,30,50,.56);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.submit-progress-overlay.open { display: flex; }
+.submit-progress-card {
+  width: 100%; max-width: 380px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 22px;
+  box-shadow: 0 24px 64px rgba(15,30,50,.2);
+  padding: 28px 24px 22px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.submit-progress-spinner {
+  width: 56px; height: 56px; margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 4px solid rgba(59,130,246,.14);
+  border-top-color: var(--blue-500);
+  animation: spin .8s linear infinite;
+}
+.submit-progress-title {
+  font-size: 20px; font-weight: 700; color: var(--ink-900); margin-bottom: 8px;
+}
+.submit-progress-desc {
+  font-size: 13px; line-height: 1.65; color: var(--ink-500); margin-bottom: 16px;
+}
+.submit-progress-step {
+  font-size: 14px; font-weight: 700; color: var(--blue-700); margin-bottom: 10px;
+}
+.submit-progress-bar {
+  width: 100%; height: 10px; border-radius: 999px; overflow: hidden;
+  background: #E8EEF7; margin-bottom: 10px;
+}
+.submit-progress-fill {
+  width: 0%; height: 100%;
+  background: linear-gradient(135deg, var(--blue-500), #7CB7FF);
+  border-radius: inherit; transition: width .25s ease;
+}
+.submit-progress-note {
+  font-size: 12px; color: var(--ink-400); line-height: 1.6;
+}
+body.loading-submit { overflow: hidden; }
+
+@media (max-width: 480px) {
+  .form-container { padding: 0 12px 40px; margin-top: -28px; }
+  .header { padding: 36px 16px 50px; }
+  .header h1 { font-size: 20px; }
+  .header-icon { width: 38px; height: 38px; }
+  .card { padding: 22px 18px; border-radius: 16px; }
+
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-leaf"     viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96a1 1 0 0 1 1.8.5c0 7.83-3.45 13.39-9 14.54"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></symbol>
+    <symbol id="i-user"     viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-phone"    viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-message"  viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+    <symbol id="i-tag"      viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+    <symbol id="i-bag"      viewBox="0 0 24 24"><path d="M6 7l1-3h10l1 3"/><rect x="5" y="7" width="14" height="13" rx="2"/></symbol>
+    <symbol id="i-clock"    viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-pin"      viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-map"      viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></symbol>
+    <symbol id="i-camera"   viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-hash"     viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
+    <symbol id="i-send"     viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <symbol id="i-check"    viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.08"/></symbol>
+    <symbol id="i-info"     viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+    <symbol id="i-store"    viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  </defs>
+</svg>
+
+<div class="header">
+  <svg class="header-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-store"/></svg>
+  <h1>舊社里特約商家申請</h1>
+  <div class="subtitle">請填寫以下資料，我們將儘快進行資料審核</div>
+</div>
+
+<!-- ── 方案確認 Overlay ── -->
+<div class="plan-overlay" id="planOverlay">
+  <div class="poc">
+    <div class="poc-head">
+      <div class="poc-emoji" id="pocEmoji">⭐</div>
+      <div class="poc-title" id="pocTitle">確認商家方案</div>
+      <div class="poc-sub">選擇後即完成申請，里辦公室審核通過後正式上線</div>
+    </div>
+    <div class="poc-body">
+      <div class="poc-plan-label" id="pocPlanLabel">精選方案</div>
+      <div class="poc-free-banner">🎉 試用期間完全免費！享有完整功能，無需付費</div>
+      <div class="poc-features" id="pocFeatures"></div>
+    </div>
+    <div class="poc-foot">
+      <button type="button" class="poc-confirm-btn" id="pocConfirmBtn">確認方案，送出申請</button>
+      <button type="button" class="poc-back-btn" onclick="closePlanOverlay()">返回修改</button>
+    </div>
+  </div>
+</div>
+
+<div class="submit-progress-overlay" id="submitProgressOverlay" aria-hidden="true">
+  <div class="submit-progress-card">
+    <div class="submit-progress-spinner"></div>
+    <div class="submit-progress-title">正在送出申請</div>
+    <div class="submit-progress-desc">照片需要先壓縮並上傳，過程可能需要 10 到 30 秒，請先不要關閉頁面。</div>
+    <div class="submit-progress-step" id="submitProgressStep">準備處理資料…</div>
+    <div class="submit-progress-bar">
+      <div class="submit-progress-fill" id="submitProgressFill"></div>
+    </div>
+    <div class="submit-progress-note" id="submitProgressNote">送出完成後會自動顯示成功畫面</div>
+  </div>
+</div>
+
+<div class="form-container">
+  <form id="reportForm" novalidate>
+    <!-- 蜜罐：機器人才會填這個欄位 -->
+    <input type="text" name="website" id="f_website" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
+
+    <!-- 卡片 1：申請人資訊（暫時隱藏，目前由里長直接建立） -->
+    <div class="card" id="card-applicant" style="display:none">
+      <div class="section-title"><span class="title-bar"></span>申請人資訊</div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-user"/></svg> 姓名
+        </label>
+        <input type="text" id="f_name" placeholder="真實姓名">
+        <div class="error-text">請輸入姓名</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-phone"/></svg> 電話
+        </label>
+        <input type="text" inputmode="tel" id="f_phone" placeholder="務必留下手機或住家電話以利聯絡">
+        <div class="error-text">請輸入電話</div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-message"/></svg> Line ID
+        </label>
+        <input type="text" id="f_line" placeholder="請留下 LINE ID 以利聯絡">
+      </div>
+    </div>
+
+    <!-- 卡片 2：商家方案（暫時隱藏，目前由里長統一管理） -->
+    <div class="card" id="card-plan" style="display:none">
+      <div class="section-title"><span class="title-bar"></span>選擇商家方案</div>
+
+      <div class="plan-options">
+
+        <!-- 免費方案 -->
+        <label class="plan-option plan-option--free">
+          <input type="radio" name="plan" value="免費" checked onchange="onPlanChange()">
+          <div class="plan-card">
+            <div class="plan-card-top">
+              <span class="plan-icon">🏠</span>
+              <span class="plan-name">免費方案</span>
+              <span class="plan-price plan-price-free">免費</span>
+            </div>
+            <div class="plan-benefits">
+              <div class="plan-benefit"><span class="pbc pbc-free">✓</span>刊登於美食地圖頁面</div>
+              <div class="plan-benefit"><span class="pbc pbc-free">✓</span>顯示店家介紹、聯絡資訊</div>
+              <div class="plan-benefit"><span class="pbc pbc-free">✓</span>里民可直接查看店家詳情</div>
+            </div>
+          </div>
+        </label>
+
+        <!-- 精選方案 -->
+        <label class="plan-option plan-option--std">
+          <input type="radio" name="plan" value="精選" onchange="onPlanChange()">
+          <div class="plan-card">
+            <div class="plan-card-top">
+              <span class="plan-icon">⭐</span>
+              <span class="plan-name">精選方案</span>
+              <span class="plan-price plan-price-std">
+                <span class="plan-price-current">限時免費</span>
+                <span class="plan-price-old">$300 / 月</span>
+              </span>
+            </div>
+            <div class="plan-benefits">
+              <div class="plan-benefit"><span class="pbc pbc-std">✓</span>包含所有免費方案權益</div>
+              <div class="plan-benefit"><span class="pbc pbc-std">✓</span>顯示 <strong>⭐ 精選商家</strong> 藍色標章</div>
+              <div class="plan-benefit"><span class="pbc pbc-std">✓</span>提升里民搜尋能見度</div>
+            </div>
+          </div>
+        </label>
+
+        <!-- 優選方案 -->
+        <label class="plan-option plan-option--premium">
+          <input type="radio" name="plan" value="優選" onchange="onPlanChange()">
+          <div class="plan-card">
+            <div class="plan-card-top">
+              <span class="plan-icon">👑</span>
+              <span class="plan-name">優選方案</span>
+              <span class="plan-recommended">推薦</span>
+              <span class="plan-price plan-price-premium">
+                <span class="plan-price-current">限時免費</span>
+                <span class="plan-price-old">$500 / 月</span>
+              </span>
+            </div>
+            <div class="plan-benefits">
+              <div class="plan-benefit"><span class="pbc pbc-premium">✓</span>包含所有精選方案權益</div>
+              <div class="plan-benefit"><span class="pbc pbc-premium">✓</span><strong>置頂顯示</strong>，優先出現在商店列表最上方</div>
+              <div class="plan-benefit"><span class="pbc pbc-premium">✓</span>專屬 <strong>👑 優選推薦</strong> 金色標章</div>
+              <div class="plan-benefit"><span class="pbc pbc-premium">✓</span>搶先觸及每一位瀏覽的里民</div>
+            </div>
+          </div>
+        </label>
+
+      </div>
+
+      <div class="plan-trial-note" id="planTrialNote" style="display:none">
+        <svg class="icon" style="flex-shrink:0;color:#3B82F6"><use href="#i-info"/></svg>
+        <span>🎉 <strong>試用期間完全免費！</strong> 現在申請即可享有所選方案的完整功能，無需任何費用，後續收費方式將另行公告。</span>
+      </div>
+
+    </div>
+
+    <!-- 卡片 3：申請商家 -->
+    <div class="card">
+      <div class="section-title"><span class="title-bar"></span>申請商家</div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-tag"/></svg> 商家類別
+        </label>
+        <select id="f_cate">
+          <option value="">請選擇類別</option>
+          <option value="美食地圖">美食地圖</option>
+          <option value="飲料冰品">飲料冰品</option>
+          <option value="健康醫療">健康醫療</option>
+          <option value="生活便利">生活便利</option>
+          <option value="住宅相關">住宅相關</option>
+          <option value="寵物專區">寵物專區</option>
+          <option value="其他">其他</option>
+        </select>
+        <div class="error-text">請選擇商家類別</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-clipboard"/></svg> 店家名稱
+        </label>
+        <input type="text" id="f_title" placeholder="請輸入店家名稱">
+        <div class="error-text">請輸入店家名稱</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-phone"/></svg> 店家電話
+        </label>
+        <input type="text" inputmode="tel" id="f_store_phone" placeholder="請輸入店家電話">
+        <div class="error-text">請輸入有效店家電話號碼</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-hash"/></svg> 店家統編
+        </label>
+        <input type="text" id="f_num" placeholder="如有店家統編可提供">
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-bag"/></svg> 經營項目 / 服務內容
+        </label>
+        <textarea id="f_desc" class="rich-textarea" placeholder="可直接換行分段填寫店家經營項目或服務內容。" rows="6"></textarea>
+        <div class="error-text">請輸入經營內容</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-file-text"/></svg> 優惠方案
+        </label>
+        <textarea id="f_offer" class="rich-textarea" placeholder="可直接換行分段填寫服務內容、優惠方案或注意事項。" rows="6"></textarea>
+        <div class="error-text">請輸入優惠方案</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-clock"/></svg> 營業時間
+        </label>
+        <textarea id="f_clock" class="rich-textarea" placeholder="例：週一 11:00-22:00&#10;週二公休&#10;週三至週日 11:00-22:00" rows="5"></textarea>
+        <div class="error-text">請輸入營業時間</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-pin"/></svg> 店家地址
+        </label>
+        <input type="text" id="f_addr" placeholder="請輸入完整地址">
+        <div class="error-text">請輸入完整地址</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-map"/></svg> Google 地圖
+        </label>
+        <input type="url" id="f_map" placeholder="https://maps.app.goo.gl/xxxxxxxxxxxxxxxxxx">
+        <div class="field-hint hint-box">
+          <svg class="icon"><use href="#i-info"/></svg>
+          打開 Google Map → 搜尋店家 → 分享 → 複製連結 → 貼回來
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-tag"/></svg> 品牌標籤
+        </label>
+        <div class="brand-tag-picker">
+          <div class="brand-tag-selected" id="brandTagSelected"></div>
+          <div class="brand-tag-input-row">
+            <input type="text" id="f_brandtag_new" placeholder="沒有適合的標籤時輸入新的" maxlength="6">
+            <button type="button" class="brand-tag-add" onclick="addBrandTagInput()">新增</button>
+          </div>
+          <div class="brand-tag-options" id="brandTagOptions"></div>
+        </div>
+        <div class="field-hint">
+          <svg class="icon"><use href="#i-info"/></svg>
+          可選最多 3 個標籤，每個最多 6 個字；新標籤會在店家審核公開後提供其他店家選用
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0">
+        <label class="field-label">
+          <svg class="icon"><use href="#i-leaf"/></svg> 商家連結
+        </label>
+        <input type="url" id="f_brandurl" placeholder="官網、粉絲頁或訂餐連結（LINE 品牌介紹按鈕會連到此）">
+        <div class="field-hint hint-box">
+          <svg class="icon"><use href="#i-info"/></svg>
+          填入官網、FB 粉絲頁或訂餐平台連結，LINE 展示的「品牌介紹」按鈕會連到這裡
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 4：照片附件 -->
+    <div class="card">
+      <div class="section-title"><span class="title-bar"></span>店家照片附件</div>
+
+      <div class="field-group">
+        <div class="photo-upload-area" id="storePhotoArea">
+          <div class="photo-preview-grid" id="storePhotoGrid"></div>
+          <label class="photo-add-btn" id="storePhotoAddBtn">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增照片（最多 10 張）
+            <input type="file" accept="image/*" multiple id="storePhotoInput" style="display:none" onchange="handleStorePhotoAdd(this)">
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <svg class="icon"><use href="#i-send"/></svg> 送出申請
+      </button>
+    </div>
+
+  </form>
+
+  <!-- 成功畫面 -->
+  <div class="success-msg" id="successMsg">
+    <div class="card">
+      <div class="check-wrap">
+        <svg class="icon"><use href="#i-check"/></svg>
+      </div>
+      <h2>特約商家申請已完成！</h2>
+      <p>我們將儘快審核並公告，感謝您的申請！</p>
+      <button onclick="location.reload()">繼續申請</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">舊社里 里民小幫手</div>
+
+<script src="storeconfig.js"></script>
+<script src="utils.js"></script>
+<script src="./assets/sortable-order.js"></script>
+<script>
+// 記錄頁面開啟時間，用於防機器人驗證
+window._storeFormTs = Date.now();
+
+// ── 方案選擇邏輯 ──
+var PLAN_FEATURES = {
+  '精選': ['刊登於美食地圖頁面', '顯示 ⭐ 精選商家 藍色標章', '提升里民搜尋能見度'],
+  '優選': ['置頂顯示，出現在商店列表最上方', '顯示 👑 優選推薦 金色標章', '搶先觸及每一位瀏覽的里民'],
+};
+
+function getSelectedPlan() {
+  var radios = document.querySelectorAll('input[name="plan"]');
+  for (var i = 0; i < radios.length; i++) {
+    if (radios[i].checked) return radios[i].value;
+  }
+  return '免費';
+}
+
+function onPlanChange() {
+  var plan = getSelectedPlan();
+  var note = document.getElementById('planTrialNote');
+  note.style.display = (plan !== '免費') ? 'flex' : 'none';
+}
+
+function openPlanOverlay() {
+  var plan = getSelectedPlan();
+  var emoji = plan === '優選' ? '👑' : '⭐';
+  var cls   = plan === '優選' ? 'premium' : 'std';
+  document.getElementById('pocEmoji').textContent = emoji;
+  document.getElementById('pocTitle').textContent = '確認' + plan + '方案';
+  var label = document.getElementById('pocPlanLabel');
+  label.textContent = emoji + '  ' + plan + '方案';
+  label.className = 'poc-plan-label ' + cls;
+  var feats = PLAN_FEATURES[plan] || [];
+  document.getElementById('pocFeatures').innerHTML = feats.map(function(f) {
+    return '<div class="poc-feature"><span style="font-size:14px">✅</span>' + f + '</div>';
+  }).join('');
+  document.getElementById('planOverlay').classList.add('open');
+}
+
+function closePlanOverlay() {
+  document.getElementById('planOverlay').classList.remove('open');
+}
+
+function setSubmitProgress(stepText, percent, noteText) {
+  document.getElementById('submitProgressStep').textContent = stepText || '正在處理…';
+  document.getElementById('submitProgressFill').style.width = Math.max(0, Math.min(100, percent || 0)) + '%';
+  if (noteText) document.getElementById('submitProgressNote').textContent = noteText;
+}
+
+function openSubmitProgress(stepText, percent, noteText) {
+  setSubmitProgress(stepText, percent, noteText);
+  document.body.classList.add('loading-submit');
+  document.getElementById('submitProgressOverlay').classList.add('open');
+  document.getElementById('submitProgressOverlay').setAttribute('aria-hidden', 'false');
+}
+
+function closeSubmitProgress() {
+  document.body.classList.remove('loading-submit');
+  document.getElementById('submitProgressOverlay').classList.remove('open');
+  document.getElementById('submitProgressOverlay').setAttribute('aria-hidden', 'true');
+}
+
+function resetSubmitActions() {
+  var btn = document.getElementById('submitBtn');
+  var confirmBtn = document.getElementById('pocConfirmBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<svg class="icon"><use href="#i-send"/></svg> 送出申請';
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = '確認方案，送出申請';
+}
+
+// ── 品牌標籤 picker ──
+var availableBrandTags = [];
+var selectedBrandTags = [];
+var brandTagDefs = [];
+var BRAND_TAG_PALETTE = {
+  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
+  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
+  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+};
+var storeCategoryFallback = ['美食地圖','飲料冰品','健康醫療','生活便利','住宅相關','寵物專區','其他'];
+
+function brandTagValue(value) {
+  return String(value || '').trim();
+}
+
+function brandTagJs(value) {
+  return brandTagValue(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+function brandTagStyle(tag) {
+  var def = brandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };
+  var color = BRAND_TAG_PALETTE[def.color] || BRAND_TAG_PALETTE.gold;
+  return ' style=\"background:' + color.bg + ';color:' + color.txt + ';border-color:' + color.bd + '\"';
+}
+
+function renderBrandTagPicker() {
+  var selected = document.getElementById('brandTagSelected');
+  var options = document.getElementById('brandTagOptions');
+  if (!selected || !options) return;
+  selected.innerHTML = selectedBrandTags.length
+    ? selectedBrandTags.map(function(tag) {
+        return '<span class="brand-tag-chip"' + brandTagStyle(tag) + '>' + esc(tag) +
+          '<button type="button" aria-label="移除 ' + esc(tag) + '" onclick="removeBrandTag(\'' + brandTagJs(tag) + '\')">×</button></span>';
+      }).join('')
+    : '<span class="brand-tag-empty">尚未選擇標籤</span>';
+  options.innerHTML = availableBrandTags.length
+    ? availableBrandTags.map(function(tag) {
+        var active = selectedBrandTags.indexOf(tag) !== -1;
+        return '<button type="button" class="brand-tag-option' + (active ? ' selected' : '') +
+          '"' + brandTagStyle(tag) + ' onclick="toggleBrandTag(\'' + brandTagJs(tag) + '\')">' + esc(tag) + '</button>';
+      }).join('')
+    : '<span class="brand-tag-empty">公開店家累積標籤後會顯示在這裡</span>';
+}
+
+function addBrandTag(tag) {
+  tag = brandTagValue(tag);
+  if (!tag) return true;
+  if (tag.length > 6) { alert('每個標籤最多 6 個字'); return false; }
+  if (/^\d+$/.test(tag)) { alert('品牌標籤不能只有數字'); return false; }
+  if (selectedBrandTags.indexOf(tag) !== -1) return true;
+  if (selectedBrandTags.length >= 3) { alert('一家店最多 3 個品牌標籤'); return false; }
+  selectedBrandTags.push(tag);
+  renderBrandTagPicker();
+  return true;
+}
+
+function addBrandTagInput() {
+  var input = document.getElementById('f_brandtag_new');
+  if (!input || !addBrandTag(input.value)) return;
+  input.value = '';
+}
+
+function removeBrandTag(tag) {
+  selectedBrandTags = selectedBrandTags.filter(function(item) { return item !== tag; });
+  renderBrandTagPicker();
+}
+
+function toggleBrandTag(tag) {
+  if (selectedBrandTags.indexOf(tag) !== -1) removeBrandTag(tag);
+  else addBrandTag(tag);
+}
+
+function renderStoreCategoryOptions(categories) {
+  var select = document.getElementById('f_cate');
+  if (!select) return;
+  var current = select.value;
+  var values = Array.isArray(categories) && categories.length ? categories : storeCategoryFallback;
+  select.innerHTML = '<option value="">請選擇類別</option>' + values.map(function(category) {
+    return '<option value="' + esc(category) + '"' + (current === category ? ' selected' : '') + '>' + esc(category) + '</option>';
+  }).join('');
+}
+
+function loadStoreTaxonomy() {
+  renderStoreCategoryOptions(storeCategoryFallback);
+  if (!CONFIG.STORE_API_URL) return renderBrandTagPicker();
+  fetch(CONFIG.STORE_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'getPublicStoreTaxonomy' })
+  })
+    .then(function(res) { return res.json(); })
+    .then(function(json) {
+      var taxonomy = json.success && json.taxonomy ? json.taxonomy : {};
+      renderStoreCategoryOptions(taxonomy.categories);
+      availableBrandTags = Array.isArray(taxonomy.brandTags) ? taxonomy.brandTags : [];
+      brandTagDefs = Array.isArray(taxonomy.brandTagDefs) ? taxonomy.brandTagDefs : [];
+      renderBrandTagPicker();
+    })
+    .catch(function() { renderBrandTagPicker(); });
+}
+
+// ── 多選照片 widget ──
+var storePhotos = [];
+var storePhotoIdSeq = 0;
+var storePhotoSortable = null;
+
+function renderStorePhotoGrid() {
+  var grid   = document.getElementById('storePhotoGrid');
+  var addBtn = document.getElementById('storePhotoAddBtn');
+  if (!grid) return;
+  grid.innerHTML = '';
+  storePhotos.forEach(function(p) {
+    var div = document.createElement('div');
+    div.className = 'photo-preview-item';
+    div.setAttribute('data-sort-id', String(p.id));
+    var img = document.createElement('img'); img.src = p.src; img.alt = '照片';
+    var rmBtn = document.createElement('button');
+    rmBtn.type = 'button'; rmBtn.className = 'item-remove'; rmBtn.textContent = '✕';
+    rmBtn.setAttribute('data-pid', String(p.id));
+    rmBtn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      var pid = parseInt(this.getAttribute('data-pid'));
+      syncStorePhotosFromDOM();
+      storePhotos = storePhotos.filter(function(x) { return x.id !== pid; });
+      renderStorePhotoGrid();
+    });
+    div.appendChild(img); div.appendChild(rmBtn);
+    if (storePhotos.length > 1) {
+      var hint = document.createElement('span');
+      hint.className = 'drag-hint'; hint.textContent = '拖曳排序';
+      div.appendChild(hint);
+    }
+    grid.appendChild(div);
+  });
+  if (addBtn) addBtn.classList.toggle('hidden', storePhotos.length >= 10);
+  if (storePhotoSortable) { storePhotoSortable.destroy(); storePhotoSortable = null; }
+  if (storePhotos.length > 1) {
+    storePhotoSortable = new SortableOrder(grid, {
+      selector: '.photo-preview-item',
+      onReorder: function(ids) {
+        var idMap = {};
+        storePhotos.forEach(function(p) { idMap[p.id] = p; });
+        storePhotos = ids.map(function(id) { return idMap[parseInt(id)]; }).filter(Boolean);
+      }
+    });
+  }
+}
+
+function syncStorePhotosFromDOM() {
+  var grid = document.getElementById('storePhotoGrid');
+  if (!grid) return;
+  var idMap = {};
+  storePhotos.forEach(function(p) { idMap[p.id] = p; });
+  var ordered = Array.prototype.map.call(grid.querySelectorAll('[data-sort-id]'), function(el) {
+    return idMap[parseInt(el.getAttribute('data-sort-id'))];
+  }).filter(Boolean);
+  if (ordered.length === storePhotos.length) storePhotos = ordered;
+}
+
+function handleStorePhotoAdd(input) {
+  if (!input.files || !input.files.length) return;
+  var slots = 10 - storePhotos.length;
+  if (slots <= 0) return;
+  var files = Array.prototype.slice.call(input.files, 0, slots);
+  var pending = files.length;
+  files.forEach(function(file) {
+    var id = storePhotoIdSeq++;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      storePhotos.push({ id: id, src: e.target.result, file: file });
+      pending--;
+      if (pending === 0) renderStorePhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+// 壓縮圖片（縮小到 1600px 以內，JPEG 80% 品質）
+function compressImage(file) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var maxSize = 1600;
+        var w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadPhoto(file) {
+  if (!file) return '';
+  try {
+    var dataUrl = await compressImage(file);
+    var b64 = dataUrl.indexOf(',') !== -1 ? dataUrl.split(',')[1] : dataUrl;
+    var res = await fetch(CONFIG.STORE_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'uploadStorePhoto',
+        imageBase64: b64,
+        mimeType: file.type || 'image/jpeg'
+      })
+    });
+    var json = await res.json();
+    return (json.success && json.url) ? json.url : '';
+  } catch (e) {
+    console.warn('[Upload] 照片上傳失敗:', e);
+    return '';
+  }
+}
+
+async function uploadAllPhotos(btn) {
+  syncStorePhotosFromDOM();
+  if (!storePhotos.length) return Array(10).fill('');
+  var results = [];
+  for (var i = 0; i < storePhotos.length; i++) {
+    btn.innerHTML = '<span class="spinner"></span> 上傳照片 ' + (i + 1) + '/' + storePhotos.length + '…';
+    setSubmitProgress('正在上傳照片 ' + (i + 1) + '/' + storePhotos.length + '…', Math.round(((i + 1) / (storePhotos.length + 1)) * 75), '大圖會需要多幾秒，這是正常的');
+    results.push(await uploadPhoto(storePhotos[i].file));
+  }
+  while (results.length < 10) results.push('');
+  return results;
+}
+
+// 表單驗證
+function validateForm() {
+  var valid = true;
+
+  // 店家電話可留空；有填時才檢查格式。
+  var storePhoneEl = document.getElementById('f_store_phone');
+  var storePhoneErr = storePhoneEl.parentElement.querySelector('.error-text');
+  if (storePhoneEl.value.trim() && storePhoneEl.value.replace(/[^\d]/g, '').length < 8) {
+    storePhoneEl.classList.add('invalid');
+    if (storePhoneErr) { storePhoneErr.style.display = 'block'; }
+    valid = false;
+  } else {
+    storePhoneEl.classList.remove('invalid');
+    if (storePhoneErr) storePhoneErr.style.display = 'none';
+  }
+
+  return valid;
+}
+
+// 清除驗證狀態
+document.querySelectorAll('input, textarea, select').forEach(function(el) {
+  el.addEventListener('input', function() {
+    this.classList.remove('invalid');
+    var err = this.parentElement.querySelector('.error-text');
+    if (err) err.style.display = 'none';
+  });
+});
+
+// 實際送出（不論有無 overlay）
+async function doSubmit() {
+  var btn = document.getElementById('submitBtn');
+  var confirmBtn = document.getElementById('pocConfirmBtn');
+  btn.disabled = true;
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = '處理中，請稍候…';
+  btn.innerHTML = '<span class="spinner"></span> 準備上傳…';
+  openSubmitProgress('正在整理申請資料…', 10, '若有照片，系統會先壓縮再上傳');
+
+  try {
+    var photoUrls = await uploadAllPhotos(btn);
+    btn.innerHTML = '<span class="spinner"></span> 送出申請中…';
+    setSubmitProgress('正在送出申請資料…', 88, '資料送出後會自動進入完成畫面');
+
+    var payload = {
+      action:      'submitStore',
+      website:     document.getElementById('f_website').value,
+      formTs:      window._storeFormTs || 0,
+      cate:        document.getElementById('f_cate').value,
+      title:       document.getElementById('f_title').value.trim(),
+      storephone:  document.getElementById('f_store_phone').value.trim(),
+      taxid:       document.getElementById('f_num').value.trim(),
+      desc:        document.getElementById('f_desc').value.trim(),
+      offer:       document.getElementById('f_offer').value.trim(),
+      opentime:    document.getElementById('f_clock').value.trim(),
+      addr:        document.getElementById('f_addr').value.trim(),
+      map:         document.getElementById('f_map').value.trim(),
+      brandTags:   selectedBrandTags.slice(0, 3),
+      brandUrl:    document.getElementById('f_brandurl').value.trim(),
+      photo1:  photoUrls[0], photo2:  photoUrls[1], photo3:  photoUrls[2],
+      photo4:  photoUrls[3], photo5:  photoUrls[4], photo6:  photoUrls[5],
+      photo7:  photoUrls[6], photo8:  photoUrls[7], photo9:  photoUrls[8],
+      photo10: photoUrls[9],
+      planType:    getSelectedPlan(),
+    };
+
+    var submitEndpoint = CONFIG.STORE_API_URL || CONFIG.SCRIPT_URL;
+    var res = await fetch(submitEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var result = await res.json();
+    if (!result.success) throw new Error(result.error || '送出失敗');
+
+    setSubmitProgress('申請已送出，正在完成畫面…', 100, '完成後會自動顯示成功訊息');
+    closePlanOverlay();
+    closeSubmitProgress();
+    document.getElementById('reportForm').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (err) {
+    closePlanOverlay();
+    closeSubmitProgress();
+    alert('送出失敗，請稍後再試。\n錯誤：' + err.message);
+    resetSubmitActions();
+  }
+}
+
+// overlay 確認按鈕觸發真正送出
+document.getElementById('pocConfirmBtn').addEventListener('click', doSubmit);
+document.getElementById('f_brandtag_new').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addBrandTagInput(); }
+});
+loadStoreTaxonomy();
+
+// 送出表單：免費直送、精選/優選先開 overlay
+document.getElementById('reportForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  if (!validateForm()) {
+    document.querySelector('.invalid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  var plan = getSelectedPlan();
+  if (plan === '精選' || plan === '優選') {
+    openPlanOverlay();
+  } else {
+    await doSubmit();
+  }
+});
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

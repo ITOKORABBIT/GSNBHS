@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公開案件 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+
+:root{
+  --bg:#eff8f2;
+  --card:#ffffff;
+  --border:#bdd9ca;
+  --divider:#d0e8da;
+  --lbl:#4e7260;
+  --val:#1a3028;
+  --muted:#86b09e;
+  --heading:#112620;
+  --primary:#5b9b7b;
+  --primary-light:#e6f1ea;
+  --primary-dark:#4a8366;
+  --shadow-sm:0 1px 3px rgba(30,80,55,.07);
+  --shadow-md:0 2px 8px rgba(30,80,55,.09),0 1px 2px rgba(30,80,55,.05);
+  --radius:10px;
+  --font:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--val);
+  font-size:15px;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+.page-header{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:0 16px;
+  height:54px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.header-title{
+  flex:1;
+  font-size:16px;
+  font-weight:700;
+  color:var(--heading);
+  text-align:center;
+}
+
+.header-subtitle{
+  font-size:12px;
+  font-weight:400;
+  color:var(--lbl);
+  margin-top:1px;
+}
+
+.report-btn{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:7px 13px;
+  border-radius:8px;
+  border:none;
+  background:#f08080;
+  font-size:13px;
+  font-weight:600;
+  color:#fff;
+  transition:background .15s;
+  white-space:nowrap;
+}
+
+.report-btn:hover{background:#d85c5c}
+
+.filter-wrap{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:54px;
+  z-index:90;
+}
+
+.filter-bar{
+  padding:8px 16px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.search-wrap{
+  flex:1;
+  min-width:180px;
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.search-wrap svg{
+  position:absolute;
+  left:10px;
+  color:var(--muted);
+  pointer-events:none;
+}
+
+.search-input{
+  width:100%;
+  padding:7px 10px 7px 34px;
+  border-radius:7px;
+  border:1px solid var(--border);
+  background:var(--bg);
+  font-family:var(--font);
+  font-size:13px;
+  color:var(--val);
+  outline:none;
+  transition:border-color .15s;
+}
+
+.search-input:focus{border-color:var(--primary)}
+
+.dropdown{position:relative}
+
+.dropdown-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--bg);
+  font-size:13px;
+  font-weight:600;
+  color:var(--lbl);
+  transition:all .15s;
+  white-space:nowrap;
+}
+
+.dropdown-btn:hover{background:var(--divider)}
+.dropdown-btn.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.dropdown-btn .chevron{transition:transform .2s;flex-shrink:0}
+.dropdown-btn.open .chevron{transform:rotate(180deg)}
+
+.dropdown-panel{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 6px 24px rgba(0,0,0,.13);
+  z-index:300;
+  min-width:170px;
+  display:none;
+  overflow:hidden;
+}
+
+.dropdown-panel.open{display:block}
+.dropdown-list{max-height:230px;overflow-y:auto;padding:4px 0}
+
+.dropdown-item{
+  padding:8px 14px;
+  font-size:13px;
+  color:var(--val);
+  cursor:pointer;
+  transition:background .1s;
+}
+
+.dropdown-item:hover{background:var(--bg)}
+.dropdown-item.selected{color:var(--primary);font-weight:700;background:var(--primary-light)}
+
+.result-bar{
+  padding:10px 16px 4px;
+  font-size:12px;
+  color:var(--lbl);
+}
+
+.result-bar strong{color:var(--primary)}
+
+.card-grid{
+  padding:4px 12px 100px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+  gap:12px;
+}
+
+.case-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  display:flex;
+  flex-direction:column;
+  border-left:4px solid var(--primary);
+}
+
+.case-card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-md);
+}
+
+.card-thumb{
+  width:100%;
+  aspect-ratio:16/9;
+  background:var(--divider);
+  overflow:hidden;
+  flex-shrink:0;
+  position:relative;
+}
+
+.card-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .3s;
+}
+
+.case-card:hover .card-thumb img{transform:scale(1.04)}
+
+.card-thumb-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#d8eee2 0%,#c8e4d5 100%);
+}
+
+.card-body{
+  padding:12px 14px 14px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding-bottom:8px;
+  margin-bottom:8px;
+  border-bottom:1px solid var(--divider);
+  font-size:11px;
+  color:var(--muted);
+}
+
+.card-date{
+  display:inline-flex;
+  align-items:center;
+  min-width:0;
+}
+
+.card-title{
+  font-size:14px;
+  font-weight:700;
+  color:var(--heading);
+  line-height:1.45;
+  margin-bottom:6px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.card-location{
+  font-size:12px;
+  color:var(--lbl);
+  line-height:1.5;
+  margin-bottom:8px;
+  min-height:18px;
+  display:-webkit-box;
+  -webkit-line-clamp:1;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.card-tags{
+  margin-top:auto;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.state-wrap{
+  grid-column:1 / -1;
+  text-align:center;
+  padding:60px 24px;
+  color:var(--lbl);
+}
+
+.state-wrap svg{margin:0 auto 16px;opacity:.4}
+.state-wrap h3{font-size:16px;color:var(--heading);margin-bottom:6px}
+.state-wrap p{font-size:13px}
+
+.skel{
+  background:linear-gradient(90deg,var(--divider) 25%,#c2ddd0 50%,var(--divider) 75%);
+  background-size:300% 100%;
+  animation:shimmer 1.4s infinite;
+  border-radius:5px;
+}
+
+@keyframes shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+.skel-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  overflow:hidden;
+}
+
+@media(max-width:480px){
+  .card-grid{grid-template-columns:1fr;padding:4px 10px 80px}
+  .filter-bar{flex-wrap:wrap}
+
+  /* 手機改橫向列：固定卡片高度，照片放大但不撐版 */
+  .case-card{flex-direction:row;height:116px}
+  .card-thumb{width:110px;height:100%;flex-shrink:0;aspect-ratio:auto}
+  .card-body{padding:7px 10px;min-width:0;overflow:hidden}
+  .card-top{margin-bottom:3px}
+  .card-title{font-size:13px;margin-bottom:3px;-webkit-line-clamp:2}
+  .card-location{margin-bottom:5px}
+}
+
+/* ── 瀏覽統計 ── */
+.stats-row{
+  padding:2px 16px 8px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--lbl);
+}
+.stats-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 11px;border-radius:999px;border:none;
+  background:var(--primary-light);font-size:12px;font-weight:700;
+  color:var(--primary-dark);cursor:pointer;transition:background .15s;
+}
+.stats-btn:hover{background:var(--divider)}
+.vc-badge{display:inline-flex;align-items:center;gap:2px;font-size:11px;color:var(--muted)}
+.vm-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(17,38,32,.38);z-index:500;
+  align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(5px);
+}
+.vm-backdrop.open{display:flex}
+.vm-box{
+  background:#fff;border-radius:16px;
+  width:min(100%,360px);max-height:80vh;overflow:auto;
+  box-shadow:0 12px 40px rgba(17,38,32,.18);
+}
+.vm-head{
+  padding:16px 16px 12px;border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.vm-title{font-size:15px;font-weight:700;color:var(--heading)}
+.vm-close{
+  width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);transition:background .15s;
+}
+.vm-close:hover{background:var(--divider)}
+.vm-body{padding:10px 16px 16px}
+.vm-empty{text-align:center;color:var(--muted);padding:24px 0;font-size:13px}
+.rank-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--divider);
+}
+.rank-row:last-child{border-bottom:none}
+.rank-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:11px;font-weight:700;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.rank-num.r1{background:#e9a21b}
+.rank-num.r2{background:#8a8a8a}
+.rank-num.r3{background:#a06432}
+.rank-name{flex:1;font-size:13px;color:var(--val);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-cnt{font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:2px}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div style="width:60px"></div>
+  <div class="header-title">
+    <div>公開案件</div>
+    <div class="header-subtitle" id="headerSubtitle">舊社里 里民小幫手</div>
+  </div>
+  <button class="report-btn" onclick="window.location.href='report.html'">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    我要通報
+  </button>
+</div>
+
+<div class="filter-wrap">
+  <div class="filter-bar">
+    <div class="dropdown" id="categoryDropdown">
+      <button class="dropdown-btn" id="categoryBtn" onclick="toggleDropdown('categoryDropdown')">
+        <span id="categoryLabel">全部類別</span>
+        <svg class="chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dropdown-panel">
+        <div class="dropdown-list" id="categoryList">
+          <div class="dropdown-item selected" data-value="all" onclick="selectCategory(this)">全部類別</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="搜尋案件…" oninput="applyFilters()">
+    </div>
+  </div>
+</div>
+
+<div class="result-bar" id="resultBar">載入中…</div>
+
+<div class="stats-row" id="statsRow" style="display:none">
+  <span style="display:inline-flex;align-items:center;gap:4px">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+    <span id="pageViewCount">–</span> 次瀏覽
+  </span>
+  <button class="stats-btn" onclick="openVmModal()">🔥 熱門排行</button>
+</div>
+<div class="vm-backdrop" id="vmBackdrop" onclick="closeVmModal(event)">
+  <div class="vm-box">
+    <div class="vm-head">
+      <div class="vm-title">🔥 最多點閱 TOP 5</div>
+      <button class="vm-close" onclick="closeVmModalDirect()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="vm-body" id="vmBody"></div>
+  </div>
+</div>
+
+<div class="card-grid" id="cardGrid">
+  <div class="skel-card" style="height:220px">
+    <div class="skel" style="height:130px;border-radius:0"></div>
+    <div style="padding:12px 14px">
+      <div class="skel" style="height:12px;width:50%;margin-bottom:8px"></div>
+      <div class="skel" style="height:15px;width:85%;margin-bottom:6px"></div>
+      <div class="skel" style="height:12px;width:65%"></div>
+    </div>
+  </div>
+  <div class="skel-card" style="height:220px">
+    <div class="skel" style="height:130px;border-radius:0"></div>
+    <div style="padding:12px 14px">
+      <div class="skel" style="height:12px;width:40%;margin-bottom:8px"></div>
+      <div class="skel" style="height:15px;width:90%;margin-bottom:6px"></div>
+      <div class="skel" style="height:12px;width:70%"></div>
+    </div>
+  </div>
+  <div class="skel-card" style="height:220px">
+    <div class="skel" style="height:130px;border-radius:0"></div>
+    <div style="padding:12px 14px">
+      <div class="skel" style="height:12px;width:55%;margin-bottom:8px"></div>
+      <div class="skel" style="height:15px;width:75%;margin-bottom:6px"></div>
+      <div class="skel" style="height:12px;width:60%"></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script>
+var CASE_ACTIONS = { getPublicCases: 1, getPublicCase: 1, getViewStats: 1, recordCardView: 1 };
+function apiCall(action, extra) {
+  var payload = Object.assign({ action: action }, extra || {});
+  var url = CASE_ACTIONS[action] ? CONFIG.CASE_API_URL : CONFIG.SCRIPT_URL;
+  var isCaseApi = !!CASE_ACTIONS[action];
+  return fetch(url, {
+    method: 'POST',
+    redirect: isCaseApi ? undefined : 'follow',
+    headers: { 'Content-Type': isCaseApi ? 'application/json' : 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); });
+}
+
+var CATE_COLOR = {
+  '生活': { bg:'#e0f7fa', txt:'#006b6b' },
+  '校園': { bg:'#fff3e0', txt:'#b75d00' },
+  '交通': { bg:'#ebf3ff', txt:'#1a56a8' },
+  '環境': { bg:'#eaf3eb', txt:'#2f6836' },
+  '治安': { bg:'#fee2e2', txt:'#991b1b' },
+  '修繕': { bg:'#fff8e1', txt:'#f57f17' },
+  '其他': { bg:'#f0eeec', txt:'#7a6e66' }
+};
+
+var STATUS_COLOR = {
+  '處理中': { bg:'#fff8e1', txt:'#b75d00' },
+  '已結案': { bg:'#f0eeec', txt:'#7a6e66' }
+};
+
+function statusBadge(status) {
+  if (!status) return '';
+  var color = STATUS_COLOR[status] || { bg:'#f0eeec', txt:'#7a6e66' };
+  return '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:' + color.bg + ';color:' + color.txt + '">' + esc(status) + '</span>';
+}
+
+function cateBadge(cat) {
+  if (!cat) return '';
+  var color = CATE_COLOR[cat] || { bg:'#f0eeec', txt:'#7a6e66' };
+  return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:' + color.bg + ';color:' + color.txt + '">' +
+    '<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>' +
+    esc(cat) + '</span>';
+}
+
+var allCases = [];
+var currentCategoryFilter = 'all';
+var vcData = {};
+var vcNamesMap = {};
+var EYE_SVG = '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+function fmtNum(n) {
+  return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function loadViewStats() {
+  apiCall('getViewStats', { page: 'openlist' })
+    .then(function(json) {
+      if (!json.success) return;
+      vcData = json.cardCounts || {};
+      document.getElementById('statsRow').style.display = 'flex';
+      document.getElementById('pageViewCount').textContent = fmtNum(json.pageCount);
+      updateViewBadges();
+    })
+    .catch(function() {});
+}
+
+function updateViewBadges() {
+  Object.keys(vcData).forEach(function(id) {
+    var el = document.getElementById('vc-' + id);
+    if (el) el.innerHTML = EYE_SVG + ' ' + fmtNum(vcData[id]);
+  });
+}
+
+function recordCardView(id) {
+  apiCall('recordCardView', { page: 'openlist', itemId: id }).catch(function() {});
+}
+
+function openVmModal() {
+  var entries = Object.keys(vcData).map(function(id) {
+    return { id: id, name: vcNamesMap[id] || id, count: vcData[id] };
+  });
+  entries.sort(function(a, b) { return b.count - a.count; });
+  var top5 = entries.slice(0, 5);
+  var cls = ['r1', 'r2', 'r3', '', ''];
+  var html = top5.length
+    ? top5.map(function(item, i) {
+        return '<div class="rank-row">' +
+          '<div class="rank-num ' + (cls[i] || '') + '">' + (i + 1) + '</div>' +
+          '<div class="rank-name">' + esc(item.name) + '</div>' +
+          '<div class="rank-cnt">' + EYE_SVG + ' ' + fmtNum(item.count) + '</div>' +
+          '</div>';
+      }).join('')
+    : '<div class="vm-empty">尚無點閱資料</div>';
+  document.getElementById('vmBody').innerHTML = html;
+  document.getElementById('vmBackdrop').classList.add('open');
+}
+
+function closeVmModal(e) {
+  if (e.target === document.getElementById('vmBackdrop')) closeVmModalDirect();
+}
+function closeVmModalDirect() {
+  document.getElementById('vmBackdrop').classList.remove('open');
+}
+
+function applySnapshot(cases) {
+  allCases = cases;
+  allCases.forEach(function(item) {
+    vcNamesMap[item.caseId] = item.publicTitle || item.caseId;
+  });
+  buildCategoryChips();
+  applyFilters();
+  document.getElementById('headerSubtitle').textContent = CONFIG.VILLAGE_NAME + ' ' + CONFIG.SYSTEM_NAME;
+}
+
+function loadAll() {
+  // 先從 sessionStorage 即時渲染（返回時不等 GAS）
+  try {
+    var cached = JSON.parse(sessionStorage.getItem('pub_cases_cache') || 'null');
+    if (cached && Array.isArray(cached) && cached.length) {
+      applySnapshot(cached);
+      loadViewStats();
+    }
+  } catch(e) {}
+
+  // 背景更新最新資料
+  apiCall('getPublicCases')
+    .then(function(json) {
+      if (!json.success) {
+        if (!allCases.length) showError(json.error || '載入案件失敗');
+        return;
+      }
+      try { sessionStorage.setItem('pub_cases_cache', JSON.stringify(json.cases || [])); } catch(e) {}
+      applySnapshot(json.cases || []);
+      loadViewStats();
+    })
+    .catch(function() {
+      if (!allCases.length) showError('載入失敗，請稍後再試');
+    });
+}
+
+function toggleDropdown(id) {
+  var root = document.getElementById(id);
+  var panel = root.querySelector('.dropdown-panel');
+  var btn = root.querySelector('.dropdown-btn');
+  var wasOpen = panel.classList.contains('open');
+  closeAllDropdowns();
+  if (!wasOpen) {
+    panel.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-panel').forEach(function(p) { p.classList.remove('open'); });
+  document.querySelectorAll('.dropdown-btn').forEach(function(b) { b.classList.remove('open'); });
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown')) closeAllDropdowns();
+});
+
+function selectCategory(el) {
+  currentCategoryFilter = el.dataset.value;
+  document.querySelectorAll('#categoryList .dropdown-item').forEach(function(item) {
+    item.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  document.getElementById('categoryLabel').textContent = currentCategoryFilter === 'all' ? '全部類別' : el.textContent.trim();
+  document.getElementById('categoryBtn').classList.toggle('active', currentCategoryFilter !== 'all');
+  closeAllDropdowns();
+  applyFilters();
+}
+
+function buildCategoryChips() {
+  var cats = {};
+  allCases.forEach(function(item) {
+    if (item.publicCate) cats[item.publicCate] = true;
+  });
+
+  var keys = Object.keys(cats).sort();
+  var html = '<div class="dropdown-item selected" data-value="all" onclick="selectCategory(this)">全部類別</div>';
+
+  keys.forEach(function(cat) {
+    html += '<div class="dropdown-item" data-value="' + esc(cat) + '" onclick="selectCategory(this)">' + esc(cat) + '</div>';
+  });
+
+  document.getElementById('categoryList').innerHTML = html;
+}
+
+function applyFilters() {
+  var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  var filtered = allCases.filter(function(item) {
+    if (currentCategoryFilter !== 'all' && (item.publicCate || '') !== currentCategoryFilter) return false;
+    if (!q) return true;
+    var haystack = [item.publicTitle, item.publicCate, item.publicLoc, item.publicSummary].join(' ').toLowerCase();
+    return haystack.indexOf(q) !== -1;
+  });
+
+  renderGrid(filtered);
+  updateViewBadges();
+  document.getElementById('resultBar').innerHTML = '共 <strong>' + filtered.length + '</strong> 筆公開案件' +
+    (allCases.length !== filtered.length ? '，全部 ' + allCases.length + ' 筆' : '');
+}
+
+function renderGrid(cases) {
+  var grid = document.getElementById('cardGrid');
+  if (!cases.length) {
+    grid.innerHTML = '<div class="state-wrap">' +
+      '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' +
+      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+      '<h3>沒有符合的案件</h3><p>請嘗試調整搜尋條件</p></div>';
+    return;
+  }
+
+  grid.innerHTML = cases.map(renderCard).join('');
+}
+
+function imgFallback(img) {
+  img.parentNode.innerHTML = '<div class="card-thumb-placeholder">' +
+    '<svg width="28" height="28" fill="none" stroke="#b8a898" stroke-width="1.5" viewBox="0 0 24 24">' +
+    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +
+    '<polyline points="21 15 16 10 5 21"/></svg></div>';
+}
+
+function formatReplyDate(replyTime) {
+  if (!replyTime) return '';
+  var date = new Date(replyTime);
+  if (isNaN(date.getTime())) return String(replyTime).slice(0, 10);
+  return date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+}
+
+function renderCard(item) {
+  var thumb = item.repPhoto1
+    ? '<div class="card-thumb"><img src="' + esc(item.repPhoto1) + '" alt="" loading="lazy" onerror="imgFallback(this)"></div>'
+    : '<div class="card-thumb"><div class="card-thumb-placeholder">' +
+      '<svg width="28" height="28" fill="none" stroke="#b8a898" stroke-width="1.5" viewBox="0 0 24 24">' +
+      '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +
+      '<polyline points="21 15 16 10 5 21"/></svg></div></div>';
+
+  var html = '<div class="case-card" onclick="openCase(\'' + esc(item.caseId) + '\')">';
+  html += thumb;
+  html += '<div class="card-body">';
+  html += '<div class="card-top">';
+  html += '<span class="card-date">';
+  if (item.replyTime) {
+    html += '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px;margin-right:3px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + esc(formatReplyDate(item.replyTime));
+  }
+  html += '</span>';
+  html += '<span class="vc-badge" id="vc-' + esc(item.caseId) + '">' + EYE_SVG + ' –</span>';
+  html += '</div>';
+  html += '<div class="card-title">' + esc(item.publicTitle || '（無標題）') + '</div>';
+  html += '<div class="card-location">';
+  if (item.publicLoc) {
+    html += '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px;margin-right:3px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(item.publicLoc);
+  }
+  html += '</div>';
+  html += '<div class="card-tags">';
+  if (item.publicCate) html += cateBadge(item.publicCate);
+  if (item.status) html += statusBadge(item.status);
+  html += '</div></div></div>';
+  return html;
+}
+
+function openCase(id) {
+  recordCardView(id);
+  vcData[id] = (vcData[id] || 0) + 1;
+  for (var i = 0; i < allCases.length; i++) {
+    if (allCases[i].caseId === id) {
+      try { sessionStorage.setItem('case_preview_' + id, JSON.stringify(allCases[i])); } catch(e) {}
+      break;
+    }
+  }
+  window.location.href = 'opendetail.html?id=' + encodeURIComponent(id);
+}
+
+function showError(message) {
+  document.getElementById('resultBar').textContent = '載入失敗';
+  document.getElementById('cardGrid').innerHTML = '<div class="state-wrap">' +
+    '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' +
+    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<h3>無法載入案件</h3><p>' + esc(message) + '</p></div>';
+}
+
+loadAll();
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

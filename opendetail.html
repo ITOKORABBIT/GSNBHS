@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公開案件詳情 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+
+:root{
+  --bg:        #EFF8F2;
+  --card:      #FFFFFF;
+  --border:    #BDD9CA;
+  --divider:   #D0E8DA;
+  --lbl:       #4E7260;
+  --val:       #1A3028;
+  --muted:     #86B09E;
+  --heading:   #112620;
+  --primary:       #5B9B7B;
+  --primary-light: #E6F1EA;
+  --primary-dark:  #4A8366;
+  --shadow-sm: 0 1px 3px rgba(30,80,55,.07);
+  --shadow-md: 0 2px 8px rgba(30,80,55,.09), 0 1px 2px rgba(30,80,55,.05);
+  --radius:    10px;
+  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body{
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--val);
+  font-size: 15px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page header ── */
+.page-header{
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 50;
+}
+.back-btn{
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 14px; color: var(--lbl);
+  transition: background .15s;
+}
+.back-btn:hover{ background: var(--bg); }
+.page-title{
+  font-size: 16px; font-weight: 700;
+  color: var(--heading); flex: 1;
+  text-align: center;
+}
+.report-btn{
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 13px;
+  border-radius: 8px;
+  border: none;
+  background: #F08080;
+  font-size: 13px; font-weight: 600;
+  color: #fff;
+  transition: background .15s;
+}
+.report-btn:hover{ background: #D85C5C; }
+
+/* ── Container ── */
+.container{
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+}
+
+/* ── Card ── */
+.card{
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.card-header{
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 13px; font-weight: 700;
+  color: var(--lbl);
+  display: flex; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
+/* ── Title card ── */
+.case-title-card{
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border-left: 4px solid var(--primary);
+}
+.case-meta{
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+.badge-done{
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+  background: #EAF3EB; color: #2F6836;
+}
+.case-main-title{
+  font-size: 18px; font-weight: 700;
+  color: var(--heading); line-height: 1.4;
+}
+
+/* ── Info table ── */
+.info-table{ padding: 4px 0; }
+.info-row{
+  display: flex;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--divider);
+  gap: 12px;
+}
+.info-row:last-child{ border-bottom: none; }
+.info-lbl{
+  width: 80px; flex-shrink: 0;
+  font-size: 12px; font-weight: 600;
+  color: var(--lbl);
+  padding-top: 1px;
+}
+.info-val{
+  flex: 1; font-size: 14px;
+  color: var(--val); line-height: 1.55;
+}
+.empty{ color: var(--muted); }
+.desc{ white-space: pre-wrap; line-height: 1.7; }
+
+/* ── Photo grid ── */
+.photo-grid-wrap{ padding: 12px 18px 14px; }
+.photo-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.photo-grid img{
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: 8px; border: 1px solid var(--border);
+  cursor: pointer; transition: transform .2s;
+}
+.photo-grid img:hover{ transform: scale(1.03); }
+
+/* ── Lightbox ── */
+.lightbox{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 999;
+  display: none; align-items: center; justify-content: center;
+}
+.lightbox.open{ display: flex; }
+.lightbox img{
+  max-width: 95vw; max-height: 90vh;
+  border-radius: 6px; object-fit: contain;
+}
+.lb-close{
+  position: absolute; top: 16px; right: 20px;
+  color: #fff; font-size: 28px; cursor: pointer;
+  background: none; border: none; line-height: 1;
+}
+.lb-prev, .lb-next{
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,.18); border: none; color: #fff;
+  font-size: 26px; width: 44px; height: 44px;
+  border-radius: 50%; cursor: pointer; line-height: 1;
+  display: none; align-items: center; justify-content: center;
+  z-index: 1001; transition: background .15s;
+}
+.lb-prev{ left: 14px; }
+.lb-next{ right: 14px; }
+.lb-prev:hover,.lb-next:hover{ background: rgba(255,255,255,.32); }
+.lb-counter{
+  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,.9); font-size: 13px;
+  background: rgba(0,0,0,.45); padding: 4px 14px; border-radius: 20px;
+  display: none; pointer-events: none;
+}
+
+/* ── Error/Loading ── */
+.state-wrap{
+  text-align: center; padding: 80px 24px;
+  color: var(--lbl);
+}
+.state-wrap svg{ margin: 0 auto 16px; opacity: .4; }
+.state-wrap h3{ font-size: 18px; color: var(--heading); margin-bottom: 8px; }
+.state-wrap p{ font-size: 14px; }
+
+@media(max-width:520px){
+  .photo-grid{ grid-template-columns: repeat(2, 1fr); }
+  .info-lbl{ width: 68px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Lightbox ── -->
+<div class="lightbox" id="lightbox" onclick="closeLb()">
+  <button class="lb-close" onclick="closeLb()">&#215;</button>
+  <button class="lb-prev" id="lbPrevBtn">&#10094;</button>
+  <img id="lbImg" src="" alt="" onclick="closeLb()">
+  <button class="lb-next" id="lbNextBtn">&#10095;</button>
+  <div class="lb-counter" id="lbCounter"></div>
+</div>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+  <button class="back-btn" onclick="goBack()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    返回
+  </button>
+  <div class="page-title" id="pageTitle">公開案件詳情</div>
+  <button class="report-btn" onclick="window.location.href='report.html'">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    通報
+  </button>
+</div>
+
+<!-- ── Main content ── -->
+<div class="container">
+  <div id="mainContent">
+    <div class="state-wrap">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <h3>載入中…</h3>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script>
+// ──────────────────────────────────────────
+// API HELPER（公開端點不需 session）
+// ──────────────────────────────────────────
+function apiCall(action, extra) {
+  var payload = Object.assign({ action: action }, extra || {});
+  return fetch(CONFIG.CASE_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); });
+}
+
+// ──────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────
+function v(s){ return s ? esc(s) : '<span class="empty">—</span>'; }
+
+var CATE_COLOR = {
+  '生活':  { bg:'#E0F7FA', txt:'#006B6B' },
+  '校園':  { bg:'#FFF3E0', txt:'#B75D00' },
+  '交通':  { bg:'#EBF3FF', txt:'#1A56A8' },
+  '環境':  { bg:'#EAF3EB', txt:'#2F6836' },
+  '治安':  { bg:'#FEE2E2', txt:'#991B1B' },
+  '修繕':  { bg:'#FFF8E1', txt:'#F57F17' },
+  '其他':  { bg:'#F0EEEC', txt:'#7A6E66' },
+};
+var STATUS_COLOR = {
+  '處理中':  { bg:'#FFF8E1', txt:'#B75D00' },
+  '已結案':  { bg:'#F0EEEC', txt:'#7A6E66' },
+};
+function statusBadge(status) {
+  if (!status) return '';
+  var c = STATUS_COLOR[status] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  return '<span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:' + c.bg + ';color:' + c.txt + '">' + esc(status) + '</span>';
+}
+function cateBadge(cat) {
+  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;background:' + c.bg + ';color:' + c.txt + '">' +
+    '<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>' +
+    esc(cat) + '</span>';
+}
+
+function row(lbl, val){
+  return '<div class="info-row"><div class="info-lbl">' + lbl + '</div><div class="info-val">' + val + '</div></div>';
+}
+
+// ──────────────────────────────────────────
+// LIGHTBOX
+// ──────────────────────────────────────────
+var _lbPhotos = [];
+var _lbIdx = 0;
+
+function openLb(photos, idx) {
+  _lbPhotos = photos;
+  _lbIdx = idx || 0;
+  _updateLb();
+  document.getElementById('lightbox').classList.add('open');
+}
+function _updateLb() {
+  document.getElementById('lbImg').src = _lbPhotos[_lbIdx];
+  var multi = _lbPhotos.length > 1;
+  var prev = document.getElementById('lbPrevBtn');
+  var next = document.getElementById('lbNextBtn');
+  var ctr  = document.getElementById('lbCounter');
+  prev.style.display = (multi && _lbIdx > 0) ? 'flex' : 'none';
+  next.style.display = (multi && _lbIdx < _lbPhotos.length - 1) ? 'flex' : 'none';
+  if (multi) {
+    ctr.textContent = (_lbIdx + 1) + ' / ' + _lbPhotos.length;
+    ctr.style.display = 'block';
+  } else {
+    ctr.style.display = 'none';
+  }
+}
+function lbMove(dir) {
+  var n = _lbIdx + dir;
+  if (n >= 0 && n < _lbPhotos.length) { _lbIdx = n; _updateLb(); }
+}
+function closeLb() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lbImg').src = '';
+}
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape')     closeLb();
+  if (e.key === 'ArrowLeft')  lbMove(-1);
+  if (e.key === 'ArrowRight') lbMove(1);
+});
+
+// ──────────────────────────────────────────
+// DATA LOAD
+// ──────────────────────────────────────────
+var caseId = new URLSearchParams(location.search).get('id') || '';
+
+function goBack() {
+  if (history.length > 1) {
+    history.back();
+  } else {
+    location.href = 'openlist.html';
+  }
+}
+
+function loadCase() {
+  if (!caseId) { showError('缺少案件編號'); return; }
+
+  // 從 sessionStorage 取摘要資料，先立即渲染（不等 GAS）
+  var hasPreview = false;
+  try {
+    var preview = JSON.parse(sessionStorage.getItem('case_preview_' + caseId) || 'null');
+    if (preview && preview.caseId) { renderCase(preview); hasPreview = true; }
+  } catch(e) {}
+
+  // 背景呼叫 GAS 取完整資料（repPhoto2-10）
+  apiCall('getPublicCase', { caseId: caseId })
+    .then(function(json){
+      if (!json.success) {
+        if (!hasPreview) showError(json.error || '找不到此案件');
+        return;
+      }
+      renderCase(json.case || json.caseData);
+    })
+    .catch(function(){
+      if (!hasPreview) showError('載入失敗，請稍後再試');
+    });
+}
+
+// ──────────────────────────────────────────
+// RENDER
+// ──────────────────────────────────────────
+function renderCase(d) {
+  var repPhotos = [d.repPhoto1, d.repPhoto2, d.repPhoto3, d.repPhoto4, d.repPhoto5,
+                   d.repPhoto6, d.repPhoto7, d.repPhoto8, d.repPhoto9, d.repPhoto10].filter(Boolean);
+  var title = d.publicTitle || '公開案件詳情';
+
+  document.getElementById('pageTitle').textContent = title;
+
+  var html = '';
+
+  // ── Title card ──
+  html += '<div class="case-title-card">';
+  html += '<div class="case-meta">';
+  if (d.status) html += statusBadge(d.status);
+  if (d.publicCate) html += cateBadge(d.publicCate);
+  html += '</div>';
+  html += '<div class="case-main-title">' + esc(title) + '</div>';
+  html += '</div>';
+
+  // ── 處理資訊 ──
+  html += '<div class="card">';
+  html += '<div class="card-header">';
+  html += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+  html += ' 處理資訊</div>';
+  html += '<div class="info-table">';
+  if (d.replyTime) html += row('處理時間', v(d.replyTime));
+  if (d.publicLoc) html += row('地點', v(d.publicLoc));
+  if (d.publicSummary) html += row('處理摘要', '<span class="desc">' + esc(d.publicSummary) + '</span>');
+  html += '</div>';
+
+  if (repPhotos.length) {
+    _lbPhotos = repPhotos;
+    html += '<div class="photo-grid-wrap">';
+    html += '<div style="font-size:12px;color:var(--lbl);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">處理照片</div>';
+    html += '<div class="photo-grid">';
+    repPhotos.forEach(function(p, i){
+      html += '<img src="' + esc(p) + '" alt="" loading="lazy" onclick="openLb(_lbPhotos,' + i + ')">';
+    });
+    html += '</div></div>';
+  }
+
+  html += '</div>';
+
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function showError(msg) {
+  document.getElementById('mainContent').innerHTML =
+    '<div class="state-wrap">' +
+    '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<h3>無法顯示</h3><p>' + esc(msg) + '</p></div>';
+}
+
+// ──────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Prev / Next 按鈕不冒泡，否則會觸發 lightbox 的 closeLb
+  document.getElementById('lbPrevBtn').addEventListener('click', function(e){ e.stopPropagation(); lbMove(-1); });
+  document.getElementById('lbNextBtn').addEventListener('click', function(e){ e.stopPropagation(); lbMove(1); });
+
+  // 左右滑動切換照片（Android / iOS 通用）
+  var lb = document.getElementById('lightbox');
+  var sx = 0;
+  lb.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, {passive: true});
+  lb.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 50) {
+      e.preventDefault(); // 攔截，不觸發後續 click（不關閉 lightbox）
+      dx < 0 ? lbMove(1) : lbMove(-1);
+    }
+  }, {passive: false});
+
+  loadCase();
+});
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

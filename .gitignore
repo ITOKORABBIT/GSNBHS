@@ -1,0 +1,22 @@
+# Secrets
+google-service-account.json
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Local Cloudflare/Wrangler state
+.wrangler/
+**/.wrangler/
+node_modules/
+d1-backups/
+
+NOPHOTO.png
+Q版人像.png
+playwright-mcp/

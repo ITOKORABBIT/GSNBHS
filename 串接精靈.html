@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>里民小幫手 串接精靈</title>
+<style>
+:root{
+  --bg:#f4efe7;
+  --card:#fffdf9;
+  --line:#dccfbe;
+  --text:#2f261d;
+  --muted:#7a6a58;
+  --brand:#3f7a5d;
+  --brand-soft:#ebf4ee;
+  --gold:#a77b2d;
+  --gold-soft:#fbf4e2;
+  --blue:#2e67cc;
+  --blue-soft:#eef4ff;
+  --danger:#b54b3b;
+  --radius:22px;
+  --shadow:0 18px 40px rgba(58,44,31,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(167,123,45,.12), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(63,122,93,.12), transparent 24%),
+    var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+.wrap{
+  width:min(1180px,calc(100% - 24px));
+  margin:20px auto 48px;
+}
+.hero,.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.hero{
+  padding:28px;
+  margin-bottom:18px;
+}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  background:var(--gold-soft);
+  color:var(--gold);
+  font-size:13px;
+  font-weight:800;
+}
+h1{
+  margin:14px 0 10px;
+  font-size:38px;
+  line-height:1.25;
+}
+.hero p{
+  margin:0;
+  color:var(--muted);
+  font-size:18px;
+  max-width:900px;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin-top:20px;
+}
+.hero-note{
+  background:#faf6ef;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+}
+.hero-note strong{display:block;margin-bottom:6px;font-size:16px}
+.hero-note span{font-size:14px;color:var(--muted)}
+.layout{
+  display:grid;
+  grid-template-columns:1.4fr .9fr;
+  gap:18px;
+}
+.stack{display:flex;flex-direction:column;gap:18px}
+.card{padding:22px}
+.card h2{
+  margin:0 0 12px;
+  font-size:24px;
+}
+.sub{
+  margin:-4px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+.grid2,.grid3{
+  display:grid;
+  gap:14px;
+}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.field{margin-top:14px}
+.label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:6px;
+  font-size:14px;
+  font-weight:800;
+}
+.pill{
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
+.req{background:#fde8e4;color:var(--danger)}
+.opt{background:#f0ece6;color:var(--muted)}
+input,textarea{
+  width:100%;
+  padding:12px 14px;
+  border:1.5px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  color:var(--text);
+  font:inherit;
+  outline:none;
+  transition:border-color .16s ease, box-shadow .16s ease;
+}
+input:focus,textarea:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 4px rgba(46,103,204,.10);
+}
+textarea{min-height:92px;resize:vertical}
+.hint{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:12.5px;
+}
+.auto{
+  background:#f7f3ec;
+  color:#5f5144;
+}
+.details{
+  margin-top:12px;
+  border:1px solid #d8dff0;
+  border-radius:16px;
+  background:#f9fbff;
+}
+details summary{
+  cursor:pointer;
+  padding:12px 14px;
+  font-weight:800;
+  color:var(--blue);
+}
+details .body{
+  padding:0 14px 14px;
+  color:#526074;
+  font-size:14px;
+}
+details ol,details ul{margin:0;padding-left:20px}
+details li{margin:6px 0}
+.info,.warn,.good{
+  border-radius:16px;
+  padding:14px 16px;
+  font-size:14px;
+  margin-top:14px;
+}
+.info{background:var(--blue-soft);border:1px solid #cddcf7;color:#29497c}
+.warn{background:#fff4e7;border:1px solid #eed7ae;color:#875b09}
+.good{background:var(--brand-soft);border:1px solid #c9e3d2;color:#20523c}
+.button-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+button{
+  border:none;
+  cursor:pointer;
+  font:inherit;
+  font-weight:800;
+  padding:12px 18px;
+  border-radius:14px;
+  transition:transform .12s ease, opacity .12s ease, background .12s ease;
+}
+button:hover{transform:translateY(-1px)}
+.btn-brand{background:var(--brand);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-soft{background:#f1ece4;color:#554636}
+.btn-outline{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.preview{
+  margin-top:14px;
+  border-radius:18px;
+  overflow:auto;
+  border:1px solid #293548;
+  background:#162132;
+}
+.preview pre{
+  margin:0;
+  padding:16px;
+  color:#dbe8ff;
+  font-size:12px;
+  line-height:1.7;
+  white-space:pre-wrap;
+}
+.mini-title{
+  margin:18px 0 8px;
+  font-size:17px;
+  font-weight:900;
+}
+.copy-block{
+  margin-top:12px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#faf7f2;
+}
+.copy-block textarea{
+  min-height:78px;
+  font-family:Consolas,monospace;
+  font-size:12px;
+  background:#fffdfb;
+}
+.small{font-size:12px;color:var(--muted)}
+.list{
+  display:grid;
+  gap:10px;
+  margin-top:14px;
+}
+.list-item{
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#fcfaf6;
+}
+.list-item strong{display:block;margin-bottom:4px}
+.footer-note{
+  margin-top:18px;
+  color:var(--muted);
+  font-size:12px;
+}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr}
+  .hero-grid,.grid3{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .wrap{width:min(100%,calc(100% - 14px))}
+  .hero,.card{padding:18px}
+  .grid2{grid-template-columns:1fr}
+  h1{font-size:30px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="badge">現行基底：E:\MY PROJECT\舊社里小幫手</div>
+    <h1>里民小幫手 串接精靈</h1>
+    <p>這份精靈不是舊版那種只填欄位的表單，而是把目前正式版真正需要的 GitHub、Google、Apps Script、LINE、Make 串接資訊整理成可交接的設定流程。填完後可直接匯出設定檔與 Apps Script 常數區塊。</p>
+    <div class="hero-grid">
+      <div class="hero-note"><strong>先複製模板</strong><span>不要直接改母版資料夾，先複製成新的里別專案後再填。</span></div>
+      <div class="hero-note"><strong>現行架構已更新</strong><span>現在是單一 Apps Script、單一 Google Sheet、三個照片資料夾、兩條 Make 通知 Webhook。</span></div>
+      <div class="hero-note"><strong>精靈用途</strong><span>幫你蒐集資料、提醒去哪裡拿金鑰、產出 `config.json` / `config.js` / `storeconfig.js` / `apps-script-constants.gs`。</span></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="stack">
+      <section class="card">
+        <h2>1. 基本資訊</h2>
+        <p class="sub">先把新里別的識別資訊填好，後面網址、檔名與預設代號都會自動帶入。</p>
+
+        <div class="field">
+          <div class="label">新專案資料夾路徑 <span class="pill req">必填</span></div>
+          <input id="folder_path" placeholder="例：E:\MY PROJECT\太平區新城里小幫手">
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">區名 <span class="pill req">必填</span></div>
+            <input id="district" placeholder="例：太平區">
+          </div>
+          <div class="field">
+            <div class="label">里名 <span class="pill req">必填</span></div>
+            <input id="village" placeholder="例：新城里">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">系統代號 code <span class="pill req">必填</span></div>
+            <input id="code" placeholder="例：TPXCHS">
+            <div class="hint">建議用英文大寫。GitHub Repo 名稱預設會跟它一樣。</div>
+          </div>
+          <div class="field">
+            <div class="label">案件前綴 case_prefix <span class="pill req">必填</span></div>
+            <input id="case_prefix" placeholder="例：TP">
+            <div class="hint">Apps Script 送件編號會用到，例如 `TP260422001`。</div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">完整里名 village_name <span class="pill opt">自動</span></div>
+            <input id="village_name" class="auto" readonly>
+          </div>
+          <div class="field">
+            <div class="label">系統名稱 system_name <span class="pill opt">可改</span></div>
+            <input id="system_name" value="里民小幫手">
+          </div>
+        </div>
+
+        <details class="details">
+          <summary>為什麼現在多了 case_prefix？</summary>
+          <div class="body">
+            <p>現行版 Apps Script 在建立案件編號時，不應再固定用舊社里的 `HP`。所以模板已改成用可設定的 `CASE_PREFIX`，讓每個新里別可以用自己的前綴。</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>2. GitHub 與網站網址</h2>
+        <p class="sub">GitHub Pages 仍然是網站前台與後台頁面的部署方式。</p>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">GitHub 帳號 <span class="pill req">必填</span></div>
+            <input id="github_user" value="ITOKORABBIT">
+          </div>
+          <div class="field">
+            <div class="label">Repo 名稱 <span class="pill opt">自動</span></div>
+            <input id="repo_name" placeholder="預設等於 code">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">Pages URL <span class="pill opt">自動</span></div>
+            <input id="pages_url" class="auto" readonly>
+          </div>
+          <div class="field">
+            <div class="label">BASE_URL <span class="pill opt">自動</span></div>
+            <input id="base_url" class="auto" readonly>
+          </div>
+        </div>
+
+        <details class="details">
+          <summary>GitHub Pages 目前應該怎麼設？</summary>
+          <div class="body">
+            <ol>
+              <li>建立 Public repository。</li>
+              <li>到 Repo 的 `Settings → Pages`。</li>
+              <li>Source 選 `Deploy from a branch`。</li>
+              <li>Branch 選 `main / root`。</li>
+              <li>幾分鐘後網站會出現在 `https://帳號.github.io/Repo名/`。</li>
+            </ol>
+          </div>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>3. Google Sheet 與 Drive</h2>
+        <p class="sub">現行版至少需要 1 個 Google Sheet 與 3 個照片資料夾。</p>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">Google Sheet ID <span class="pill req">必填</span></div>
+            <input id="sheet_id" placeholder="例：1AbCdEf...">
+          </div>
+          <div class="field">
+            <div class="label">Drive 主資料夾 ID <span class="pill opt">建議填</span></div>
+            <input id="drive_root_folder_id" placeholder="整個專案根資料夾 ID">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div class="field">
+            <div class="label">NBH 資料夾 ID <span class="pill req">必填</span></div>
+            <input id="nbh_folder_id" placeholder="Photos/NBH">
+          </div>
+          <div class="field">
+            <div class="label">STOR 資料夾 ID <span class="pill req">必填</span></div>
+            <input id="stor_folder_id" placeholder="Photos/STOR">
+          </div>
+          <div class="field">
+            <div class="label">BULLETIN 資料夾 ID <span class="pill req">必填</span></div>
+            <input id="bulletin_folder_id" placeholder="Photos/BULLETIN">
+          </div>
+        </div>
+
+        <div class="good">建議 Drive 結構：`專案根資料夾 / Photos / NBH、STOR、BULLETIN`。Google Sheet 可以放在根資料夾同層。</div>
+
+        <details class="details">
+          <summary>工作表目前要有哪些？</summary>
+          <div class="body">
+            <ul>
+              <li>`案件清單`：30 欄，含公開欄位與置頂順序。</li>
+              <li>`商店清單`：32 欄，含方案類型與置頂順序。</li>
+              <li>`管理員名單`：新版 4 欄（顯示名稱 / 角色 / 啟用 / Email）。</li>
+              <li>`公佈欄`：8 欄；若未建立，可在 Apps Script 手動執行 `setupBulletinSheet()`。</li>
+            </ul>
+          </div>
+        </details>
+
+        <div class="mini-title">欄位標題快速複製</div>
+
+        <div class="copy-block">
+          <div class="small">案件清單（第 1 列貼上）</div>
+          <textarea id="hdr_cases" readonly></textarea>
+          <div class="button-row">
+            <button class="btn-soft" data-copy="hdr_cases">複製案件欄位</button>
+          </div>
+        </div>
+
+        <div class="copy-block">
+          <div class="small">商店清單（第 1 列貼上）</div>
+          <textarea id="hdr_stores" readonly></textarea>
+          <div class="button-row">
+            <button class="btn-soft" data-copy="hdr_stores">複製商店欄位</button>
+          </div>
+        </div>
+
+        <div class="copy-block">
+          <div class="small">管理員名單（第 1 列貼上）</div>
+          <textarea id="hdr_admins" readonly></textarea>
+          <div class="button-row">
+            <button class="btn-soft" data-copy="hdr_admins">複製管理員欄位</button>
+          </div>
+        </div>
+
+        <div class="copy-block">
+          <div class="small">公佈欄（第 1 列貼上）</div>
+          <textarea id="hdr_bulletin" readonly></textarea>
+          <div class="button-row">
+            <button class="btn-soft" data-copy="hdr_bulletin">複製公告欄位</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Apps Script 與 Google OAuth</h2>
+        <p class="sub">後台登入與所有資料讀寫，現在都走同一支 Apps Script。</p>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">Apps Script Web App URL <span class="pill req">必填</span></div>
+            <input id="script_url" placeholder="部署後的 /exec URL">
+          </div>
+          <div class="field">
+            <div class="label">Google OAuth Client ID <span class="pill req">必填</span></div>
+            <input id="google_client_id" placeholder="xxxx.apps.googleusercontent.com">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">API Key（商店上傳照片會用到） <span class="pill opt">自動產生</span></div>
+          <input id="api_key" placeholder="按下方按鈕自動產生">
+          <div class="button-row">
+            <button id="gen_key" class="btn-soft" type="button">重新產生 API Key</button>
+          </div>
+        </div>
+
+        <details class="details">
+          <summary>Apps Script 部署後第一件事要做什麼？</summary>
+          <div class="body">
+            <ol>
+              <li>把模板資料夾內的 `apps-script.gs` 貼到 Google Apps Script。</li>
+              <li>先用精靈匯出的 `apps-script-constants.gs` 覆蓋 `TEMPLATE CONSTANTS` 區塊。</li>
+              <li>部署成 Web App：執行身分選自己，存取選所有人。</li>
+              <li>第一次請手動執行：
+                <ul>
+                  <li>`setupPinColumns()`</li>
+                  <li>`setupBulletinSheet()`</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="details">
+          <summary>Google OAuth Client ID 要去哪裡拿？</summary>
+          <div class="body">
+            <ol>
+              <li>到 Google Cloud Console 建立專案。</li>
+              <li>建立 OAuth Client ID，類型選 Web application。</li>
+              <li>Authorized JavaScript origins 至少加上 GitHub Pages 網址。</li>
+              <li>把 Client ID 貼進這裡；後台頁面 `admin.html` / `bulletinlist.html` / `storelist.html` 會用到。</li>
+            </ol>
+          </div>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>5. LINE 官方帳號與 Make 通知</h2>
+        <p class="sub">目前正式版是由 Apps Script 呼叫 Make Webhook，再由 Make 去推送 LINE 通知。</p>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">案件通知 Webhook <span class="pill req">必填</span></div>
+            <input id="report_webhook_url" placeholder="REPORT_WEBHOOK_URL">
+          </div>
+          <div class="field">
+            <div class="label">商店通知 Webhook <span class="pill req">必填</span></div>
+            <input id="store_notify_webhook_url" placeholder="STORE_NOTIFY_WEBHOOK_URL">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">LINE 官方帳號名稱 <span class="pill opt">建議填</span></div>
+            <input id="line_official_account_name" placeholder="例：舊社里小幫手">
+          </div>
+          <div class="field">
+            <div class="label">LINE Basic ID <span class="pill opt">建議填</span></div>
+            <input id="line_basic_id" placeholder="例：@xxxxxxx">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">LINE Channel ID <span class="pill opt">建議填</span></div>
+            <input id="line_channel_id">
+          </div>
+          <div class="field">
+            <div class="label">LINE 群組 ID <span class="pill opt">日後擴充</span></div>
+            <input id="line_group_id">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">LINE Channel Secret <span class="pill opt">交接紀錄</span></div>
+            <input id="line_channel_secret">
+          </div>
+          <div class="field">
+            <div class="label">LINE Channel Access Token <span class="pill opt">交接紀錄</span></div>
+            <input id="line_channel_access_token">
+          </div>
+        </div>
+
+        <div class="warn">提醒：目前這些 LINE 金鑰不會直接寫進公開網站前端。精靈保留這些欄位，主要是為了交接紀錄與未來擴充，不是叫你把秘密金鑰公開上 GitHub。</div>
+
+        <details class="details">
+          <summary>LINE 官方帳號與 Make 的建議設定順序</summary>
+          <div class="body">
+            <ol>
+              <li>到 LINE Official Account Manager 建立官方帳號。</li>
+              <li>到 LINE Developers 建 Provider 與 Messaging API Channel。</li>
+              <li>保存 Channel ID / Secret / Access Token。</li>
+              <li>在 Make 建兩條流程：
+                <ul>
+                  <li>新案件通知</li>
+                  <li>新商店申請通知</li>
+                </ul>
+              </li>
+              <li>把 Make Webhook URL 貼回這份精靈。</li>
+            </ol>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <h2>6. 管理員與交接備註</h2>
+        <p class="sub">這裡的 Email 會進 `config.json`，方便交接；真正權限仍要寫入 Google Sheet 的管理員名單。</p>
+
+        <div class="field">
+          <div class="label">管理員 Email（每行一個） <span class="pill opt">建議填</span></div>
+          <textarea id="admin_emails" placeholder="owner@example.com&#10;staff@example.com"></textarea>
+        </div>
+
+        <div class="info">目前 Apps Script 的管理員維護功能只允許 super admin。建議在 Google Sheet「管理員名單」中，至少先建立一位角色為「超級管理員」且啟用為 TRUE 的帳號。</div>
+
+        <div class="mini-title">現行版重要檔案</div>
+        <div class="list">
+          <div class="list-item"><strong>config.js</strong><span>案件 / 公告 / admin 頁面共用設定。</span></div>
+          <div class="list-item"><strong>storeconfig.js</strong><span>商店頁面設定；`store.html` 的照片上傳會用到 API Key。</span></div>
+          <div class="list-item"><strong>apps-script.gs</strong><span>統一後端；模板內這份已經改成現行架構占位版。</span></div>
+          <div class="list-item"><strong>assets/no-photo.svg</strong><span>案件無圖時的預設圖片，Apps Script 也會引用這個 BASE_URL 路徑。</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>7. 匯出設定檔</h2>
+        <p class="sub">建議至少匯出四個檔案並放回你剛複製的新專案資料夾。</p>
+
+        <div class="button-row">
+          <button class="btn-brand" id="download_json" type="button">下載 config.json</button>
+          <button class="btn-blue" id="download_config_js" type="button">下載 config.js</button>
+          <button class="btn-blue" id="download_storeconfig_js" type="button">下載 storeconfig.js</button>
+          <button class="btn-outline" id="download_constants" type="button">下載 apps-script-constants.gs</button>
+          <button class="btn-soft" id="preview_btn" type="button">顯示設定預覽</button>
+        </div>
+
+        <div class="preview" id="preview_box" style="display:none">
+          <pre id="preview_text"></pre>
+        </div>
+
+        <div class="footer-note">若之後要交接給別人，最重要的是保留 `config.json`、`操作說明.txt`、`apps-script.gs`、GitHub Repo、Google Sheet、Drive 資料夾與 LINE / Make 後台登入資訊。</div>
+      </section>
+
+      <section class="card">
+        <h2>8. 建議操作順序</h2>
+        <div class="list">
+          <div class="list-item"><strong>1.</strong><span>先建立 GitHub Repo 與 GitHub Pages。</span></div>
+          <div class="list-item"><strong>2.</strong><span>建立 Google Drive 資料夾與 Google Sheet。</span></div>
+          <div class="list-item"><strong>3.</strong><span>填入 Google OAuth Client ID。</span></div>
+          <div class="list-item"><strong>4.</strong><span>把模板的 `apps-script.gs` 貼到 Google Apps Script，並部署成 Web App。</span></div>
+          <div class="list-item"><strong>5.</strong><span>把部署後的 `script_url` 貼回精靈。</span></div>
+          <div class="list-item"><strong>6.</strong><span>設定 Make 與 LINE 官方帳號通知，填入兩條 Webhook。</span></div>
+          <div class="list-item"><strong>7.</strong><span>匯出 `config.js` / `storeconfig.js` / `config.json` / `apps-script-constants.gs`。</span></div>
+          <div class="list-item"><strong>8.</strong><span>用正式版 `舊社里小幫手` 為基底建立新專案並覆蓋設定檔。</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>9. 這版和舊版不一樣的地方</h2>
+        <div class="warn">
+          已移除舊模板常見但現行版不再依賴的項目：
+          <br>1. `reurl.cc API Key`
+          <br>2. `datastore_id`
+          <br>3. 舊版 `webhook_a / webhook_b / webhook_stor`
+          <br>4. 舊版分離式商店後端思維
+        </div>
+        <div class="good">
+          現行版重點改成：
+          <br>1. 單一 Apps Script
+          <br>2. 單一 Google Sheet
+          <br>3. NBH / STOR / BULLETIN 三個照片資料夾
+          <br>4. 兩條 Make 通知 Webhook
+          <br>5. 後台 Google 登入 + super admin 權限
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS_KEY = 'village-helper-wizard-v2';
+const IDS = [
+  'folder_path','district','village','village_name','system_name','code','case_prefix',
+  'github_user','repo_name','pages_url','base_url',
+  'sheet_id','drive_root_folder_id','nbh_folder_id','stor_folder_id','bulletin_folder_id',
+  'script_url','google_client_id','api_key',
+  'report_webhook_url','store_notify_webhook_url',
+  'line_official_account_name','line_basic_id','line_channel_id','line_channel_secret','line_channel_access_token','line_group_id',
+  'admin_emails'
+];
+
+const HEADERS = {
+  cases: '案件ID\t通報時間\t狀態\t類別\t姓名\t電話\tLineID\t主旨\t說明\t地址\t地圖網址\t1999案件編號\t照片1\t照片2\t照片3\t回覆時間\t最後更新\t回覆內容\t回覆照片1\t回覆照片2\t回覆照片3\t處理人\t備註\t是否公開\t公開標題\t公開類別\t公開地點\t公開摘要\t回覆網址\t置頂順序',
+  stores: '商店ID\t申請時間\t狀態\t商家類別\t申請人姓名\t申請人電話\t申請人LineID\t店家名稱\t店家電話\t統一編號\t經營內容\t優惠方案\t營業時間\t店家地址\t地圖網址\t照片1\t照片2\t照片3\t管理員備註\t最後更新\t審核人\t公開店名\t公開類別\t公開電話\t公開地址\t公開地圖\t公開經營內容\t公開優惠\t公開營業時間\t公開統一編號\t方案類型\t置頂順序',
+  admins: '顯示名稱\t角色\t啟用\tEmail',
+  bulletin: '公告ID\t建立時間\t標題\t內容\t圖片網址\t置頂\t狀態\t建立者'
+};
+
+const $ = (id) => document.getElementById(id);
+
+function value(id){ return $(id).value || ''; }
+
+function saveState(){
+  const data = {};
+  IDS.forEach(id => data[id] = value(id));
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+function restoreState(){
+  try{
+    const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    IDS.forEach(id => {
+      if (data[id] && $(id)) $(id).value = data[id];
+    });
+  }catch(_){}
+}
+
+function autoFill(){
+  const district = value('district').trim();
+  const village = value('village').trim();
+  const code = value('code').trim().toUpperCase();
+  if (value('code') !== code) $('code').value = code;
+
+  $('village_name').value = (district + village).trim();
+  if (!value('repo_name') && code) $('repo_name').value = code;
+  if (!value('case_prefix') && code.length >= 2) $('case_prefix').value = code.slice(0,2);
+
+  const gh = value('github_user').trim();
+  const repo = value('repo_name').trim();
+  const base = gh && repo ? `https://${gh.toLowerCase()}.github.io/${repo}` : '';
+  $('pages_url').value = base ? `${base}/` : '';
+  $('base_url').value = base;
+
+  if (!value('api_key') && code) {
+    $('api_key').value = `${code.toLowerCase()}_sk_${Math.random().toString(36).slice(2,14)}`;
+  }
+
+  saveState();
+}
+
+function buildConfig(){
+  const adminEmails = value('admin_emails').split('\n').map(s => s.trim()).filter(Boolean);
+  return {
+    _note: '此檔案建議由 串接精靈.html 匯出；若手動修改，請確認文字編碼維持 UTF-8。',
+    _version: '2.0',
+    _generated_at: new Date().toISOString().slice(0,10),
+    _source_project: 'E:\\MY PROJECT\\舊社里小幫手',
+    folder_path: value('folder_path').trim(),
+    district: value('district').trim(),
+    village: value('village').trim(),
+    village_name: value('village_name').trim(),
+    system_name: value('system_name').trim() || '里民小幫手',
+    code: value('code').trim().toUpperCase(),
+    case_prefix: value('case_prefix').trim().toUpperCase(),
+    github_user: value('github_user').trim(),
+    repo_name: value('repo_name').trim(),
+    pages_url: value('pages_url').trim(),
+    base_url: value('base_url').trim(),
+    sheet_id: value('sheet_id').trim(),
+    drive_root_folder_id: value('drive_root_folder_id').trim(),
+    nbh_folder_id: value('nbh_folder_id').trim(),
+    stor_folder_id: value('stor_folder_id').trim(),
+    bulletin_folder_id: value('bulletin_folder_id').trim(),
+    script_url: value('script_url').trim(),
+    google_client_id: value('google_client_id').trim(),
+    api_key: value('api_key').trim(),
+    report_webhook_url: value('report_webhook_url').trim(),
+    store_notify_webhook_url: value('store_notify_webhook_url').trim(),
+    line_official_account_name: value('line_official_account_name').trim(),
+    line_basic_id: value('line_basic_id').trim(),
+    line_channel_id: value('line_channel_id').trim(),
+    line_channel_secret: value('line_channel_secret').trim(),
+    line_channel_access_token: value('line_channel_access_token').trim(),
+    line_group_id: value('line_group_id').trim(),
+    admin_emails: adminEmails
+  };
+}
+
+function buildConfigJs(){
+  const cfg = buildConfig();
+  return `const CONFIG = {
+  VILLAGE_NAME: '${escapeJs(cfg.village_name)}',
+  SYSTEM_NAME: '${escapeJs(cfg.system_name)}',
+
+  // Public pages should not ship writable webhook secrets.
+  REPORT_WEBHOOK_URL: '',
+  REPLY_WEBHOOK_URL: '',
+  STORE_WEBHOOK_URL: '',
+
+  SCRIPT_URL: '${escapeJs(cfg.script_url)}',
+  BASE_URL: '${escapeJs(cfg.base_url)}',
+  GOOGLE_CLIENT_ID: '${escapeJs(cfg.google_client_id)}',
+
+  // Deprecated on the resident-side public app. Kept only for backward compatibility.
+  API_KEY: ''
+};`;
+}
+
+function buildStoreConfigJs(){
+  const cfg = buildConfig();
+  return `const CONFIG = {
+  VILLAGE_NAME: '${escapeJs(cfg.village_name)}',
+  SYSTEM_NAME: '${escapeJs(cfg.system_name)}',
+  SCRIPT_URL: '${escapeJs(cfg.script_url)}',
+  BASE_URL: '${escapeJs(cfg.base_url)}',
+  GOOGLE_CLIENT_ID: '${escapeJs(cfg.google_client_id)}',
+  API_KEY: '${escapeJs(cfg.api_key)}'
+};`;
+}
+
+function buildConstants(){
+  const cfg = buildConfig();
+  return `var SHEET_ID       = '${escapeJs(cfg.sheet_id)}';
+var SHEET_CASES    = '案件清單';
+var SHEET_STORES   = '商店清單';
+var SHEET_ADMINS   = '管理員名單';
+var SHEET_BULLETIN = '公佈欄';
+
+var GOOGLE_CLIENT_ID = '${escapeJs(cfg.google_client_id)}';
+var API_KEY          = '${escapeJs(cfg.api_key)}';
+var REPORT_WEBHOOK_URL = '${escapeJs(cfg.report_webhook_url)}';
+var STORE_NOTIFY_WEBHOOK_URL = '${escapeJs(cfg.store_notify_webhook_url)}';
+var CASE_PREFIX       = '${escapeJs(cfg.case_prefix)}';
+var DETAIL_BASE_URL   = '${escapeJs(cfg.base_url)}/detail.html?id=';
+var DEFAULT_REPORT_IMAGE_URL = '${escapeJs(cfg.base_url)}/assets/no-photo.svg';
+var NBH_FOLDER_ID    = '${escapeJs(cfg.nbh_folder_id)}';
+var STOR_FOLDER_ID   = '${escapeJs(cfg.stor_folder_id)}';
+var BULLETIN_FOLDER_ID = '${escapeJs(cfg.bulletin_folder_id)}';
+var SESSION_TTL      = 2592000;
+var PUBLIC_FORM_MIN_MS      = 3000;
+var PUBLIC_FORM_MAX_MS      = 2 * 60 * 60 * 1000;
+var PUBLIC_SUBMIT_COOLDOWN  = 300;
+var UPLOAD_RATE_LIMIT = 10;
+var UPLOAD_RATE_WINDOW = 60;`;
+}
+
+function escapeJs(str){
+  return String(str || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
+function downloadFile(name, content, type){
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function preview(){
+  const text = [
+    'config.json',
+    JSON.stringify(buildConfig(), null, 2),
+    '',
+    'apps-script-constants.gs',
+    buildConstants()
+  ].join('\n');
+  $('preview_text').textContent = text;
+  $('preview_box').style.display = $('preview_box').style.display === 'none' ? 'block' : 'none';
+}
+
+function copyFrom(id){
+  navigator.clipboard.writeText($(id).value);
+}
+
+window.addEventListener('load', () => {
+  restoreState();
+  $('hdr_cases').value = HEADERS.cases;
+  $('hdr_stores').value = HEADERS.stores;
+  $('hdr_admins').value = HEADERS.admins;
+  $('hdr_bulletin').value = HEADERS.bulletin;
+
+  IDS.forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('input', autoFill);
+  });
+
+  $('gen_key').addEventListener('click', () => {
+    const code = value('code').trim().toLowerCase() || 'village';
+    $('api_key').value = `${code}_sk_${Math.random().toString(36).slice(2,14)}`;
+    saveState();
+  });
+
+  $('download_json').addEventListener('click', () => {
+    downloadFile('config.json', JSON.stringify(buildConfig(), null, 2), 'application/json');
+  });
+  $('download_config_js').addEventListener('click', () => {
+    downloadFile('config.js', buildConfigJs(), 'text/javascript');
+  });
+  $('download_storeconfig_js').addEventListener('click', () => {
+    downloadFile('storeconfig.js', buildStoreConfigJs(), 'text/javascript');
+  });
+  $('download_constants').addEventListener('click', () => {
+    downloadFile('apps-script-constants.gs', buildConstants(), 'text/plain');
+  });
+  $('preview_btn').addEventListener('click', preview);
+
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => copyFrom(btn.dataset.copy));
+  });
+
+  autoFill();
+});
+</script>
+</body>
+</html>

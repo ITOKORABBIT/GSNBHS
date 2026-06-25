@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gsnbhs-bulletins-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-05-16",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "ALLOWED_ORIGIN": "https://gsnbhs.pages.dev",
+    "GAS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz-tyVnT1v5h3TeMzmaAoSPa7GtBO_jay1PrkmRL-LL0N3bTeOojg4EMep9hnDG0DVO/exec",
+    "GOOGLE_CLIENT_ID": "998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com",
+    "ADMIN_EMAILS": "ulch0709@gmail.com,peaceli236@gmail.com,chinchinya0828@gmail.com"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "9a11524bfdbb4bb789fd44f58d2e8bf1"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gsnbhs-db",
+      "database_id": "3fb4a75a-7f61-480a-9ad2-dc4421519ad5",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

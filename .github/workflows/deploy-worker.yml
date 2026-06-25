@@ -1,0 +1,85 @@
+name: Deploy Cloudflare Workers
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "workers/events-api/**"
+      - "workers/bulletins-api/**"
+      - "workers/stores-api/**"
+      - "workers/cases-api/**"
+      - ".github/workflows/deploy-worker.yml"
+
+jobs:
+  deploy-events-api:
+    runs-on: ubuntu-latest
+    name: Deploy events-api Worker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: workers/events-api
+        run: npm ci --include=optional
+      - name: Apply D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/events-api
+          wranglerVersion: "4"
+          command: d1 migrations apply gsnbhs-db --remote
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/events-api
+          wranglerVersion: "4"
+
+  deploy-bulletins-api:
+    runs-on: ubuntu-latest
+    name: Deploy bulletins-api Worker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: workers/bulletins-api
+        run: npm ci --include=optional
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/bulletins-api
+          wranglerVersion: "4"
+
+  deploy-stores-api:
+    runs-on: ubuntu-latest
+    name: Deploy stores-api Worker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: workers/stores-api
+        run: npm ci --include=optional
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/stores-api
+          wranglerVersion: "4"
+
+  deploy-cases-api:
+    runs-on: ubuntu-latest
+    name: Deploy cases-api Worker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: workers/cases-api
+        run: npm ci --include=optional
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/cases-api
+          wranglerVersion: "4"

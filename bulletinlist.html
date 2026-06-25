@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公告管理 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Noto Sans TC',sans-serif;
+  background:#f3f0ea;
+  color:#2b231b;
+  min-height:100vh;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+:root{
+  --card:#fff;
+  --border:#e4d9ce;
+  --muted:#8d7968;
+  --text:#2b231b;
+  --heading:#18120d;
+  --accent:#b95353;
+  --accent-soft:#fff1ef;
+  --green:#2f6836;
+  --green-soft:#eaf3eb;
+  --gold:#9b6112;
+  --gold-soft:#fff4df;
+  --gray:#6f645a;
+  --gray-soft:#f2efea;
+  --shadow:0 14px 40px rgba(43,35,27,.08);
+  --radius:18px;
+}
+
+.login-shell{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:24px 16px;
+}
+.login-card{
+  width:min(100%,420px);
+  padding:30px 26px;
+  border:1px solid var(--border);
+  border-radius:24px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+.login-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:16px;
+}
+.login-title{
+  font-size:28px;
+  font-weight:800;
+  color:var(--heading);
+  margin-bottom:10px;
+}
+.login-sub{
+  color:var(--muted);
+  line-height:1.7;
+  margin-bottom:22px;
+}
+.login-error{
+  display:none;
+  margin-top:16px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-size:14px;
+}
+
+.page{
+  max-width:1280px;
+  margin:0 auto;
+  padding:24px 20px 40px;
+}
+.topbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:20px;
+  padding:22px 24px;
+  border:1px solid rgba(228,217,206,.8);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at top right, rgba(185,83,83,.08), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,251,247,.92));
+  box-shadow:var(--shadow);
+}
+.title-wrap h1{
+  font-size:32px;
+  font-weight:800;
+  color:var(--heading);
+  margin-bottom:8px;
+}
+.title-wrap p{color:var(--muted);line-height:1.7}
+.top-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{
+  padding:11px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-weight:700;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 20px rgba(43,35,27,.08)}
+.btn.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
+.btn.ghost{
+  background:#fbf7f2;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:20px;
+  align-items:start;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.panel{
+  padding:20px;
+}
+.editor-panel.collapsed{
+  display:none;
+}
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:16px;
+}
+.search{
+  flex:1;
+  min-width:220px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+}
+.pill-group{display:flex;flex-wrap:wrap;gap:8px}
+.pill{
+  padding:9px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.pill.active{
+  background:var(--accent-soft);
+  border-color:transparent;
+  color:var(--accent);
+}
+
+.list-wrap{padding:4px 0}
+.group-header{
+  display:flex;align-items:center;gap:8px;
+  padding:14px 4px 6px;
+  font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.04em;
+}
+.group-header:first-child{padding-top:4px}
+.group-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.bull-item{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  border:1px solid var(--border);border-radius:14px;background:#fff;
+  transition:transform .15s,box-shadow .15s;
+}
+.bull-item:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(43,35,27,.08)}
+.bull-drag-handle{
+  flex:0 0 auto;color:var(--muted);cursor:grab;
+  font-size:17px;opacity:.45;user-select:none;padding:2px 4px;
+}
+.bull-drag-handle:active{cursor:grabbing}
+.bull-item-body{flex:1;min-width:0}
+.bull-item-title{font-weight:800;color:var(--heading);margin-bottom:4px;word-break:break-all}
+.bull-item-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:4px}
+.bull-item-preview{font-size:13px;color:var(--muted);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bull-item-actions{display:flex;flex-wrap:nowrap;gap:8px;flex:0 0 auto}
+.sortable-ghost{opacity:.4}
+.sortable-drag{box-shadow:0 8px 24px rgba(43,35,27,.18)!important}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.badge-published{background:var(--green-soft);color:var(--green)}
+.badge-draft{background:var(--gold-soft);color:var(--gold)}
+.badge-pinned{background:var(--gray-soft);color:var(--gray)}
+.inline-btn{
+  padding:8px 10px;
+  border:none;
+  border-radius:10px;
+  background:#f7f3ee;
+  font-size:13px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.editor-modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(43,35,27,.32);
+  backdrop-filter:blur(6px);
+  z-index:200;
+}
+.editor-modal.open{display:flex}
+.editor-panel{
+  width:min(100%,920px);
+  max-height:min(92vh,980px);
+  overflow:auto;
+}
+
+.editor-head{
+  position:sticky;
+  top:0;
+  background:var(--card);
+  z-index:10;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding-bottom:16px;
+  margin-bottom:2px;
+  border-bottom:1px solid var(--border);
+}
+.editor-head-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.editor-close{
+  width:42px;
+  height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:var(--muted);
+  transition:background .18s ease, color .18s ease, transform .18s ease;
+}
+.editor-close:hover{
+  background:#f8f2ec;
+  color:var(--heading);
+  transform:translateY(-1px);
+}
+.editor-close svg{
+  width:18px;
+  height:18px;
+}
+.editor-title{font-size:24px;font-weight:800;color:var(--heading)}
+.editor-sub{margin-top:6px;color:var(--muted);line-height:1.7}
+.form-section{margin-bottom:16px}
+.label{
+  display:block;
+  margin-bottom:6px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+.input,.textarea,.select{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+}
+.textarea{min-height:160px;resize:vertical;line-height:1.8}
+.hidden-field{display:none}
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.editor-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:10px;
+}
+.editor-btn{
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:#fff;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+.editor-btn:hover{
+  background:#faf6f1;
+  color:var(--heading);
+}
+.rich-editor{
+  min-height:180px;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  line-height:1.8;
+  color:var(--text);
+  outline:none;
+}
+.rich-editor:empty:before{
+  content:attr(data-placeholder);
+  color:var(--muted);
+}
+.rich-editor h2,.rich-editor h3{
+  color:var(--heading);
+  margin:0 0 .6em;
+}
+.rich-editor p{margin:0 0 .9em}
+.rich-editor ul,.rich-editor ol{padding-left:1.4em;margin:0 0 .9em}
+.rich-editor blockquote{
+  margin:0 0 .9em;
+  padding-left:12px;
+  border-left:3px solid var(--border);
+  color:var(--muted);
+}
+.rich-editor a{color:var(--accent)}
+.upload-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+}
+.upload-input{
+  display:none;
+}
+.upload-meta{
+  flex:1;
+  min-width:220px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fcfaf7;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+  overflow:hidden;
+}
+.upload-meta strong{
+  color:var(--heading);
+}
+.upload-list{
+  margin-top:6px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.upload-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  max-width:100%;
+}
+.upload-link{
+  flex:1;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.upload-remove{
+  flex:0 0 auto;
+  padding:4px 10px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:#b0584d;
+  font-size:12px;
+  font-weight:700;
+}
+.upload-remove:hover{background:#fff4f2}
+.upload-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+.upload-note{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:12px;
+}
+.toggle-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fcf8f4;
+}
+.preview-box{
+  margin-top:16px;
+  padding:16px;
+  border:1px dashed var(--border);
+  border-radius:14px;
+  background:linear-gradient(180deg, #fffdfb, #fff8f2);
+}
+.preview-gallery{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+.preview-gallery img{
+  width:100%;
+  height:auto;
+  border-radius:12px;
+  display:block;
+}
+.form-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:20px;
+}
+.hint{
+  padding:14px 16px;
+  border-radius:14px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  font-size:14px;
+  line-height:1.7;
+  margin-bottom:16px;
+}
+.success{
+  background:var(--green-soft);
+  color:var(--green);
+}
+.empty{
+  padding:44px 20px;
+  text-align:center;
+  color:var(--muted);
+}
+.empty h3{font-size:18px;color:var(--heading);margin-bottom:8px}
+
+@media (max-width: 980px){
+  .layout{grid-template-columns:1fr}
+}
+@media (max-width: 720px){
+  .page{padding:18px 14px 30px}
+  .topbar{padding:18px}
+  .editor-modal{padding:12px}
+  .grid-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="login-shell" id="loginScreen">
+  <div class="login-card">
+    <div class="login-badge">活動公告欄</div>
+    <div class="login-title">公告管理</div>
+    <div class="login-sub">這裡是里長使用的公告發布頁。請使用已授權的 Google 帳號登入。</div>
+    <div id="loginBtnWrap"></div>
+    <div class="login-error" id="loginError">登入失敗，或此帳號尚未被加入管理名單。</div>
+  </div>
+</div>
+
+<div class="page" id="appShell" style="display:none">
+  <div class="topbar">
+    <div class="title-wrap">
+      <h1>公告管理</h1>
+      <p>這裡負責新增、編輯、發布與刪除活動公告。「公佈欄公開頁」只會顯示狀態為「已發布」的公告。</p>
+    </div>
+    <div class="top-actions">
+      <a class="btn" href="admin.html?tab=bulletins">回管理後台</a>
+      <a class="btn" href="bulletin.html" target="_blank" rel="noopener">查看里民前台</a>
+      <button class="btn primary" onclick="createBulletin()">新增公告</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <section class="card panel">
+      <div class="toolbar">
+        <input class="search" id="searchInput" type="text" placeholder="搜尋標題、內容、建立者…" oninput="renderBulletins()">
+        <div class="pill-group" id="statusPills"></div>
+      </div>
+      <div class="list-wrap" id="listWrap"></div>
+    </section>
+  </div>
+
+  <div class="editor-modal" id="editorModal" onclick="handleEditorBackdrop(event)">
+    <section class="card panel editor-panel collapsed" id="editorPanel">
+      <div class="editor-head">
+        <div>
+          <div class="editor-title" id="editorTitle">新增公告</div>
+          <div class="editor-sub" id="editorSub">建立新公告後，可先存為未發布，再決定是否發布到里民前台。</div>
+        </div>
+        <div class="editor-head-actions">
+          <button class="editor-close" type="button" onclick="closeEditor()" aria-label="關閉編輯器">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+              <path d="M6 6l12 12M18 6 6 18"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="hint" id="messageBox" style="display:none"></div>
+
+      <div class="form-section">
+        <label class="label" for="titleInput">公告標題</label>
+        <input class="input" id="titleInput" type="text" placeholder="例如：五月里民清潔日通知">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-section">
+          <label class="label" for="statusInput">狀態</label>
+          <select class="select" id="statusInput">
+            <option value="未發布">未發布</option>
+            <option value="已發布">已發布</option>
+          </select>
+        </div>
+        <div class="form-section">
+          <label class="label" for="categoryInput">公告分類</label>
+          <select class="select" id="categoryInput">
+            <option value="緊急通告">🚨 緊急通告</option>
+            <option value="政策宣導">📋 政策宣導</option>
+            <option value="里民活動" selected>🎪 里民活動</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="label" for="contentInput">公告內容</label>
+        <div class="editor-toolbar">
+          <button class="editor-btn" type="button" onclick="applyEditorCommand('bold')">粗體</button>
+          <button class="editor-btn" type="button" onclick="applyEditorCommand('formatBlock','<h2>')">標題</button>
+          <button class="editor-btn" type="button" onclick="applyEditorCommand('insertUnorderedList')">項目</button>
+          <button class="editor-btn" type="button" onclick="applyEditorCommand('insertOrderedList')">編號</button>
+          <button class="editor-btn" type="button" onclick="applyEditorCommand('formatBlock','<blockquote>')">引用</button>
+          <button class="editor-btn" type="button" onclick="insertEditorLink()">連結</button>
+          <button class="editor-btn" type="button" onclick="applyEditorCommand('removeFormat')">清除格式</button>
+        </div>
+        <div class="rich-editor" id="contentEditor" contenteditable="true" data-placeholder="請輸入公告內容，可簡單排版。"></div>
+        <textarea class="hidden-field" id="contentInput"></textarea>
+      </div>
+
+      <div class="form-section">
+        <label class="label" for="imageFileInput">公告圖片</label>
+        <input class="upload-input" id="imageFileInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple onchange="uploadBulletinImages(this.files)">
+        <input id="imageInput" type="hidden">
+        <div class="upload-row">
+          <button class="btn" type="button" onclick="document.getElementById('imageFileInput').click()">選擇圖片</button>
+          <div class="upload-meta" id="imageUploadMeta">尚未上傳圖片</div>
+        </div>
+        <div class="upload-actions">
+          <button class="btn" type="button" id="removeImageBtn" onclick="clearBulletinImage()" style="display:none">移除圖片</button>
+        </div>
+        <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。</div>
+      </div>
+
+      <label class="toggle-row">
+        <input type="checkbox" id="pinnedInput">
+        <span>設為置頂公告</span>
+      </label>
+
+      <div class="preview-box" id="previewBox">
+        <strong>預覽摘要</strong>
+        <div id="previewTitle" style="margin-top:10px;font-weight:800;color:var(--heading)">尚未輸入標題</div>
+        <div id="previewMeta" style="margin-top:8px;color:var(--muted)">狀態：未發布</div>
+        <div id="previewContent" style="margin-top:10px;color:var(--muted);line-height:1.8">尚未輸入內容</div>
+        <div class="preview-gallery" id="previewGallery" style="display:none"></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn primary" id="saveBtn" onclick="saveBulletin()">儲存公告</button>
+        <button class="btn" onclick="resetEditor()">清空編輯器</button>
+        <button class="btn" id="deleteBtn" onclick="removeBulletin()" style="display:none">刪除此公告</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script>
+(function(){
+  if (/Line\//i.test(navigator.userAgent)) {
+    var url = new URL(location.href);
+    if (!url.searchParams.has('openExternalBrowser')) {
+      url.searchParams.set('openExternalBrowser', '1');
+      location.replace(url.toString());
+    }
+  }
+})();
+
+const BULLETIN_DRAFT_KEY = 'hpnbhs_bulletin_editor_drafts';
+const BULLETIN_CACHE_KEY = 'hpnbhs_bulletins_cache_v1';
+let allBulletins = [];
+let filterStatus = 'all';
+let editingBulletinId = null;
+let uploadingBulletinImage = false;
+var sortableInstances = [];
+var CATE_SORT_OFFSET = { '緊急通告': 0, '政策宣導': 10000, '里民活動': 20000 };
+var CATE_ORDER = ['緊急通告', '政策宣導', '里民活動'];
+
+function catGroupLabel(c) {
+  if (c === '緊急通告') return '🚨 緊急通告';
+  if (c === '政策宣導') return '📋 政策宣導';
+  return '🎪 里民活動';
+}
+
+function openEditor() {
+  document.getElementById('editorModal').classList.add('open');
+  document.getElementById('editorPanel').classList.remove('collapsed');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditor() {
+  persistCurrentDraftCache();
+  document.getElementById('editorModal').classList.remove('open');
+  document.getElementById('editorPanel').classList.add('collapsed');
+  document.body.style.overflow = '';
+  hideMessage();
+}
+
+function handleEditorBackdrop(event) {
+  return;
+}
+
+function splitImageUrls(value) {
+  return String(value || '')
+    .split(/\r?\n|,/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function setImageUrls(urls) {
+  document.getElementById('imageInput').value = (urls || []).join('\n');
+}
+
+function getImageUrls() {
+  return splitImageUrls(document.getElementById('imageInput').value);
+}
+
+function syncEditorContent() {
+  document.getElementById('contentInput').value = document.getElementById('contentEditor').innerHTML.trim();
+}
+
+function applyEditorCommand(command, value) {
+  document.getElementById('contentEditor').focus();
+  document.execCommand(command, false, value || null);
+  syncEditorContent();
+  refreshPreview();
+}
+
+function insertEditorLink() {
+  const url = prompt('請輸入連結網址');
+  if (!url) return;
+  applyEditorCommand('createLink', url);
+}
+
+function stripHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').trim();
+}
+
+function normalizeBulletinStatus(status) {
+  return status === '已發布' ? '已發布' : '未發布';
+}
+
+function getDraftScope() {
+  return editingBulletinId || '__new__';
+}
+
+function getDraftStore() {
+  try {
+    return JSON.parse(localStorage.getItem(BULLETIN_DRAFT_KEY) || '{}');
+  } catch (error) {
+    localStorage.removeItem(BULLETIN_DRAFT_KEY);
+    return {};
+  }
+}
+
+function setDraftStore(store) {
+  localStorage.setItem(BULLETIN_DRAFT_KEY, JSON.stringify(store || {}));
+}
+
+function buildEditorSnapshot() {
+  syncEditorContent();
+  return {
+    bulletinId: editingBulletinId || '',
+    title: document.getElementById('titleInput').value.trim(),
+    status: document.getElementById('statusInput').value,
+    category: document.getElementById('categoryInput').value,
+    imageUrl: getImageUrls().join('\n'),
+    content: document.getElementById('contentInput').value.trim(),
+    pinned: document.getElementById('pinnedInput').checked,
+    ts: Date.now()
+  };
+}
+
+function hasDraftContent(snapshot) {
+  if (!snapshot) return false;
+  return !!(snapshot.title || stripHtml(snapshot.content) || snapshot.imageUrl || snapshot.pinned);
+}
+
+function persistCurrentDraftCache() {
+  const store = getDraftStore();
+  const scope = getDraftScope();
+  const snapshot = buildEditorSnapshot();
+  if (hasDraftContent(snapshot)) {
+    if (!editingBulletinId) snapshot.status = '未發布';
+    store[scope] = snapshot;
+  } else {
+    delete store[scope];
+  }
+  setDraftStore(store);
+}
+
+function clearDraftCache(scope) {
+  const store = getDraftStore();
+  delete store[scope];
+  setDraftStore(store);
+}
+
+function applyDraftSnapshot(snapshot) {
+  if (!snapshot) return;
+  document.getElementById('titleInput').value = snapshot.title || '';
+  document.getElementById('statusInput').value = normalizeBulletinStatus(snapshot.status);
+  document.getElementById('categoryInput').value = snapshot.category || '里民活動';
+  setImageUrls(splitImageUrls(snapshot.imageUrl || ''));
+  document.getElementById('imageFileInput').value = '';
+  document.getElementById('contentInput').value = snapshot.content || '';
+  document.getElementById('contentEditor').innerHTML = snapshot.content || '';
+  document.getElementById('pinnedInput').checked = !!snapshot.pinned;
+  updateImageMeta(getImageUrls());
+  refreshPreview();
+}
+
+function restoreDraftCache(scope) {
+  const snapshot = getDraftStore()[scope];
+  if (!snapshot || !hasDraftContent(snapshot)) return false;
+  applyDraftSnapshot(snapshot);
+  showMessage('已替你恢復上次未送出的內容。', true);
+  return true;
+}
+
+// workerCall：公告 CRUD 走 Worker；apiCall 保留給 GAS（圖片上傳）
+function workerCall(action, extra) {
+  const sess = getSession();
+  const payload = Object.assign({ action: action }, extra || {});
+  if (sess) {
+    payload.sessionToken = sess.sessionToken;
+    if (sess.id_token) payload.id_token = sess.id_token;
+  }
+  return fetch(CONFIG.BULLETIN_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+}
+
+function apiCall(action, extra) {
+  const sess = getSession();
+  const payload = Object.assign({ action: action }, extra || {});
+  if (sess) payload.sessionToken = sess.sessionToken;
+  return fetch(CONFIG.SCRIPT_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.text())
+  .then(t => JSON.parse(t));
+}
+
+function showMessage(message, success) {
+  const box = document.getElementById('messageBox');
+  box.textContent = message;
+  box.className = success ? 'hint success' : 'hint';
+  box.style.display = 'block';
+}
+
+function hideMessage() {
+  document.getElementById('messageBox').style.display = 'none';
+}
+
+function saveBulletinsCache() {
+  try {
+    sessionStorage.setItem(BULLETIN_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), bulletins: allBulletins || [] }));
+  } catch (error) {}
+}
+
+function renderCachedBulletins() {
+  try {
+    const raw = sessionStorage.getItem(BULLETIN_CACHE_KEY);
+    if (!raw) return false;
+    const cache = JSON.parse(raw);
+    if (!cache || !Array.isArray(cache.bulletins)) return false;
+    allBulletins = cache.bulletins;
+    renderBulletins();
+    return true;
+  } catch (error) {
+    sessionStorage.removeItem(BULLETIN_CACHE_KEY);
+    return false;
+  }
+}
+
+function ensureLogin() {
+  return !!getSession();
+}
+
+
+function initGoogle() {
+  if (ensureLogin()) {
+    enterApp();
+    return;
+  }
+  if (!CONFIG.GOOGLE_CLIENT_ID) return;
+  if (typeof google === 'undefined') {
+    setTimeout(initGoogle, 300);
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: onGoogleSignIn,
+    auto_select: true
+  });
+  google.accounts.id.renderButton(document.getElementById('loginBtnWrap'), {
+    type: 'standard',
+    theme: 'filled_blue',
+    size: 'large',
+    text: 'signin_with',
+    locale: 'zh-TW',
+    width: 280
+  });
+  google.accounts.id.prompt();
+}
+
+function onGoogleSignIn(resp) {
+  document.getElementById('loginError').style.display = 'none';
+  fetch(CONFIG.BULLETIN_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'login', id_token: resp.credential })
+  })
+  .then(r => r.json())
+  .then(json => {
+    if (!json.success) {
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    setSession(json.sessionToken, json.email, json.name, json.role || '', json.id_token || resp.credential);
+    enterApp();
+  })
+  .catch(() => {
+    document.getElementById('loginError').style.display = 'block';
+  });
+}
+
+function enterApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  closeEditor();
+  renderCachedBulletins();
+  loadBulletins();
+}
+
+function createBulletin() {
+  openEditor();
+  editingBulletinId = null;
+  document.getElementById('editorTitle').textContent = '新增公告';
+  document.getElementById('editorSub').textContent = '建立新公告後，可先存為未發布，再決定是否發布到里民前台。';
+  document.getElementById('titleInput').value = '';
+  document.getElementById('statusInput').value = '未發布';
+  document.getElementById('categoryInput').value = '里民活動';
+  document.getElementById('imageInput').value = '';
+  document.getElementById('imageFileInput').value = '';
+  document.getElementById('contentInput').value = '';
+  document.getElementById('contentEditor').innerHTML = '';
+  document.getElementById('pinnedInput').checked = false;
+  document.getElementById('deleteBtn').style.display = 'none';
+  hideMessage();
+  updateImageMeta([]);
+  refreshPreview();
+  restoreDraftCache('__new__');
+}
+
+function resetEditor() {
+  clearDraftCache('__new__');
+  createBulletin();
+}
+
+function fillEditor(item) {
+  openEditor();
+  editingBulletinId = item.bulletinId;
+  document.getElementById('editorTitle').textContent = '編輯公告';
+  document.getElementById('editorSub').textContent = '目前正在編輯 ' + item.bulletinId + '，儲存後會立即同步到資料表。';
+  document.getElementById('titleInput').value = item.title || '';
+  document.getElementById('statusInput').value = normalizeBulletinStatus(item.status);
+  document.getElementById('categoryInput').value = item.category || '里民活動';
+  document.getElementById('imageInput').value = item.imageUrl || '';
+  document.getElementById('imageFileInput').value = '';
+  document.getElementById('contentInput').value = item.content || '';
+  document.getElementById('contentEditor').innerHTML = item.content || '';
+  document.getElementById('pinnedInput').checked = !!item.pinned;
+  document.getElementById('deleteBtn').style.display = 'inline-flex';
+  hideMessage();
+  updateImageMeta(splitImageUrls(item.imageUrl || ''));
+  refreshPreview();
+  restoreDraftCache(item.bulletinId);
+}
+
+function updateImageMeta(urls) {
+  const meta = document.getElementById('imageUploadMeta');
+  const removeBtn = document.getElementById('removeImageBtn');
+  if (uploadingBulletinImage) {
+    meta.innerHTML = '<strong>圖片上傳中…</strong><br>請稍候，完成後會自動套用到公告。';
+    removeBtn.style.display = 'none';
+    return;
+  }
+  if (urls && urls.length) {
+    meta.innerHTML = '<strong>已上傳圖片 ' + urls.length + ' 張</strong><div class="upload-list">' + urls.map((url, index) => (
+      '<div class="upload-item"><a class="upload-link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(url) + '</a><button class="upload-remove" type="button" onclick="removeBulletinImage(' + index + ')">移除</button></div>'
+    )).join('') + '</div>';
+    removeBtn.style.display = 'inline-flex';
+    return;
+  }
+  meta.textContent = '尚未上傳圖片';
+  removeBtn.style.display = 'none';
+}
+
+function removeBulletinImage(index) {
+  const urls = getImageUrls();
+  if (index < 0 || index >= urls.length) return;
+  urls.splice(index, 1);
+  setImageUrls(urls);
+  updateImageMeta(urls);
+  refreshPreview();
+  persistCurrentDraftCache();
+}
+
+function clearBulletinImage() {
+  setImageUrls([]);
+  document.getElementById('imageFileInput').value = '';
+  updateImageMeta([]);
+  refreshPreview();
+  persistCurrentDraftCache();
+}
+
+async function uploadBulletinImages(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  if (uploadingBulletinImage) return;
+  uploadingBulletinImage = true;
+  updateImageMeta(getImageUrls());
+  hideMessage();
+  try {
+    const existing = getImageUrls();
+    for (const file of files) {
+      if (!/^image\/(jpeg|png|gif|webp)$/i.test(file.type)) {
+        throw new Error('僅支援 JPG、PNG、GIF、WEBP 圖片。');
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('圖片檔案太大，請控制在 5MB 以內。');
+      }
+      const dataUrl = await readFileAsDataUrl(file);
+      const b64 = dataUrl.indexOf(',') !== -1 ? dataUrl.split(',')[1] : String(dataUrl || '');
+      const json = await workerCall('uploadBulletinImage', {
+        imageBase64: b64,
+        mimeType: file.type || 'image/jpeg'
+      });
+      if (json.code === 401) {
+        clearSession();
+        location.reload();
+        return;
+      }
+      if (!json.success || !json.url) {
+        throw new Error(json.error || '圖片上傳失敗。');
+      }
+      existing.push(json.url);
+      setImageUrls(existing);
+      updateImageMeta(existing);
+      refreshPreview(dataUrl, json.url);
+      persistCurrentDraftCache();
+    }
+    showMessage('圖片已上傳。', true);
+  } catch (error) {
+    showMessage(error.message || '圖片上傳失敗，請稍後再試。', false);
+  } finally {
+    uploadingBulletinImage = false;
+    updateImageMeta(getImageUrls());
+    document.getElementById('imageFileInput').value = '';
+  }
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function() { resolve(reader.result); };
+    reader.onerror = function() { reject(new Error('讀取圖片失敗，請重新選擇。')); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function buildPills() {
+  const counts = { all: allBulletins.length };
+  allBulletins.forEach(item => {
+    const key = normalizeBulletinStatus(item.status);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const pills = [{ value: 'all', label: '全部 ' + counts.all }];
+  ['已發布', '未發布'].forEach(k => {
+    pills.push({ value: k, label: k + ' ' + (counts[k] || 0) });
+  });
+  document.getElementById('statusPills').innerHTML = pills.map(item => (
+    '<button class="pill' + (item.value === filterStatus ? ' active' : '') + '" onclick="setFilterStatus(\'' + escapeHtml(item.value) + '\')">' + escapeHtml(item.label) + '</button>'
+  )).join('');
+}
+
+function setFilterStatus(value) {
+  filterStatus = value;
+  renderBulletins();
+}
+
+function renderBulletinCard(item) {
+  var statusClass = normalizeBulletinStatus(item.status) === '已發布' ? 'badge-published' : 'badge-draft';
+  var preview = stripHtml(item.content || '').slice(0, 80);
+  var bid = escapeHtml(item.bulletinId);
+  return '<div class="bull-item" data-bulletin-id="' + bid + '" onclick="editBulletin(\'' + bid + '\')" style="cursor:pointer">' +
+    '<div class="bull-drag-handle" onclick="event.stopPropagation()">⠿</div>' +
+    '<div class="bull-item-body">' +
+      '<div class="bull-item-title">' + escapeHtml(item.title || '（無標題）') + '</div>' +
+      '<div class="bull-item-meta">' +
+        '<span class="badge ' + statusClass + '">' + escapeHtml(normalizeBulletinStatus(item.status)) + '</span>' +
+        (item.pinned ? ' <span class="badge badge-pinned">置頂</span>' : '') +
+        ' <span style="font-size:12px;color:var(--muted)">' + escapeHtml(fmtDate(item.createdAt)) + '</span>' +
+      '</div>' +
+      (preview ? '<div class="bull-item-preview">' + escapeHtml(preview) + '</div>' : '') +
+    '</div>' +
+    '<div class="bull-item-actions">' +
+      '<button class="inline-btn" onclick="event.stopPropagation(); quickToggleStatus(\'' + bid + '\')">' +
+        (normalizeBulletinStatus(item.status) === '已發布' ? '取消發布' : '發布') +
+      '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderBulletins() {
+  sortableInstances.forEach(function(s){ try{ s.destroy(); }catch(e){} });
+  sortableInstances = [];
+
+  buildPills();
+  var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  var listWrap = document.getElementById('listWrap');
+
+  var list = allBulletins.filter(function(item) {
+    if (filterStatus !== 'all' && normalizeBulletinStatus(item.status) !== filterStatus) return false;
+    if (!q) return true;
+    var hay = [item.bulletinId, item.title, item.content, item.author, item.category || ''].join(' ').toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+
+  // Sort by category group, then sortOrder
+  var catW = { '緊急通告': 1, '政策宣導': 2, '里民活動': 3 };
+  list.sort(function(a, b) {
+    var wa = catW[a.category] || 3, wb = catW[b.category] || 3;
+    if (wa !== wb) return wa - wb;
+    var ha = a.sortOrder > 0, hb = b.sortOrder > 0;
+    if (ha !== hb) return ha ? 1 : -1;
+    if (!ha) return (b.createdAt || '').localeCompare(a.createdAt || '');
+    return a.sortOrder - b.sortOrder;
+  });
+
+  if (!list.length) {
+    listWrap.innerHTML = '<div class="empty"><h3>沒有符合的公告</h3><p>請切換狀態或調整搜尋條件。</p></div>';
+    return;
+  }
+
+  // Group by category
+  var groups = {};
+  CATE_ORDER.forEach(function(c) { groups[c] = []; });
+  list.forEach(function(item) {
+    var c = item.category || '里民活動';
+    if (!groups[c]) groups[c] = [];
+    groups[c].push(item);
+  });
+
+  var html = '';
+  CATE_ORDER.forEach(function(cateKey) {
+    var grp = groups[cateKey];
+    if (!grp || !grp.length) return;
+    html += '<div class="group-header">' + escapeHtml(catGroupLabel(cateKey)) +
+            ' <span style="font-weight:400;font-size:12px;opacity:.7">(' + grp.length + ')</span></div>';
+    html += '<div class="group-cards" data-group-key="' + escapeHtml(cateKey) + '">';
+    grp.forEach(function(item) { html += renderBulletinCard(item); });
+    html += '</div>';
+  });
+  listWrap.innerHTML = html;
+
+  // Init SortableJS per group
+  CATE_ORDER.forEach(function(cateKey) {
+    var el = listWrap.querySelector('.group-cards[data-group-key="' + cateKey + '"]');
+    if (!el) return;
+    (function(key, container) {
+      var inst = Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        delay: 200,
+        delayOnTouchOnly: true,
+        onEnd: function() { onBulletinSortEnd(key, container); }
+      });
+      sortableInstances.push(inst);
+    })(cateKey, el);
+  });
+}
+
+function onBulletinSortEnd(groupKey, el) {
+  var cards = el.querySelectorAll('[data-bulletin-id]');
+  var offset = CATE_SORT_OFFSET[groupKey] || 0;
+  var orders = [];
+  for (var i = 0; i < cards.length; i++) {
+    var bid = cards[i].getAttribute('data-bulletin-id');
+    var sortVal = offset + (i + 1) * 10;
+    orders.push({ bulletinId: bid, sortOrder: sortVal });
+    for (var j = 0; j < allBulletins.length; j++) {
+      if (allBulletins[j].bulletinId === bid) { allBulletins[j].sortOrder = sortVal; break; }
+    }
+  }
+  saveBulletinsCache();
+  workerCall('reorderBulletins', { orders: orders })
+    .catch(function() { console.error('reorderBulletins failed'); });
+}
+
+function editBulletin(id) {
+  const item = allBulletins.find(entry => entry.bulletinId === id);
+  if (!item) return;
+  fillEditor(item);
+}
+
+function quickToggleStatus(id) {
+  const item = allBulletins.find(entry => entry.bulletinId === id);
+  if (!item) return;
+  const oldStatus = normalizeBulletinStatus(item.status);
+  const nextStatus = oldStatus === '已發布' ? '未發布' : '已發布';
+  item.status = nextStatus;
+  saveBulletinsCache();
+  renderBulletins();
+  workerCall('updateBulletin', {
+    bulletinId: id,
+    status: nextStatus
+  }).then(json => {
+    if (json.code === 401) {
+      clearSession();
+      location.reload();
+      return;
+    }
+    if (!json.success) {
+      item.status = oldStatus;
+      saveBulletinsCache();
+      renderBulletins();
+      showMessage(json.error || '更新失敗', false);
+      return;
+    }
+    showMessage('公告狀態已更新。', true);
+  }).catch(() => {
+    item.status = oldStatus;
+    saveBulletinsCache();
+    renderBulletins();
+    showMessage('更新失敗，請稍後再試。', false);
+  });
+}
+
+function loadBulletins() {
+  workerCall('getBulletins').then(json => {
+    if (json.code === 401) {
+      clearSession();
+      location.reload();
+      return;
+    }
+    if (!json.success) throw new Error(json.error || '載入失敗');
+    allBulletins = json.bulletins || [];
+    saveBulletinsCache();
+    renderBulletins();
+  }).catch(error => {
+    document.getElementById('listWrap').innerHTML = '<div class="empty"><h3>無法載入公告</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function saveBulletin() {
+  syncEditorContent();
+  const title = document.getElementById('titleInput').value.trim();
+  const content = document.getElementById('contentInput').value.trim();
+  const imageUrl = getImageUrls().join('\n');
+  const status = normalizeBulletinStatus(document.getElementById('statusInput').value);
+  const category = document.getElementById('categoryInput').value;
+  const pinned = document.getElementById('pinnedInput').checked;
+
+  if (!title) {
+    showMessage('請輸入公告標題。', false);
+    return;
+  }
+
+  const action = editingBulletinId ? 'updateBulletin' : 'addBulletin';
+  const payload = {
+    title: title,
+    content: content,
+    imageUrl: imageUrl,
+    status: status,
+    category: category,
+    pinned: pinned
+  };
+  if (editingBulletinId) payload.bulletinId = editingBulletinId;
+
+  document.getElementById('saveBtn').textContent = '儲存中…';
+  workerCall(action, payload).then(json => {
+    document.getElementById('saveBtn').textContent = '儲存公告';
+    if (json.code === 401) {
+      clearSession();
+      location.reload();
+      return;
+    }
+    if (!json.success) {
+      showMessage(json.error || '儲存失敗', false);
+      return;
+    }
+    showMessage(editingBulletinId ? '公告已更新。' : '公告已新增。', true);
+    const previousScope = getDraftScope();
+    if (!editingBulletinId && json.bulletinId) editingBulletinId = json.bulletinId;
+    const cachedItem = Object.assign({}, payload, {
+      bulletinId: editingBulletinId,
+      status: normalizeBulletinStatus(payload.status),
+      pinned: !!payload.pinned,
+      updatedAt: new Date().toISOString()
+    });
+    const idx = allBulletins.findIndex(item => item.bulletinId === editingBulletinId);
+    if (idx >= 0) allBulletins[idx] = Object.assign({}, allBulletins[idx], cachedItem);
+    else allBulletins.unshift(cachedItem);
+    saveBulletinsCache();
+    renderBulletins();
+    clearDraftCache(previousScope);
+    clearDraftCache(getDraftScope());
+    loadBulletins();
+  }).catch(() => {
+    document.getElementById('saveBtn').textContent = '儲存公告';
+    showMessage('儲存失敗，請稍後再試。', false);
+  });
+}
+
+function removeBulletin() {
+  if (!editingBulletinId) return;
+  if (!confirm('確定要刪除這則公告？')) return;
+  const removingScope = getDraftScope();
+  workerCall('deleteBulletin', { bulletinId: editingBulletinId }).then(json => {
+    if (json.code === 401) {
+      clearSession();
+      location.reload();
+      return;
+    }
+    if (!json.success) {
+      showMessage(json.error || '刪除失敗', false);
+      return;
+    }
+    clearDraftCache(removingScope);
+    allBulletins = allBulletins.filter(item => item.bulletinId !== editingBulletinId);
+    saveBulletinsCache();
+    renderBulletins();
+    closeEditor();
+    loadBulletins();
+  }).catch(() => {
+    showMessage('刪除失敗，請稍後再試。', false);
+  });
+}
+
+// freshLocalUrl: 剛上傳的 data URL（本地預覽用）；freshDriveUrl: 對應的 Drive URL（已存入 imageInput）
+function refreshPreview(freshLocalUrl, freshDriveUrl) {
+  const title = document.getElementById('titleInput').value.trim();
+  syncEditorContent();
+  const content = document.getElementById('contentInput').value.trim();
+  const images = getImageUrls();
+  const status = document.getElementById('statusInput').value;
+  const category = document.getElementById('categoryInput').value;
+  const pinned = document.getElementById('pinnedInput').checked;
+  document.getElementById('previewTitle').textContent = title || '尚未輸入標題';
+  document.getElementById('previewMeta').textContent = '狀態：' + normalizeBulletinStatus(status) + ' ・ ' + category + (pinned ? ' ・ 置頂' : '');
+  const previewContent = document.getElementById('previewContent');
+  previewContent.innerHTML = content || '尚未輸入內容';
+  const gallery = document.getElementById('previewGallery');
+  if (images.length) {
+    gallery.innerHTML = images.map(function(url) {
+      // 剛上傳的照片用本地 data URL 顯示，避免 lh3 propagation delay
+      var src = (freshDriveUrl && freshLocalUrl && url === freshDriveUrl) ? freshLocalUrl : url;
+      return '<img src="' + escapeHtml(src) + '" alt="" onerror="retryLh3Img(this)" data-orig="' + escapeHtml(url) + '">';
+    }).join('');
+    gallery.style.display = 'grid';
+  } else {
+    gallery.style.display = 'none';
+    gallery.innerHTML = '';
+  }
+}
+
+['titleInput', 'contentInput', 'imageInput', 'statusInput', 'categoryInput', 'pinnedInput'].forEach(id => {
+  document.addEventListener('input', event => {
+    if (event.target && event.target.id === id) refreshPreview();
+  });
+  document.addEventListener('change', event => {
+    if (event.target && event.target.id === id) refreshPreview();
+  });
+});
+document.getElementById('contentEditor').addEventListener('input', function() {
+  syncEditorContent();
+  refreshPreview();
+  persistCurrentDraftCache();
+});
+
+['titleInput', 'contentInput', 'imageInput', 'statusInput', 'categoryInput', 'pinnedInput'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', persistCurrentDraftCache);
+  el.addEventListener('change', persistCurrentDraftCache);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (getSession()) { enterApp(); return; }
+  let tries = 0;
+  const timer = setInterval(function() {
+    if (typeof google !== 'undefined' || ++tries > 30) {
+      clearInterval(timer);
+      initGoogle();
+    }
+  }, 200);
+});
+['click','keydown','mousedown','touchstart','scroll'].forEach(function(eventName) {
+  window.addEventListener(eventName, function() {
+    touchSession();
+  }, { passive: true });
+});
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

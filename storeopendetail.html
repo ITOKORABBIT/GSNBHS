@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商店詳情 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+
+:root{
+  --bg:        #EDF5FF;
+  --card:      #FFFFFF;
+  --border:    #B8D4EE;
+  --divider:   #CCE2F5;
+  --lbl:       #456280;
+  --val:       #182C44;
+  --muted:     #80AACB;
+  --heading:   #0E2038;
+  --primary:       #4A92C4;
+  --primary-light: #E3F2FF;
+  --primary-dark:  #3070A0;
+  --shadow-sm: 0 1px 3px rgba(20,60,100,.07);
+  --shadow-md: 0 2px 8px rgba(20,60,100,.09), 0 1px 2px rgba(20,60,100,.05);
+  --radius:    10px;
+  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body{
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--val);
+  font-size: 15px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page header ── */
+.page-header{
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 50;
+}
+.back-btn{
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 14px; color: var(--lbl);
+  transition: background .15s;
+}
+.back-btn:hover{ background: var(--bg); }
+.page-title{
+  font-size: 16px; font-weight: 700;
+  color: var(--heading); flex: 1;
+  text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* ── Container ── */
+.container{
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+}
+
+/* ── Hero image ── */
+.hero-placeholder{
+  width: 100%; aspect-ratio: 16/9;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #DCEEFF 0%, #C8E2F8 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+
+/* ── Carousel ── */
+.carousel-wrap{
+  position: relative;
+  width: 100%;
+  height: min(80vw, 500px);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: #111;
+  user-select: none;
+}
+.carousel-track{
+  display: flex;
+  width: 100%; height: 100%;
+  transition: transform .3s ease;
+}
+.carousel-slide{
+  flex: 0 0 100%; height: 100%;
+  cursor: zoom-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel-slide img{
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain;
+  display: block;
+}
+.carousel-btn{
+  position: absolute; top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,.45);
+  border: none; color: #fff;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; line-height: 1;
+  cursor: pointer; z-index: 5;
+  transition: background .15s;
+}
+.carousel-btn:hover{ background: rgba(0,0,0,.7); }
+.carousel-btn.prev{ left: 10px; }
+.carousel-btn.next{ right: 10px; }
+.carousel-dots{
+  position: absolute; bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 5;
+}
+.carousel-dot{
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.45);
+  cursor: pointer;
+  transition: background .2s;
+}
+.carousel-dot.active{ background: #fff; }
+
+/* ── Title card ── */
+.title-card{
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border-left: 4px solid var(--primary);
+}
+.title-meta{
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+.cate-badge{
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 9px; border-radius: 5px;
+  font-size: 12px; font-weight: 700;
+}
+.store-name{
+  font-size: 20px; font-weight: 700;
+  color: var(--heading); line-height: 1.35;
+  margin-bottom: 6px;
+}
+.store-phone-hero{
+  display: flex; align-items: center; gap: 6px;
+  font-size: 15px; font-weight: 600;
+  color: var(--primary); margin-top: 4px;
+}
+.store-phone-hero a{
+  color: var(--primary); text-decoration: none;
+}
+.store-phone-hero a:hover{ text-decoration: underline; }
+
+/* ── Card ── */
+.card{
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.card-header{
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 13px; font-weight: 700;
+  color: var(--lbl);
+  display: flex; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
+/* ── Info table ── */
+.info-table{ padding: 4px 0; }
+.info-row{
+  display: flex;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--divider);
+  gap: 12px;
+}
+.info-row:last-child{ border-bottom: none; }
+.info-lbl{
+  width: 80px; flex-shrink: 0;
+  font-size: 12px; font-weight: 600;
+  color: var(--lbl); padding-top: 2px;
+}
+.info-val{
+  flex: 1; font-size: 14px;
+  color: var(--val); line-height: 1.6;
+  word-break: break-word;
+}
+.info-val a{ color: var(--primary); text-decoration: none; }
+.info-val a:hover{ text-decoration: underline; }
+.pre{ white-space: pre-wrap; }
+.paragraph-list{ display:flex; flex-direction:column; gap:7px; }
+.paragraph-list p{ margin:0; line-height:1.7; }
+
+/* ── Offer highlight ── */
+.offer-box{
+  margin: 0 18px 14px;
+  padding: 12px 14px;
+  background: var(--primary-light);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+  font-size: 13px; color: var(--primary-dark);
+  line-height: 1.6; white-space: pre-wrap;
+}
+
+/* ── Photo grid ── */
+.photo-grid-wrap{ padding: 12px 18px 14px; }
+.photo-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.photo-grid img{
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: 8px; border: 1px solid var(--border);
+  cursor: pointer; transition: transform .2s;
+}
+.photo-grid img:hover{ transform: scale(1.03); }
+
+/* ── Lightbox ── */
+.lightbox{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 999;
+  display: none; align-items: center; justify-content: center;
+}
+.lightbox.open{ display: flex; }
+.lightbox img{
+  max-width: 95vw; max-height: 90vh;
+  border-radius: 6px; object-fit: contain;
+}
+.lb-close{
+  position: absolute; top: 16px; right: 20px;
+  color: #fff; font-size: 28px; cursor: pointer;
+  background: none; border: none; line-height: 1;
+}
+.lb-prev, .lb-next{
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,.18); border: none; color: #fff;
+  font-size: 26px; width: 44px; height: 44px;
+  border-radius: 50%; cursor: pointer; line-height: 1;
+  display: none; align-items: center; justify-content: center;
+  z-index: 1001; transition: background .15s;
+}
+.lb-prev{ left: 14px; }
+.lb-next{ right: 14px; }
+.lb-prev:hover,.lb-next:hover{ background: rgba(255,255,255,.32); }
+.lb-counter{
+  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,.9); font-size: 13px;
+  background: rgba(0,0,0,.45); padding: 4px 14px; border-radius: 20px;
+  display: none; pointer-events: none;
+}
+
+/* ── Error/Loading ── */
+.state-wrap{
+  text-align: center; padding: 80px 24px;
+  color: var(--lbl);
+}
+.state-wrap svg{ margin: 0 auto 16px; opacity: .4; }
+.state-wrap h3{ font-size: 18px; color: var(--heading); margin-bottom: 8px; }
+.state-wrap p{ font-size: 14px; }
+
+@media(max-width:520px){
+  .photo-grid{ grid-template-columns: repeat(2, 1fr); }
+  .info-lbl{ width: 66px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Lightbox ── -->
+<div class="lightbox" id="lightbox" onclick="closeLb()">
+  <button class="lb-close" onclick="closeLb()">&#215;</button>
+  <button class="lb-prev" id="lbPrevBtn">&#10094;</button>
+  <img id="lbImg" src="" alt="" onclick="closeLb()">
+  <button class="lb-next" id="lbNextBtn">&#10095;</button>
+  <div class="lb-counter" id="lbCounter"></div>
+</div>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+  <button class="back-btn" onclick="window.location.href='storeopenlist.html'">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    返回商家列表
+  </button>
+  <div class="page-title" id="pageTitle">商店詳情</div>
+</div>
+
+<!-- ── Main content ── -->
+<div class="container">
+  <div id="mainContent">
+    <div class="state-wrap">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <h3>載入中…</h3>
+    </div>
+  </div>
+</div>
+
+<script src="storeconfig.js"></script>
+<script src="utils.js"></script>
+<script>
+function apiCall(action, extra) {
+  var payload = Object.assign({ action: action }, extra || {});
+  return fetch(storeApiEndpoint(action), {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(t){ return JSON.parse(t); });
+}
+
+function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
+var taxonomyBrandTagDefs = [];
+var renderedStoreData = null;
+var BRAND_TAG_PALETTE = {
+  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
+  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
+  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+};
+function brandTagCss(tag) {
+  var def = taxonomyBrandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };
+  var color = BRAND_TAG_PALETTE[def.color] || BRAND_TAG_PALETTE.gold;
+  return 'background:' + color.bg + ';color:' + color.txt + ';border:1px solid ' + color.bd + ';padding:3px 8px;border-radius:999px;display:inline-flex;margin:2px 5px 2px 0;font-weight:700;font-size:12px';
+}
+function brandTagBadges(d){ return brandTags(d).map(function(tag){ return '<span style="' + brandTagCss(tag) + '">' + esc(tag) + '</span>'; }).join(''); }
+function loadStoreBrandTagDefs() {
+  apiCall('getPublicStoreTaxonomy').then(function(json){
+    taxonomyBrandTagDefs = json.success && json.taxonomy && Array.isArray(json.taxonomy.brandTagDefs) ? json.taxonomy.brandTagDefs : [];
+    if (renderedStoreData) renderStore(renderedStoreData);
+  }).catch(function(){});
+}
+function splitParagraphText(s) {
+  var text = String(s || '').replace(/\r\n?/g, '\n').trim();
+  if (!text) return [];
+  return text.split(/\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
+}
+function paragraphValue(s) {
+  var parts = splitParagraphText(s);
+  if (!parts.length) return '';
+  return '<div class="paragraph-list">' + parts.map(function(p){ return '<p>' + esc(p) + '</p>'; }).join('') + '</div>';
+}
+
+var CATE_COLOR = {
+  '食': { bg:'#FFF3E0', txt:'#B75D00' },
+  '衣': { bg:'#F3EBFF', txt:'#6B28A8' },
+  '住': { bg:'#EBF3FF', txt:'#1A56A8' },
+  '行': { bg:'#E0F7FA', txt:'#006B6B' },
+  '育': { bg:'#EAF3EB', txt:'#2F6836' },
+  '樂': { bg:'#FEE2E2', txt:'#991B1B' },
+  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
+};
+function cateBadge(cat) {
+  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
+}
+
+var _lbPhotos = [], _lbIdx = 0;
+function openLb(photos, idx){
+  _lbPhotos = photos; _lbIdx = idx || 0;
+  _updateLb();
+  document.getElementById('lightbox').classList.add('open');
+}
+function _updateLb(){
+  document.getElementById('lbImg').src = _lbPhotos[_lbIdx];
+  var multi = _lbPhotos.length > 1;
+  var prev = document.getElementById('lbPrevBtn');
+  var next = document.getElementById('lbNextBtn');
+  var ctr  = document.getElementById('lbCounter');
+  prev.style.display = (multi && _lbIdx > 0) ? 'flex' : 'none';
+  next.style.display = (multi && _lbIdx < _lbPhotos.length - 1) ? 'flex' : 'none';
+  if (multi) { ctr.textContent = (_lbIdx+1) + ' / ' + _lbPhotos.length; ctr.style.display = 'block'; }
+  else { ctr.style.display = 'none'; }
+}
+function lbMove(dir){
+  var n = _lbIdx + dir;
+  if (n >= 0 && n < _lbPhotos.length){ _lbIdx = n; _updateLb(); }
+}
+function closeLb(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lbImg').src = '';
+}
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape')     closeLb();
+  if (e.key === 'ArrowLeft')  lbMove(-1);
+  if (e.key === 'ArrowRight') lbMove(1);
+});
+
+/* ── Carousel state ── */
+var carouselPhotos = [];
+var carouselIdx = 0;
+
+function buildCarousel(photos) {
+  if (!photos.length) {
+    return '<div class="hero-placeholder"><svg width="48" height="48" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>';
+  }
+  var slides = photos.map(function(url, i) {
+    return '<div class="carousel-slide" onclick="openLb(carouselPhotos,' + i + ')">' +
+      '<img src="' + esc(url) + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '" ' +
+      'onerror="this.parentNode.style.background=\'#1a1a1a\'">' +
+      '</div>';
+  }).join('');
+  var dots = photos.length > 1 ? photos.map(function(_, i) {
+    return '<div class="carousel-dot' + (i === 0 ? ' active' : '') + '" onclick="goSlide(' + i + ')"></div>';
+  }).join('') : '';
+  var btns = photos.length > 1
+    ? '<button class="carousel-btn prev" onclick="prevSlide(event)">&#8249;</button>' +
+      '<button class="carousel-btn next" onclick="nextSlide(event)">&#8250;</button>'
+    : '';
+  return '<div class="carousel-wrap" id="carouselWrap">' +
+    '<div class="carousel-track" id="carouselTrack">' + slides + '</div>' +
+    btns +
+    (dots ? '<div class="carousel-dots" id="carouselDots">' + dots + '</div>' : '') +
+    '</div>';
+}
+
+function goSlide(idx) {
+  if (!carouselPhotos.length) return;
+  carouselIdx = (idx + carouselPhotos.length) % carouselPhotos.length;
+  var track = document.getElementById('carouselTrack');
+  if (track) track.style.transform = 'translateX(-' + (carouselIdx * 100) + '%)';
+  var dots = document.querySelectorAll('.carousel-dot');
+  dots.forEach(function(d, i) { d.classList.toggle('active', i === carouselIdx); });
+}
+function prevSlide(e) { if (e) e.stopPropagation(); goSlide(carouselIdx - 1); }
+function nextSlide(e) { if (e) e.stopPropagation(); goSlide(carouselIdx + 1); }
+
+/* touch swipe */
+var _tsX = 0;
+document.addEventListener('touchstart', function(e) {
+  var w = document.getElementById('carouselWrap');
+  if (w && w.contains(e.target)) _tsX = e.touches[0].clientX;
+}, { passive: true });
+document.addEventListener('touchend', function(e) {
+  var w = document.getElementById('carouselWrap');
+  if (!w || !w.contains(e.target)) return;
+  var dx = e.changedTouches[0].clientX - _tsX;
+  if (Math.abs(dx) > 40) dx < 0 ? nextSlide(null) : prevSlide(null);
+}, { passive: true });
+
+var storeId = new URLSearchParams(location.search).get('id') || '';
+
+function loadStore() {
+  if (!storeId) { showError('缺少商店編號'); return; }
+
+  var hasPreview = false;
+  try {
+    var preview = JSON.parse(sessionStorage.getItem('store_preview_' + storeId) || 'null');
+    if (preview && preview.storeId) { renderStore(preview); hasPreview = true; }
+  } catch(e) {}
+
+  apiCall('getPublicStore', { storeId: storeId })
+    .then(function(json){
+      if (!json.success) {
+        if (!hasPreview) showError(json.error || '找不到此商店');
+        return;
+      }
+      renderStore(json.storeData);
+    })
+    .catch(function(){ if (!hasPreview) showError('載入失敗，請稍後再試'); });
+}
+
+function storeApiEndpoint(action) {
+  var storeApiActions = { getPublicStores: true, getPublicStore: true, getPublicStoreTaxonomy: true };
+  return (CONFIG.STORE_API_URL && storeApiActions[action]) ? CONFIG.STORE_API_URL : CONFIG.SCRIPT_URL;
+}
+
+function renderStore(d) {
+  renderedStoreData = d;
+  var name = d.pubName || '（未命名）';
+  document.getElementById('pageTitle').textContent = name;
+
+  var html = '';
+
+  // ── 照片輪播 ──
+  var photoKeys = ['photo1','photo2','photo3','photo4','photo5','photo6','photo7','photo8','photo9','photo10'];
+  carouselPhotos = photoKeys.map(function(k){ return d[k] || ''; }).filter(Boolean);
+  carouselIdx = 0;
+  html += buildCarousel(carouselPhotos);
+
+  // ── 店名 + 類別 ──
+  html += '<div class="title-card">';
+  if (d.pubCate) {
+    html += '<div class="title-meta">' + cateBadge(d.pubCate) + '</div>';
+  }
+  html += '<div class="store-name">' + esc(name) + '</div>';
+  if (d.pubPhone) {
+    html += '<div class="store-phone-hero">';
+    html += '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+    html += '<a href="tel:' + esc(d.pubPhone) + '">' + esc(d.pubPhone) + '</a>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // ── 商店資訊 ──
+  html += '<div class="card">';
+  html += '<div class="card-header">';
+  html += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+  html += ' 商店資訊</div>';
+  html += '<div class="info-table">';
+
+  if (d.pubAddr) {
+    var addrHtml = esc(d.pubAddr);
+    if (d.pubMapUrl) addrHtml += ' <a href="' + esc(d.pubMapUrl) + '" target="_blank" rel="noopener">地圖 ↗</a>';
+    html += row('地址', addrHtml);
+  }
+  if (d.pubHours) html += row('營業時間', paragraphValue(d.pubHours));
+  if (d.pubStoreNum) html += row('統一編號', esc(d.pubStoreNum));
+  if (brandTags(d).length) html += row('品牌標籤', brandTagBadges(d));
+  if (d.pubDesc) html += row('經營內容', paragraphValue(d.pubDesc));
+  if (d.brandUrl) html += row('店家官網', linkUrl(d.brandUrl));
+
+  html += '</div>';
+
+  // ── 優惠方案 ──
+  if (d.pubOffer) {
+    html += '<div class="offer-box">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.7;margin-bottom:6px">優惠方案</div>' +
+      paragraphValue(d.pubOffer) + '</div>';
+  }
+
+  html += '</div>';
+
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function row(lbl, val){
+  return '<div class="info-row"><div class="info-lbl">' + lbl + '</div><div class="info-val">' + val + '</div></div>';
+}
+
+function linkUrl(url) {
+  var text = String(url || '').trim();
+  if (!text) return '';
+  if (!/^https?:\/\//i.test(text)) return esc(text);
+  return '<a href="' + esc(text) + '" target="_blank" rel="noopener">前往連結 ↗</a>';
+}
+
+function makePlaceholder() {
+  var d = document.createElement('div');
+  d.className = 'hero-placeholder';
+  d.innerHTML = '<svg width="48" height="48" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+  return d;
+}
+
+function showError(msg) {
+  document.getElementById('mainContent').innerHTML =
+    '<div class="state-wrap">' +
+    '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<h3>無法顯示</h3><p>' + esc(msg) + '</p></div>';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('lbPrevBtn').addEventListener('click', function(e){ e.stopPropagation(); lbMove(-1); });
+  document.getElementById('lbNextBtn').addEventListener('click', function(e){ e.stopPropagation(); lbMove(1); });
+  var lb = document.getElementById('lightbox');
+  var sx = 0;
+  lb.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, {passive: true});
+  lb.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 50){ e.preventDefault(); dx < 0 ? lbMove(1) : lbMove(-1); }
+  }, {passive: false});
+  loadStoreBrandTagDefs();
+  loadStore();
+});
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

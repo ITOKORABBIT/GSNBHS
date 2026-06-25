@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活動公佈欄 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+
+:root{
+  --bg:#EFF8F2; --card:#FFF; --border:#BDD9CA; --divider:#D0E8DA;
+  --lbl:#4E7260; --val:#1A3028; --muted:#86B09E; --heading:#112620;
+  --primary:#5B9B7B; --primary-light:#E6F1EA; --primary-dark:#4A8366;
+  --pin:#F5A623; --pin-bg:#FFF8ED;
+  --shadow-sm:0 1px 3px rgba(30,80,55,.07);
+  --shadow-md:0 2px 8px rgba(30,80,55,.09),0 1px 2px rgba(30,80,55,.05);
+  --radius:10px;
+  --font:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+body{font-family:var(--font);background:var(--bg);color:var(--val);font-size:15px;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+.page-header{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:0 16px;height:54px;
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:100;
+}
+.header-icon{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-title{flex:1;font-size:16px;font-weight:700;color:var(--heading)}
+.header-sub{font-size:12px;font-weight:400;color:var(--lbl)}
+
+.list{padding:12px 12px 80px;display:flex;flex-direction:column;gap:10px}
+
+.bull-card{
+  background:var(--card);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  overflow:hidden;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  border-left:4px solid var(--primary);
+  display:flex;align-items:stretch;
+}
+.bull-card.pinned{border-left-color:var(--pin);background:var(--pin-bg)}
+.bull-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+
+.card-thumb{width:88px;flex-shrink:0;overflow:hidden;background:var(--divider)}
+.card-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.bull-card:hover .card-thumb img{transform:scale(1.03)}
+
+.card-body{padding:13px 14px 14px;flex:1;min-width:0}
+.card-meta{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+.pin-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:999px;
+  font-size:11px;font-weight:700;
+  background:var(--pin);color:#fff;
+}
+.date-lbl{font-size:12px;color:var(--muted)}
+.card-title{font-size:15px;font-weight:700;color:var(--heading);line-height:1.4;margin-bottom:6px}
+.card-preview{font-size:13px;color:var(--lbl);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Modal */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(17,38,32,.38);z-index:200;
+  align-items:center;justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(5px);
+}
+.modal-backdrop.open{display:flex}
+.modal{
+  width:min(100%,560px);max-height:88vh;
+  background:var(--card);border-radius:18px;
+  display:flex;flex-direction:column;
+  box-shadow:0 24px 60px rgba(17,38,32,.18);
+  animation:popIn .2s ease;
+}
+@keyframes popIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{padding:16px 16px 14px;border-bottom:1px solid var(--divider);display:flex;align-items:center;gap:10px}
+.modal-close{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.modal-close:hover{background:var(--divider)}
+.modal-title{flex:1;font-size:16px;font-weight:700;color:var(--heading);line-height:1.4}
+.modal-scroll{overflow-y:auto;flex:1}
+.modal-body{padding:16px 16px 8px}
+.modal-gallery{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:0 16px 20px;
+}
+.modal-gallery img{
+  width:100%;
+  height:auto;
+  border-radius:10px;
+  cursor:zoom-in;
+  display:block;
+}
+.modal-date{font-size:12px;color:var(--muted);margin-bottom:12px}
+.modal-content{font-size:15px;color:var(--val);line-height:1.85;word-break:break-word}
+.modal-content h2,.modal-content h3{margin:0 0 .7em;color:var(--heading)}
+.modal-content p{margin:0 0 1em}
+.modal-content ul,.modal-content ol{margin:0 0 1em;padding-left:1.4em}
+.modal-content blockquote{margin:0 0 1em;padding-left:12px;border-left:3px solid var(--divider);color:var(--lbl)}
+.modal-content a{color:var(--primary-dark)}
+
+/* Empty */
+.empty{text-align:center;padding:64px 24px;color:var(--muted)}
+.empty svg{margin:0 auto 16px;opacity:.35}
+.empty p{font-size:14px}
+
+/* Skeleton */
+.skel-list{padding:12px 12px;display:flex;flex-direction:column;gap:10px}
+.skel-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:4px solid var(--divider);padding:14px;overflow:hidden}
+.skel-line{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--divider) 25%,#c5e5d5 50%,var(--divider) 75%);background-size:300% 100%;animation:shimmer 1.5s infinite;margin-bottom:10px}
+.skel-line.short{width:40%}
+.skel-line.title{height:15px;width:75%;margin-bottom:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.pin-icon{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.cate-header{
+  padding:14px 4px 6px;
+  font-size:13px;font-weight:700;color:var(--lbl);letter-spacing:.03em;
+}
+.cate-header:first-child{padding-top:4px}
+.cate-badge{
+  display:inline-flex;align-items:center;
+  padding:2px 8px;border-radius:999px;
+  font-size:11px;font-weight:700;
+}
+.cate-emergency{background:#fee2e2;color:#b91c1c}
+.cate-policy{background:#dbeafe;color:#1d4ed8}
+.cate-activity{background:var(--primary-light);color:var(--primary-dark)}
+
+/* ── 瀏覽統計 ── */
+.stats-row{
+  padding:6px 16px 4px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--lbl);
+  border-bottom:1px solid var(--divider);
+  background:var(--card);
+}
+.stats-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 11px;border-radius:999px;border:none;
+  background:var(--primary-light);font-size:12px;font-weight:700;
+  color:var(--primary-dark);cursor:pointer;transition:background .15s;
+}
+.stats-btn:hover{background:var(--divider)}
+.vc-badge{display:inline-flex;align-items:center;gap:2px;font-size:11px;color:var(--muted);margin-top:4px}
+.vm-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(17,38,32,.38);z-index:300;
+  align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(5px);
+}
+.vm-backdrop.open{display:flex}
+.vm-box{
+  background:#fff;border-radius:16px;
+  width:min(100%,360px);max-height:80vh;overflow:auto;
+  box-shadow:0 12px 40px rgba(17,38,32,.18);
+}
+.vm-head{
+  padding:16px 16px 12px;border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.vm-title{font-size:15px;font-weight:700;color:var(--heading)}
+.vm-close{
+  width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--muted);transition:background .15s;
+}
+.vm-close:hover{background:var(--divider)}
+.vm-body{padding:10px 16px 16px}
+.vm-empty{text-align:center;color:var(--muted);padding:24px 0;font-size:13px}
+.rank-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--divider);
+}
+.rank-row:last-child{border-bottom:none}
+.rank-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:11px;font-weight:700;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.rank-num.r1{background:#e9a21b}
+.rank-num.r2{background:#8a8a8a}
+.rank-num.r3{background:#a06432}
+.rank-name{flex:1;font-size:13px;color:var(--val);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-cnt{font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:2px}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="header-icon">
+    <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+      <rect x="9" y="3" width="6" height="4" rx="1"/>
+      <path d="M9 12h6M9 16h4"/>
+    </svg>
+  </div>
+  <div>
+    <div class="header-title">公佈欄</div>
+    <div class="header-sub" id="villageLabel"></div>
+  </div>
+</header>
+
+<div class="stats-row" id="statsRow" style="display:none">
+  <span style="display:inline-flex;align-items:center;gap:4px">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+    <span id="pageViewCount">–</span> 次瀏覽
+  </span>
+  <button class="stats-btn" onclick="openVmModal()">🔥 熱門排行</button>
+</div>
+<div class="vm-backdrop" id="vmBackdrop" onclick="closeVmModal(event)">
+  <div class="vm-box">
+    <div class="vm-head">
+      <div class="vm-title">🔥 最多點閱 TOP 5</div>
+      <button class="vm-close" onclick="closeVmModalDirect()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="vm-body" id="vmBody"></div>
+  </div>
+</div>
+
+<div id="loadingEl" class="skel-list">
+  <div class="skel-card"><div class="skel-line short"></div><div class="skel-line title"></div><div class="skel-line"></div></div>
+  <div class="skel-card"><div class="skel-line short"></div><div class="skel-line title"></div><div class="skel-line"></div></div>
+  <div class="skel-card"><div class="skel-line short"></div><div class="skel-line title"></div><div class="skel-line"></div></div>
+</div>
+<div id="listEl" class="list" style="display:none"></div>
+<div id="emptyEl" class="empty" style="display:none">
+  <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+    <rect x="9" y="3" width="6" height="4" rx="1"/>
+  </svg>
+  <p>目前尚無公告</p>
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModalDirect()" aria-label="關閉">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="modal-title" id="modalTitle"></div>
+    </div>
+    <div class="modal-scroll">
+      <div class="modal-body">
+        <div class="modal-date" id="modalDate"></div>
+        <div class="modal-content" id="modalContent"></div>
+      </div>
+      <div class="modal-gallery" id="modalGallery" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script>
+document.getElementById('villageLabel').textContent = CONFIG.VILLAGE_NAME;
+
+const PIN_SVG = '<svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a5 5 0 0 1 5 5c0 4-5 11-5 11S7 11 7 7a5 5 0 0 1 5-5z"/><circle cx="12" cy="7" r="2"/></svg>';
+
+let _bulletins = [];
+let vcData = {};
+let vcNamesMap = {};
+const EYE_SVG = '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+function fmtNum(n) {
+  return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function apiPost(action, extra) {
+  const payload = Object.assign({ action: action }, extra || {});
+  return fetch(CONFIG.BULLETIN_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+}
+
+function loadViewStats() {
+  apiPost('getViewStats', { page: 'bulletin' })
+    .then(function(json) {
+      if (!json.success) return;
+      vcData = json.cardCounts || {};
+      document.getElementById('statsRow').style.display = 'flex';
+      document.getElementById('pageViewCount').textContent = fmtNum(json.pageCount);
+      Object.keys(vcData).forEach(function(id) {
+        const el = document.getElementById('vc-' + id);
+        if (el) el.innerHTML = EYE_SVG + ' ' + vcData[id];
+      });
+    })
+    .catch(function() {});
+}
+
+function recordCardView(id) {
+  apiPost('recordCardView', { page: 'bulletin', itemId: id }).catch(function() {});
+}
+
+function openVmModal() {
+  const entries = Object.keys(vcData).map(id => ({
+    id, name: vcNamesMap[id] || id, count: vcData[id]
+  }));
+  entries.sort((a, b) => b.count - a.count);
+  const top5 = entries.slice(0, 5);
+  const cls = ['r1', 'r2', 'r3', '', ''];
+  const html = top5.length
+    ? top5.map((item, i) =>
+        '<div class="rank-row">' +
+        '<div class="rank-num ' + (cls[i] || '') + '">' + (i + 1) + '</div>' +
+        '<div class="rank-name">' + esc(item.name) + '</div>' +
+        '<div class="rank-cnt">' + EYE_SVG + ' ' + fmtNum(item.count) + '</div>' +
+        '</div>'
+      ).join('')
+    : '<div class="vm-empty">尚無點閱資料</div>';
+  document.getElementById('vmBody').innerHTML = html;
+  document.getElementById('vmBackdrop').classList.add('open');
+}
+
+function closeVmModal(e) {
+  if (e.target === document.getElementById('vmBackdrop')) closeVmModalDirect();
+}
+function closeVmModalDirect() {
+  document.getElementById('vmBackdrop').classList.remove('open');
+}
+
+function splitImageUrls(value) {
+  return String(value || '')
+    .split(/\r?\n|,/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function stripHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').trim();
+}
+
+function sanitizeHtml(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html || '';
+  const allowed = new Set(['P','BR','STRONG','B','EM','I','U','A','UL','OL','LI','H2','H3','BLOCKQUOTE']);
+  const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT, null);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    if (!allowed.has(node.tagName)) {
+      const frag = document.createDocumentFragment();
+      while (node.firstChild) frag.appendChild(node.firstChild);
+      node.parentNode.replaceChild(frag, node);
+      return;
+    }
+    Array.from(node.attributes).forEach(attr => {
+      if (node.tagName === 'A' && attr.name === 'href') {
+        const href = attr.value || '';
+        if (!/^https?:|^mailto:|^tel:/i.test(href)) node.removeAttribute('href');
+      } else {
+        node.removeAttribute(attr.name);
+      }
+    });
+    if (node.tagName === 'A') {
+      node.setAttribute('target', '_blank');
+      node.setAttribute('rel', 'noopener');
+    }
+  });
+  return template.innerHTML;
+}
+
+function fmtDate(s) {
+  if (!s) return '';
+  return s.replace('T', ' ').slice(0, 16);
+}
+
+async function load() {
+  try {
+    const r = await fetch(CONFIG.BULLETIN_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getPublicBulletins' }),
+    });
+    const d = await r.json();
+    document.getElementById('loadingEl').style.display = 'none';
+    if (!d.success || !d.bulletins || d.bulletins.length === 0) {
+      document.getElementById('emptyEl').style.display = 'block';
+      return;
+    }
+    _bulletins = d.bulletins;
+    _bulletins.forEach(b => { vcNamesMap[b.bulletinId] = b.title || b.bulletinId; });
+    render(_bulletins);
+    loadViewStats();
+  } catch (e) {
+    document.getElementById('loadingEl').innerHTML =
+      '<div class="empty"><p>載入失敗，請重新整理頁面</p></div>';
+  }
+}
+
+function catBadgeClass(cate) {
+  if (cate === '緊急通告') return 'cate-emergency';
+  if (cate === '政策宣導') return 'cate-policy';
+  return 'cate-activity';
+}
+function catHeaderLabel(cate) {
+  if (cate === '緊急通告') return '🚨 緊急通告';
+  if (cate === '政策宣導') return '📋 政策宣導';
+  return '🎪 里民活動';
+}
+
+function render(list) {
+  // Client-side sort to ensure correct category order
+  var catW = { '緊急通告': 1, '政策宣導': 2, '里民活動': 3 };
+  list = list.slice().sort(function(a, b) {
+    var wa = catW[a.category] || 3, wb = catW[b.category] || 3;
+    if (wa !== wb) return wa - wb;
+    var ha = (a.sortOrder || 0) > 0, hb = (b.sortOrder || 0) > 0;
+    if (ha !== hb) return ha ? 1 : -1;
+    if (!ha) return (b.createdAt || '').localeCompare(a.createdAt || '');
+    return (a.sortOrder || 0) - (b.sortOrder || 0);
+  });
+  _bulletins = list;
+
+  const el = document.getElementById('listEl');
+  el.style.display = 'flex';
+  el.innerHTML = '';
+  let lastCate = null;
+  list.forEach(function(b, idx) {
+    const cate = b.category || '里民活動';
+    if (cate !== lastCate) {
+      const header = document.createElement('div');
+      header.className = 'cate-header';
+      header.textContent = catHeaderLabel(cate);
+      el.appendChild(header);
+      lastCate = cate;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'bull-card' + (b.pinned ? ' pinned' : '');
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', b.title);
+    card.addEventListener('click', function() { openModal(idx); });
+    card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') openModal(idx); });
+
+    const images = splitImageUrls(b.imageUrl);
+    let html = '<div class="card-body"><div class="card-meta">';
+    if (b.pinned) html += '<span class="pin-badge">' + PIN_SVG + ' 置頂</span>';
+    html += '<span class="cate-badge ' + catBadgeClass(cate) + '">' + esc(cate) + '</span>';
+    html += '<span class="date-lbl">' + esc(fmtDate(b.createdAt)) + '</span>';
+    html += '</div><div class="card-title">' + esc(b.title) + '</div>';
+    html += '<div class="card-preview">' + esc(stripHtml(b.content)) + '</div>';
+    html += '<span class="vc-badge" id="vc-' + esc(b.bulletinId) + '">' + EYE_SVG + ' –</span>';
+    html += '</div>';
+    if (images.length) {
+      html += '<div class="card-thumb"><img src="' + esc(images[0]) + '" alt="" loading="lazy"></div>';
+    }
+    card.innerHTML = html;
+    el.appendChild(card);
+  });
+}
+
+function openModal(idx) {
+  const b = _bulletins[idx];
+  if (!b) return;
+  recordCardView(b.bulletinId);
+  vcData[b.bulletinId] = (vcData[b.bulletinId] || 0) + 1;
+  const badge = document.getElementById('vc-' + b.bulletinId);
+  if (badge) badge.innerHTML = EYE_SVG + ' ' + vcData[b.bulletinId];
+  const images = splitImageUrls(b.imageUrl);
+  document.getElementById('modalTitle').textContent   = b.title;
+  document.getElementById('modalDate').textContent    = fmtDate(b.createdAt);
+  const contentHtml = (b.content || '')
+    .replace(/<div>/gi, '<p>')
+    .replace(/<\/div>/gi, '</p>')
+    .replace(/\n/g, '<br>');
+  document.getElementById('modalContent').innerHTML = sanitizeHtml(contentHtml);
+  const gallery = document.getElementById('modalGallery');
+  if (images.length) {
+    gallery.innerHTML = images.map(url => '<img src="' + esc(url) + '" alt="" loading="lazy">').join('');
+    gallery.style.display = 'grid';
+  } else {
+    gallery.innerHTML = '';
+    gallery.style.display = 'none';
+  }
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.querySelector('.modal-close').focus();
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModalDirect();
+});
+
+load();
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+╔══════════════════════════════════════════════════════════════╗
+║        里民小幫手 模板操作說明（現行版 2026-04-22）         ║
+╚══════════════════════════════════════════════════════════════╝
+
+【這個模板現在是做什麼用？】
+這份模板已改成以「E:\MY PROJECT\和平里小幫手」現行版本為基礎。
+用途不是重新開發，而是：
+
+1. 複製一份給新里別使用
+2. 用「串接精靈.html」蒐集新里別所需資料
+3. 產出最新版本需要的設定檔
+4. 依照這份說明，完成 GitHub / Google / LINE / Make 的串接
+
+
+════════════════════════════════════════
+一、先知道目前系統架構
+════════════════════════════════════════
+
+【目前正式版的核心架構】
+1. GitHub Pages
+   放所有前台 / 後台 HTML、JS、圖片
+
+2. Google Apps Script
+   單一後端 API
+   目前一支 script 同時處理：
+   - 里民通報 submitReport
+   - 特約商店 submitStore / uploadStorePhoto
+   - Google 登入 login / refreshSession
+   - 案件、商店、公告、管理員資料讀寫
+
+3. Google Sheet
+   當作資料庫
+   目前至少需要 4 個工作表：
+   - 案件清單
+   - 商店清單
+   - 管理員名單
+   - 公佈欄
+
+4. Google Drive
+   當作照片空間
+   目前至少需要 3 個照片資料夾：
+   - Photos/NBH
+   - Photos/STOR
+   - Photos/BULLETIN
+
+5. Make + LINE 官方帳號
+   目前正式版不是把 LINE Token 寫進網站前端，
+   而是由 Apps Script 在新增案件 / 新商店申請時，呼叫 Make Webhook，
+   再由 Make 串 LINE 通知。
+
+
+════════════════════════════════════════
+二、目前版本有哪些檔案最重要
+════════════════════════════════════════
+
+【網站前端設定】
+1. config.js
+   給案件 / 公告 / admin 共用
+
+2. storeconfig.js
+   給特約商店相關頁面用
+   目前 store.html 上傳照片會用到 API_KEY
+
+【後端】
+3. apps-script.gs
+   單一合併後端
+   這份模板裡的 apps-script.gs 已經換成現行架構占位版
+   不再是舊版後端
+
+【頁面】
+4. index.html
+5. admin.html
+6. list.html / detail.html / openlist.html / opendetail.html / report.html
+7. store.html / storelist.html / storedetail.html / storeopenlist.html / storeopendetail.html
+8. bulletin.html / bulletinlist.html
+
+【資產】
+9. assets/no-photo.svg
+10. web_logo.png / Q版人像.png / branding-footer.js
+
+
+════════════════════════════════════════
+三、正確建立新里別的順序
+════════════════════════════════════════
+
+Step 1：複製模板資料夾
+1. 複製「里民小幫手 (複製用，勿刪勿更動!!)」
+2. 改名成新專案資料夾
+3. 再打開裡面的「串接精靈.html」
+
+Step 2：用串接精靈填資料
+1. 填基本資訊
+2. 填 GitHub Repo 與 Pages 位址
+3. 填 Google Sheet ID 與 3 個 Drive 照片資料夾 ID
+4. 填 Google OAuth Client ID
+5. 填 Apps Script Web App URL
+6. 填 Make Webhook URL
+7. 填 LINE 官方帳號資訊（做紀錄與交接）
+
+Step 3：匯出設定檔
+精靈目前可匯出：
+1. config.json
+2. config.js
+3. storeconfig.js
+4. apps-script-constants.gs
+
+Step 4：處理 Apps Script
+1. 打開本資料夾內建的 apps-script.gs
+2. 找到：
+   // === TEMPLATE CONSTANTS START ===
+   到
+   // === TEMPLATE CONSTANTS END ===
+3. 用精靈匯出的 apps-script-constants.gs 覆蓋那整段
+4. 將整份 apps-script.gs 貼到 Google Apps Script
+5. 部署成 Web App
+
+Step 5：初始化 Google Sheet
+部署好 Apps Script 後，第一次請在 Apps Script 編輯器手動執行：
+1. setupPinColumns
+2. setupBulletinSheet
+
+用途：
+1. setupPinColumns
+   幫案件清單補 AD 欄「置頂順序」
+   幫商店清單補 AE 欄「方案類型」、AF 欄「置頂順序」
+
+2. setupBulletinSheet
+   建立「公佈欄」工作表
+
+Step 6：把網站檔案上到 GitHub
+1. 以「和平里小幫手」為基底複製網站檔
+2. 用新的 config.js / storeconfig.js 覆蓋
+3. push 到新 Repo
+4. 等 GitHub Pages 生效
+
+
+════════════════════════════════════════
+四、Google Drive 建議結構
+════════════════════════════════════════
+
+建議在 Google Drive 建立如下結構：
+
+[新里別里民小幫手]
+├─ [Photos]
+│  ├─ [NBH]
+│  ├─ [STOR]
+│  └─ [BULLETIN]
+└─ [Google Sheet 放在同層即可]
+
+說明：
+1. NBH
+   里民通報照片、里長回覆照片
+
+2. STOR
+   特約商店申請照片
+
+3. BULLETIN
+   公佈欄圖片
+
+分享建議：
+1. Photos/NBH、STOR、BULLETIN
+   可讓 Apps Script 建立檔案
+
+2. Google Sheet
+   至少讓系統使用者可編輯
+
+
+════════════════════════════════════════
+五、Google Sheet 工作表與欄位
+════════════════════════════════════════
+
+【1. 案件清單】
+需要 30 欄：
+A 案件ID
+B 通報時間
+C 狀態
+D 類別
+E 姓名
+F 電話
+G LineID
+H 主旨
+I 說明
+J 地址
+K 地圖網址
+L 1999案件編號
+M 照片1
+N 照片2
+O 照片3
+P 回覆時間
+Q 最後更新
+R 回覆內容
+S 回覆照片1
+T 回覆照片2
+U 回覆照片3
+V 處理人
+W 備註
+X 是否公開
+Y 公開標題
+Z 公開類別
+AA 公開地點
+AB 公開摘要
+AC 回覆網址
+AD 置頂順序
+
+【2. 商店清單】
+需要 32 欄：
+A 商店ID
+B 申請時間
+C 狀態
+D 商家類別
+E 申請人姓名
+F 申請人電話
+G 申請人LineID
+H 店家名稱
+I 店家電話
+J 統一編號
+K 經營內容
+L 優惠方案
+M 營業時間
+N 店家地址
+O 地圖網址
+P 照片1
+Q 照片2
+R 照片3
+S 管理員備註
+T 最後更新
+U 審核人
+V 公開店名
+W 公開類別
+X 公開電話
+Y 公開地址
+Z 公開地圖
+AA 公開經營內容
+AB 公開優惠
+AC 公開營業時間
+AD 公開統一編號
+AE 方案類型
+AF 置頂順序
+
+【3. 管理員名單】
+目前正式版用的是新版 4 欄：
+A 顯示名稱
+B 角色
+C 啟用
+D Email
+
+重要：
+1. 啟用欄請填 TRUE / FALSE
+2. 若要使用 admin.html 內的管理員名單功能，
+   至少要有 1 位超級管理員
+3. 角色建議：
+   - 超級管理員
+   - 管理員
+
+因為目前 Apps Script 的 getAdmins / addAdmin / updateAdmin / deleteAdmin
+已限制為 super admin 才能操作
+
+【4. 公佈欄】
+8 欄：
+A 公告ID
+B 建立時間
+C 標題
+D 內容
+E 圖片網址
+F 置頂
+G 狀態
+H 建立者
+
+
+════════════════════════════════════════
+六、LINE 官方帳號怎麼設定
+════════════════════════════════════════
+
+目前版本的 LINE 串接重點是「通知流程」，不是把 LINE 金鑰寫進前端。
+
+【你需要準備的東西】
+1. LINE 官方帳號
+2. LINE Developers Provider
+3. Messaging API Channel
+4. Channel access token
+5. 如要做進階驗證，也可一併保存 Channel secret
+
+【建議流程】
+1. 到 LINE Official Account Manager 建立官方帳號
+2. 到 LINE Developers 建立 Provider
+3. 在該 Provider 下建立 Messaging API Channel
+4. 取得：
+   - Channel ID
+   - Channel secret
+   - Channel access token
+5. 將官方帳號加入里內工作群組
+6. 讓 Make 接 Webhook 事件或通知流程
+
+【目前這份專案實際會用到什麼？】
+1. 專案程式碼本身
+   目前不直接把 LINE Token 寫入網站頁面
+
+2. Make / 自動化流程
+   會用到 LINE 官方帳號的能力做通知
+
+3. 串接精靈
+   會幫你把 LINE 欄位紀錄在 config.json
+   用途是交接與日後維護
+
+【群組 ID】
+line_group_id 目前在正式版網站程式沒有直接使用，
+但建議一樣記錄，之後若要擴充群組通知或聊天機器人會很有用。
+
+
+════════════════════════════════════════
+七、Make Webhook 目前要怎麼接
+════════════════════════════════════════
+
+目前版本與舊版最大的差別：
+
+【舊版】
+網站或前端頁面直接依賴比較多外部 webhook 設定
+
+【現行版】
+由 Apps Script 統一處理送件，
+再由 Apps Script 呼叫：
+1. REPORT_WEBHOOK_URL
+   新增里民通報時通知
+
+2. STORE_NOTIFY_WEBHOOK_URL
+   新增特約商店申請時通知
+
+所以現在不需要舊模板裡的：
+1. reurl.cc API Key
+2. datastore_id
+3. webhook_a / webhook_b / webhook_stor 那種舊命名
+
+目前只保留兩條通知用 webhook 即可。
+
+
+════════════════════════════════════════
+八、Google OAuth Client ID 怎麼拿
+════════════════════════════════════════
+
+admin.html / bulletinlist.html / storelist.html 等後台頁面，
+目前用 Google Identity Services 登入。
+
+流程：
+1. 到 Google Cloud Console 建專案
+2. 啟用 Google Identity / OAuth 相關設定
+3. 建立 OAuth Client ID
+4. 類型選 Web application
+5. Authorized JavaScript origins 至少加入：
+   - GitHub Pages 網址
+   - 若有自訂網域也一起加
+
+例如：
+https://你的帳號.github.io
+或
+https://你的帳號.github.io/你的repo
+
+6. 取得 Client ID，填入精靈
+
+
+════════════════════════════════════════
+九、精靈會幫你產出哪些檔案
+════════════════════════════════════════
+
+【1. config.json】
+總設定總表，交接最重要
+
+【2. config.js】
+案件 / 公告 / admin 頁面使用
+
+【3. storeconfig.js】
+商店相關頁面使用
+
+【4. apps-script-constants.gs】
+拿來覆蓋 apps-script.gs 裡的常數區塊
+
+
+════════════════════════════════════════
+十、現在不再需要的舊設定
+════════════════════════════════════════
+
+下面這些是舊版模板常見欄位，但現行架構已不是必填：
+1. reurl.cc API Key
+2. datastore_id
+3. 舊版分散式 webhook 命名
+4. 舊版獨立商店後端思維
+
+目前請以：
+1. 單一 Apps Script
+2. 單一 Google Sheet
+3. 三個照片資料夾
+4. 兩個 Make 通知 webhook
+為主
+
+
+════════════════════════════════════════
+十一、重要提醒
+════════════════════════════════════════
+
+1. 這個模板資料夾不要直接拿來當正式案子改
+   一定要先複製再操作
+
+2. 所有檔案請維持 UTF-8
+   尤其是 HTML / JS / GS / TXT
+
+3. 若 GitHub Pages 的 repo 名稱不同
+   記得 BASE_URL 一定要一起更新
+
+4. 若 Apps Script 有改內容
+   要到「管理部署作業」更新版本，不是只存檔就會生效
+
+5. 新專案第一次上線時，
+   務必測試：
+   - 里民通報
+   - 商店申請
+   - Google 登入
+   - 公告顯示
+   - 案件 / 商店 / 公告列表是否能正常讀取
+
+
+══════════════════════════════════════════════════════════════
+模板基底：E:\MY PROJECT\和平里小幫手
+此說明已依現行版本更新
+══════════════════════════════════════════════════════════════

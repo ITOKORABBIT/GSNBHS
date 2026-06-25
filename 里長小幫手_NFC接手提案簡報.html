@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>舊社里里長小幫手｜官方 LINE 接手與 NFC 宣傳入口提案</title>
+  <style>
+    :root {
+      --ink: #17201d;
+      --muted: #5f6d66;
+      --paper: #f7f3ea;
+      --soft: #e7dece;
+      --line: rgba(23, 32, 29, .16);
+      --accent: #19745f;
+      --accent-dark: #0f4f40;
+      --warm: #f2b84b;
+      --white: #fffdf7;
+      --shadow: 0 28px 70px rgba(40, 45, 36, .18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100svh;
+      position: relative;
+      background:
+        radial-gradient(circle at 82% 8%, rgba(242, 184, 75, .22), transparent 28%),
+        linear-gradient(135deg, #faf7ef 0%, #efe6d8 100%);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: minmax(58px, 8vw) minmax(0, 1fr) minmax(58px, 8vw);
+      grid-template-rows: 64px minmax(0, 1fr) 54px;
+      opacity: 0;
+      transform: translateX(34px) scale(.985);
+      pointer-events: none;
+      transition: opacity .42s ease, transform .42s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .content {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: center;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .brand {
+      position: absolute;
+      top: 25px;
+      left: min(8vw, 96px);
+      right: min(8vw, 96px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      font-size: 14px;
+      letter-spacing: .06em;
+      color: var(--muted);
+      z-index: 4;
+    }
+
+    .brand b {
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+
+    .progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 5px;
+      background: rgba(23, 32, 29, .08);
+      z-index: 6;
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: var(--accent);
+      transition: width .25s ease;
+    }
+
+    .nav {
+      position: absolute;
+      right: min(8vw, 96px);
+      bottom: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 8;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid rgba(23, 32, 29, .18);
+      background: rgba(255, 253, 247, .72);
+      color: var(--ink);
+      min-width: 42px;
+      height: 38px;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      transition: background .18s ease, transform .18s ease;
+    }
+
+    button:hover {
+      background: var(--white);
+      transform: translateY(-1px);
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: .1em;
+      font-size: clamp(13px, 1.6vw, 16px);
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      line-height: 1.05;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-width: 900px;
+      font-size: clamp(50px, 8vw, 116px);
+      font-weight: 900;
+    }
+
+    h2 {
+      max-width: 960px;
+      font-size: clamp(38px, 5.4vw, 78px);
+      font-weight: 900;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: clamp(18px, 2vw, 25px);
+    }
+
+    .lead {
+      max-width: 720px;
+      margin-top: 26px;
+      color: #3d4943;
+      font-size: clamp(20px, 2.2vw, 29px);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: clamp(30px, 6vw, 78px);
+      align-items: center;
+    }
+
+    .phone-scene {
+      min-height: 560px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .phone {
+      width: min(330px, 72vw);
+      aspect-ratio: 9 / 18.5;
+      border-radius: 38px;
+      background: #101814;
+      padding: 13px;
+      box-shadow: var(--shadow);
+      transform: rotate(4deg);
+    }
+
+    .screen {
+      height: 100%;
+      border-radius: 29px;
+      background: linear-gradient(180deg, #fdfbf4, #e6f0ea);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .rich-menu {
+      position: absolute;
+      inset: auto 16px 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .menu-btn {
+      min-height: 72px;
+      border-radius: 10px;
+      background: var(--white);
+      border: 1px solid rgba(15, 79, 64, .14);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      color: var(--accent-dark);
+      font-weight: 800;
+      box-shadow: 0 10px 20px rgba(23, 32, 29, .07);
+    }
+
+    .menu-btn span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .chat {
+      padding: 26px 18px;
+    }
+
+    .bubble {
+      width: 78%;
+      padding: 12px 14px;
+      border-radius: 16px 16px 16px 4px;
+      background: #dff1e7;
+      color: #24483b;
+      font-size: 14px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .nfc-token {
+      position: absolute;
+      right: 0;
+      bottom: 70px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, #fff8da 0 20%, transparent 21%),
+        conic-gradient(from 0deg, var(--warm), #f8db8a, var(--warm), #d99625, var(--warm));
+      box-shadow: 0 24px 54px rgba(122, 84, 20, .25);
+      display: grid;
+      place-items: center;
+      color: #80520c;
+      font-weight: 900;
+      transform: rotate(-10deg);
+    }
+
+    .nfc-token::after {
+      content: "NFC";
+      width: 92px;
+      height: 92px;
+      border: 2px solid rgba(128, 82, 12, .24);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, .24);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: clamp(30px, 5vw, 74px);
+      align-items: start;
+    }
+
+    .big-number {
+      font-size: clamp(84px, 12vw, 168px);
+      line-height: .85;
+      font-weight: 950;
+      color: var(--accent);
+    }
+
+    .list {
+      display: grid;
+      gap: 18px;
+      margin-top: 26px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 0 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .item strong {
+      display: block;
+      font-size: clamp(20px, 2.1vw, 28px);
+      line-height: 1.35;
+    }
+
+    .item small {
+      display: block;
+      color: var(--muted);
+      font-size: clamp(15px, 1.6vw, 18px);
+      line-height: 1.65;
+      margin-top: 4px;
+    }
+
+    .dot {
+      width: 24px;
+      height: 24px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: inset 0 0 0 7px #cfe2d7;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 48px;
+    }
+
+    .step {
+      min-height: 230px;
+      border-top: 3px solid var(--accent);
+      padding-top: 22px;
+    }
+
+    .step em {
+      display: block;
+      color: var(--accent);
+      font-style: normal;
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .step strong {
+      display: block;
+      font-size: clamp(21px, 2vw, 30px);
+      line-height: 1.28;
+      margin-bottom: 12px;
+    }
+
+    .step p {
+      font-size: clamp(15px, 1.45vw, 18px);
+      line-height: 1.65;
+    }
+
+    .costs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 42px;
+    }
+
+    .cost {
+      background: rgba(255, 253, 247, .62);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 26px;
+    }
+
+    .cost strong {
+      display: block;
+      font-size: clamp(22px, 2.3vw, 34px);
+      line-height: 1.2;
+    }
+
+    .cost b {
+      display: block;
+      color: var(--accent);
+      font-size: clamp(26px, 3.2vw, 44px);
+      margin: 18px 0 8px;
+    }
+
+    .cost small {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px 34px;
+      margin-top: 38px;
+    }
+
+    .use {
+      border-left: 4px solid var(--accent);
+      padding-left: 18px;
+    }
+
+    .use strong {
+      display: block;
+      font-size: clamp(21px, 2vw, 28px);
+      margin-bottom: 7px;
+    }
+
+    .use p {
+      font-size: clamp(15px, 1.55vw, 18px);
+      line-height: 1.65;
+    }
+
+    .quote {
+      max-width: 940px;
+      font-size: clamp(34px, 5vw, 72px);
+      line-height: 1.15;
+      font-weight: 900;
+      text-wrap: balance;
+    }
+
+    .quote span {
+      color: var(--accent);
+    }
+
+    .footer-note {
+      position: absolute;
+      left: min(8vw, 96px);
+      bottom: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      z-index: 5;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .badge {
+      border: 1px solid rgba(25, 116, 95, .22);
+      color: var(--accent-dark);
+      background: rgba(255, 253, 247, .65);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .final {
+      display: grid;
+      grid-template-columns: 1fr .72fr;
+      gap: 58px;
+      align-items: center;
+    }
+
+    .action-box {
+      background: var(--accent-dark);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+    }
+
+    .action-box h3 {
+      margin: 0 0 18px;
+      font-size: 32px;
+      line-height: 1.25;
+    }
+
+    .action-box p,
+    .action-box li {
+      color: rgba(255, 253, 247, .82);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .action-box ul {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        overflow: auto;
+      }
+
+      .deck {
+        min-height: 100svh;
+        height: auto;
+      }
+
+      .slide {
+        position: relative;
+        display: none;
+        min-height: 100svh;
+        grid-template-columns: 24px 1fr 24px;
+        grid-template-rows: 72px auto 58px;
+        padding-bottom: 40px;
+      }
+
+      .slide.active {
+        display: grid;
+      }
+
+      .brand {
+        left: 24px;
+        right: 24px;
+        font-size: 12px;
+      }
+
+      .hero-grid,
+      .two-col,
+      .final {
+        grid-template-columns: 1fr;
+      }
+
+      .phone-scene {
+        min-height: 390px;
+      }
+
+      .phone {
+        width: min(245px, 68vw);
+      }
+
+      .nfc-token {
+        width: 120px;
+        height: 120px;
+        right: 20px;
+      }
+
+      .nfc-token::after {
+        width: 66px;
+        height: 66px;
+      }
+
+      .flow,
+      .costs,
+      .matrix {
+        grid-template-columns: 1fr;
+      }
+
+      .step {
+        min-height: 0;
+      }
+
+      .nav {
+        right: 24px;
+      }
+
+      .footer-note {
+        left: 24px;
+        right: 128px;
+      }
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: white;
+      }
+
+      .deck {
+        height: auto;
+        background: white;
+      }
+
+      .slide {
+        position: relative;
+        opacity: 1;
+        transform: none;
+        page-break-after: always;
+        pointer-events: auto;
+        height: 100vh;
+      }
+
+      .nav,
+      .progress {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-label="舊社里里長小幫手提案簡報">
+    <div class="brand">
+      <span><b>舊社里里長小幫手</b> / 官方 LINE 接手提案</span>
+      <span id="pageLabel">01 / 09</span>
+    </div>
+
+    <section class="slide active">
+      <div class="content hero-grid">
+        <div>
+          <div class="kicker">LINE 接手 + NFC 宣傳入口</div>
+          <h1>讓里民找得到、用得懂、留得住</h1>
+          <p class="lead">先把官方 LINE 的功能與資料流盤點清楚，再把服務整理成一個入口；NFC 卡片與鑰匙圈負責把入口帶到每一位里民手上。</p>
+          <div class="badge-row">
+            <span class="badge">官方 LINE</span>
+            <span class="badge">圖文選單</span>
+            <span class="badge">活動報名</span>
+            <span class="badge">里民通報</span>
+            <span class="badge">NFC 宣傳卡</span>
+          </div>
+        </div>
+        <div class="phone-scene" aria-hidden="true">
+          <div class="phone">
+            <div class="screen">
+              <div class="chat">
+                <div class="bubble">您好，這裡是舊社里官方 LINE。</div>
+                <div class="bubble">請選擇您需要的服務。</div>
+              </div>
+              <div class="rich-menu">
+                <div class="menu-btn">活動報名<span>一鍵查詢與確認</span></div>
+                <div class="menu-btn">里民通報<span>拍照、定位、回覆</span></div>
+                <div class="menu-btn">特約商店<span>美食與優惠地圖</span></div>
+                <div class="menu-btn">加入社群<span>LINE / FB / IG</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="nfc-token"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content two-col">
+        <div>
+          <div class="kicker">為什麼要先接手</div>
+          <h2>現在的重點不是重做，是先把控制權拿回來</h2>
+          <p class="lead">官方 LINE 已經是里民最容易接觸到的服務入口。接手時要確認每個按鈕導去哪裡、資料送給誰、後續誰能處理。</p>
+        </div>
+        <div class="list">
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>確認現有圖文選單</strong><small>逐一盤點按鈕、網址、關鍵字、LIFF、表單與回覆訊息。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>確認資料歸屬</strong><small>姓名、電話、陳情內容、照片上傳等資料，不應留在不明帳號或前任廠商手上。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>確認可持續維護</strong><small>活動、商店、公告、報名名單，要能由里辦或授權人員自己更新。</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">第一階段</div>
+        <h2>官方 LINE 功能盤點表</h2>
+        <p class="lead">先把目前的功能畫成一張清楚的表，里長就能知道哪些能保留、哪些要改、哪些有資料風險。</p>
+        <div class="flow">
+          <div class="step">
+            <em>01</em>
+            <strong>圖文選單截圖</strong>
+            <p>確認每個按鈕區塊、名稱、位置與目前呈現方式。</p>
+          </div>
+          <div class="step">
+            <em>02</em>
+            <strong>實際點擊測試</strong>
+            <p>用使用者角度看回覆、跳轉網頁、表單是否可用。</p>
+          </div>
+          <div class="step">
+            <em>03</em>
+            <strong>後台與權限確認</strong>
+            <p>檢查網址、LINE 後台、Webhook、表單回覆資料歸屬。</p>
+          </div>
+          <div class="step">
+            <em>04</em>
+            <strong>接手清單</strong>
+            <p>列出保留、修正、重建、停用的功能與優先順序。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content two-col">
+        <div>
+          <div class="big-number">4</div>
+          <h2>先接四個最常用服務</h2>
+          <p class="lead">不要一開始塞滿功能。先讓里民最常做的事情變簡單，使用率會比功能數量重要。</p>
+        </div>
+        <div class="list">
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>活動報名與查詢</strong><small>報名、確認、候補、現場報到，減少人工對名單。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>里民通報 / 陳情</strong><small>拍照、描述、聯絡方式、處理狀態，讓案件可追蹤。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>公告與社群入口</strong><small>官方 LINE、LINE 社群、Facebook、Instagram 集中在同一頁。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>特約商店 / 美食地圖</strong><small>把地方店家與里民服務連起來，做出可感受的在地價值。</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">第二階段</div>
+        <h2>NFC 宣傳卡與鑰匙圈：把服務入口帶到現場</h2>
+        <p class="lead">NFC 不直接存個資，只寫入一個可控的入口網址。里民手機碰一下，就能加入官方 LINE、社群、FB、IG 或打開報名與通報。</p>
+        <div class="matrix">
+          <div class="use"><strong>服務處入口牌</strong><p>櫃台放一張「手機靠這裡加入官方 LINE」，長輩不用搜尋帳號。</p></div>
+          <div class="use"><strong>活動現場報到</strong><p>志工拿 NFC 牌或鑰匙圈，里民碰一下打開報到/報名頁。</p></div>
+          <div class="use"><strong>公告欄數位入口</strong><p>公告欄貼 NFC + QR Code，碰一下看最新公告、活動與停水停電資訊。</p></div>
+          <div class="use"><strong>特約商店導流</strong><p>合作店家放 NFC 貼紙，導到優惠、地圖、店家介紹與官方 LINE。</p></div>
+          <div class="use"><strong>里民通報點</strong><p>公園、巷口、常見問題點貼 NFC，碰一下直接開拍照通報。</p></div>
+          <div class="use"><strong>里長電子名片</strong><p>鑰匙圈、名片、活動小卡，都導到同一個舊社里服務入口。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">成本抓法</div>
+        <h2>先小量測試，不急著大量印製</h2>
+        <p class="lead">第一批目標是驗證手機感應、頁面內容、加入 LINE 流程與現場使用方式。確認後再做正式彩印版。</p>
+        <div class="costs">
+          <div class="cost">
+            <strong>測試版</strong>
+            <b>NT$1,000-3,000</b>
+            <small>20-50 個空白 NFC 鑰匙圈或貼紙，用手機寫入，搭配簡易貼紙標示。</small>
+          </div>
+          <div class="cost">
+            <strong>里辦試辦版</strong>
+            <b>NT$3,000-10,000</b>
+            <small>50 個鑰匙圈、200 張 NFC/QR 小卡、20 張貼紙，足夠服務處與活動測試。</small>
+          </div>
+          <div class="cost">
+            <strong>正式推廣版</strong>
+            <b>依數量報價</b>
+            <small>彩印卡片、客製鑰匙圈、抗金屬貼紙，可交由廠商印製，里辦掌握入口網址。</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content two-col">
+        <div>
+          <div class="kicker">執行原則</div>
+          <h2>實體物可以固定，內容必須能更新</h2>
+          <p class="lead">NFC 卡片寫入後最好鎖定，避免被覆寫；但鎖定前要寫的是「舊社里入口頁」，不是單一 LINE 或 FB 連結。</p>
+        </div>
+        <div class="list">
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>卡片只寫入口網址</strong><small>例如 jiusheli.tw/card。之後社群、官方 LINE、活動連結都在網站後台調整。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>NFC + QR Code 一起印</strong><small>有些手機 NFC 沒開或不會感應，QR Code 是必要備援。</small></div>
+          </div>
+          <div class="item">
+            <span class="dot"></span>
+            <div><strong>測試版先不要鎖</strong><small>確認流程沒問題後，正式版再設定唯讀，避免被惡意改寫。</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">里長可以怎麼說</div>
+        <div class="quote">「我們不是只做一張電子名片，而是把<span>里民服務入口</span>整理好，讓大家碰一下就找到里長。」</div>
+        <p class="lead">這句話很重要：NFC 是宣傳工具，真正的價值是官方 LINE 接手、資料可控、服務流程可追蹤。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content final">
+        <div>
+          <div class="kicker">建議下一步</div>
+          <h2>先做盤點，再做入口頁，最後做 NFC 試辦</h2>
+          <p class="lead">一週內可以先完成官方 LINE 現況盤點與試辦入口頁；第二週開始小量 NFC 實測，活動或服務處就能看見效果。</p>
+        </div>
+        <div class="action-box">
+          <h3>提案執行順序</h3>
+          <ul>
+            <li>盤點官方 LINE 圖文選單與現有網址</li>
+            <li>確認表單資料與後台權限</li>
+            <li>整理舊社里服務入口頁</li>
+            <li>製作 NFC/QR 試辦卡與鑰匙圈</li>
+            <li>服務處與活動現場實測後再正式印製</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">左右鍵或按鈕切換｜可用瀏覽器列印另存 PDF</div>
+    <div class="nav" aria-label="簡報控制">
+      <button type="button" id="prevBtn" aria-label="上一頁">‹</button>
+      <button type="button" id="nextBtn" aria-label="下一頁">›</button>
+    </div>
+    <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const pageLabel = document.getElementById("pageLabel");
+    const progressBar = document.getElementById("progressBar");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    let index = 0;
+
+    function showSlide(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("active", slideIndex === index);
+      });
+      pageLabel.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      progressBar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === slides.length - 1;
+    }
+
+    prevBtn.addEventListener("click", () => showSlide(index - 1));
+    nextBtn.addEventListener("click", () => showSlide(index + 1));
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        showSlide(index + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        showSlide(index - 1);
+      }
+      if (event.key === "Home") {
+        showSlide(0);
+      }
+      if (event.key === "End") {
+        showSlide(slides.length - 1);
+      }
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>

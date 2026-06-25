@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活動編輯 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei',sans-serif;background:#f3f0ea;color:#2b231b;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+:root{
+  --card:#fff;--border:#e4d9ce;--muted:#8d7968;--text:#2b231b;--heading:#18120d;
+  --accent:#b95353;--accent-soft:#fff1ef;
+  --blue:#1a73e8;--blue-soft:#e8f0fe;
+  --green:#2f6836;--green-soft:#eaf3eb;
+  --gold:#9b6112;--gold-soft:#fff4df;
+  --gray:#6f645a;--gray-soft:#f2efea;
+  --shadow:0 14px 40px rgba(43,35,27,.08);--radius:18px;
+}
+
+/* ── 登入 ── */
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login-card{width:min(100%,420px);padding:30px 26px;border:1px solid var(--border);border-radius:24px;background:#fff;box-shadow:var(--shadow)}
+.login-badge{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:800;margin-bottom:16px}
+.login-title{font-size:28px;font-weight:800;color:var(--heading);margin-bottom:10px}
+.login-sub{color:var(--muted);line-height:1.7;margin-bottom:22px}
+.login-error{display:none;margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:14px}
+
+/* ── 主頁 ── */
+.page{max-width:800px;margin:0 auto;padding:24px 20px 80px}
+.topbar{position:sticky;top:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;padding:18px 22px;border:1px solid rgba(228,217,206,.8);border-radius:24px;background:radial-gradient(circle at top right,rgba(26,115,232,.06),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,251,247,.96));box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.topbar h1{font-size:22px;font-weight:800}
+.topbar p{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── 按鈕 ── */
+.btn{padding:10px 18px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:14px;transition:transform .18s,box-shadow .18s,background .18s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,35,27,.1)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#1557b0}
+.btn.green-btn{background:var(--green);border-color:var(--green);color:#fff}
+.btn.green-btn:hover{background:#245429}
+.btn.ghost{background:#fbf7f2}
+.btn.danger{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:7px 12px;font-size:12px;border-radius:10px}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* ── 區塊卡片 ── */
+.section{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;box-shadow:var(--shadow)}
+.section-title{font-size:16px;font-weight:800;color:var(--heading);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+
+/* ── 表單元素 ── */
+.form-row{margin-bottom:16px}
+.form-row label{display:block;font-size:13px;font-weight:700;color:var(--gray);margin-bottom:6px}
+.form-row label .req{color:var(--accent);margin-left:2px}
+.form-row input,.form-row textarea,.form-row select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;color:var(--text);background:#fff;transition:border-color .2s}
+.form-row input:focus,.form-row textarea:focus,.form-row select:focus{outline:none;border-color:var(--blue)}
+.form-row textarea{resize:vertical;min-height:80px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toggle-row{display:flex;align-items:center;gap:12px;padding:10px 0}
+.toggle-row label{font-size:14px;font-weight:600}
+.toggle{width:44px;height:24px;border-radius:999px;background:#ddd;border:none;position:relative;transition:.2s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle.on::after{left:23px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.warn-hint{font-size:12px;color:var(--gold);margin-top:4px;display:none}
+
+/* ── 圖片上傳 ── */
+.img-upload-box{border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.img-upload-box:hover{border-color:var(--blue);background:var(--blue-soft)}
+.img-upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:12px;display:none}
+.img-upload-text{font-size:14px;color:var(--muted)}
+.img-upload-text strong{display:block;font-size:28px;margin-bottom:6px}
+#imgUrlDisplay{font-size:11px;color:var(--blue);word-break:break-all;margin-top:6px}
+
+/* ── 問券 Builder ── */
+.questions-list{display:flex;flex-direction:column;gap:12px}
+.q-card{background:#f8f5f0;border:1.5px solid var(--border);border-radius:14px;padding:16px;position:relative}
+.q-card.dragging{opacity:.55;border-color:var(--blue);box-shadow:0 12px 30px rgba(26,115,232,.12)}
+.q-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.q-card-header select{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:13px;font-weight:600}
+.q-num{font-size:12px;font-weight:800;color:var(--blue);background:var(--blue-soft);padding:2px 8px;border-radius:999px}
+.q-drag{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--muted);display:inline-grid;place-items:center;font-size:16px;cursor:grab}
+.q-drag:active{cursor:grabbing}
+.q-remove{margin-left:auto;background:none;border:none;color:var(--muted);font-size:18px;line-height:1;padding:2px 6px;border-radius:6px}
+.q-remove:hover{color:var(--accent);background:var(--accent-soft)}
+.q-label-input{width:100%;min-height:74px;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:10px;background:#fff;resize:vertical;line-height:1.6;white-space:pre-wrap}
+.q-label-input:focus{outline:none;border-color:var(--blue)}
+.options-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.option-row{display:flex;align-items:center;gap:6px}
+.option-input{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
+.option-input:focus{outline:none;border-color:var(--blue)}
+.option-del{background:none;border:none;color:var(--muted);font-size:16px;padding:4px;line-height:1;border-radius:6px}
+.option-del:hover{color:var(--accent)}
+.q-required-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);margin-top:8px}
+.q-required-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}
+.maxlen-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);margin-top:6px}
+.maxlen-input{width:70px;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
+.add-option-btn{font-size:12px;color:var(--blue);background:none;border:none;padding:4px 0;font-weight:700;margin-top:2px}
+.add-option-btn:hover{text-decoration:underline}
+.add-q-btn{border:2px dashed var(--border);background:#faf7f2;border-radius:14px;padding:14px;text-align:center;font-size:14px;font-weight:700;color:var(--muted);width:100%;transition:.2s}
+.add-q-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+
+/* ── 統計（編輯模式） ── */
+.stats-section{display:none}
+.stat-bar-wrap{margin:6px 0}
+.stat-bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
+.stat-bar{height:8px;border-radius:999px;background:#e8e0d8;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:999px;background:var(--blue);transition:width .4s}
+
+/* ── 問券設定 ── */
+.survey-select-wrap{display:flex;flex-direction:column;gap:10px}
+.survey-target-row{display:flex;gap:20px;flex-wrap:wrap}
+.survey-target-row label{display:inline-flex;align-items:center;gap:7px;font-size:14px;cursor:pointer;font-weight:600;color:var(--gray);transition:.15s}
+.survey-target-row label:has(input:checked){color:var(--blue)}
+.survey-target-row input[type=radio]{accent-color:var(--blue);width:16px;height:16px;cursor:pointer}
+.reminder-radio-group{display:flex;flex-direction:column;gap:8px}
+.reminder-radio-group label{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;font-weight:600;color:var(--gray);margin-bottom:0;transition:.15s}
+.reminder-radio-group label:has(input:checked){color:var(--blue)}
+.reminder-radio-group input[type=radio]{width:auto;flex-shrink:0;accent-color:var(--blue);width:16px;height:16px;cursor:pointer}
+.dt-pair{display:flex;gap:8px;}
+.form-row .dt-pair input[type=date]{flex:1;min-width:0;width:auto;}
+.form-row .dt-pair select{width:90px;flex:none;}
+
+/* ── 底部操作欄 ── */
+.action-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;box-shadow:0 -4px 20px rgba(43,35,27,.06);z-index:100}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(30px);padding:11px 18px;border-radius:14px;background:#1e1815;color:#fff;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .action-bar{justify-content:stretch}
+  .action-bar .btn{flex:1;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ── 登入 ── -->
+<div class="login-shell" id="loginShell">
+  <div class="login-card">
+    <div class="login-badge">✏️ 活動編輯</div>
+    <h1 class="login-title">里長後台</h1>
+    <p class="login-sub">請使用 Google 帳號登入。</p>
+      <div id="loginBtnWrap"></div>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── 主畫面 ── -->
+<div class="page" id="mainPage" style="display:none">
+  <div class="topbar">
+    <div>
+      <h1 id="pageTitle">新增活動</h1>
+      <p id="pageSubtitle">填寫活動資訊與問券內容</p>
+    </div>
+    <a href="./eventlist.html" class="btn ghost">← 返回列表</a>
+  </div>
+
+  <!-- 區塊一：基本資訊 -->
+  <div class="section">
+    <div class="section-title">📋 基本資訊</div>
+    <div class="form-row">
+      <label>活動名稱 <span class="req">*</span></label>
+      <input type="text" id="fName" placeholder="例：端午節社區活動" maxlength="60">
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>報名開始時間</label>
+        <div class="dt-pair"><input type="date" id="fRegStartD"><select id="fRegStartT"></select></div>
+      </div>
+      <div class="form-row">
+        <label>報名結束時間</label>
+        <div class="dt-pair"><input type="date" id="fRegEndD"><select id="fRegEndT"></select></div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>活動開始時間</label>
+        <div class="dt-pair"><input type="date" id="fEventStartD"><select id="fEventStartT"></select></div>
+      </div>
+      <div class="form-row">
+        <label>活動結束時間</label>
+        <div class="dt-pair"><input type="date" id="fEventEndD"><select id="fEventEndT"></select></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>🔔 LINE 活動提醒</label>
+      <div class="reminder-radio-group">
+        <label>
+          <input type="radio" name="reminderMode" value="none" id="rReminderNone" checked onchange="onReminderModeChange()"> 不推播
+        </label>
+        <label>
+          <input type="radio" name="reminderMode" value="custom" id="rReminderCustom" onchange="onReminderModeChange()"> 指定時間推播
+        </label>
+        <div id="reminderTimeRow" style="display:none;margin-left:24px">
+          <div class="dt-pair"><input type="date" id="fReminderTimeD"><select id="fReminderTimeT"></select></div>
+          <p class="hint" style="margin-top:4px">里民報名時可選擇是否接收此時間的 LINE 提醒通知</p>
+          <button type="button" id="resetReminderBtn" onclick="resetReminderSent()" style="display:none;margin-top:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--gray);cursor:pointer">↺ 重設提醒（清除已推播狀態）</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>活動地點</label>
+        <input type="text" id="fLocation" placeholder="例：舊社里活動中心" maxlength="60">
+      </div>
+      <div class="form-row">
+        <label>Google Map 連結</label>
+        <input type="url" id="fMapUrl" placeholder="https://maps.app.goo.gl/...">
+      </div>
+    </div>
+    <div class="toggle-row">
+      <button type="button" class="toggle" id="checkinLocationToggle" onclick="toggleCheckinLocation(event)"></button>
+      <label>限制里民簽到地點<br><span class="hint" style="font-size:11px">開啟後，優先使用 Google Map 連結定位，距離活動地點 100 公尺內才可簽到</span></label>
+    </div>
+    <div class="form-grid" id="checkinLocationFields" style="display:none">
+      <div class="form-row">
+        <label>備用簽到中心緯度</label>
+        <input type="number" id="fCheckinLat" placeholder="可留空，例：24.000000" step="0.000001" min="-90" max="90">
+      </div>
+      <div class="form-row">
+        <label>備用簽到中心經度</label>
+        <input type="number" id="fCheckinLng" placeholder="可留空，例：120.000000" step="0.000001" min="-180" max="180">
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <button type="button" onclick="fillCheckinCenterFromMap()" style="padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--gray);cursor:pointer">從 Google Map 連結帶入座標</button>
+        <button type="button" onclick="fillCheckinCenterFromCurrentLocation()" style="padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--gray);cursor:pointer;margin-left:6px">使用目前位置</button>
+        <p class="hint" style="margin-top:6px">通常只要填上方 Google Map 連結即可；若儲存時提示無法解析，再手動填座標。</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>活動簡介（後台備註，不顯示在 LINE）</label>
+      <textarea id="fDesc" placeholder="活動說明、注意事項…" maxlength="500"></textarea>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>名額上限（空白 = 不限）</label>
+        <input type="number" id="fQuota" placeholder="例：50" min="1">
+      </div>
+      <div class="form-row">
+        <label>活動狀態</label>
+        <select id="fStatus">
+          <option value="草稿">草稿</option>
+          <option value="報名中">報名中</option>
+          <option value="已截止">已截止</option>
+        </select>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <button type="button" class="toggle" id="consentToggle" onclick="toggleConsent(event)"></button>
+      <label>需要肖像權同意聲明<br><span class="hint" style="font-size:11px">開啟後，里民報名前需先同意照片拍攝告知</span></label>
+    </div>
+  </div>
+
+  <!-- 區塊二：活動文宣圖片 -->
+  <div class="section">
+    <div class="section-title">🖼️ 活動文宣圖片</div>
+    <div class="img-upload-box" id="uploadBox">
+      <input type="file" id="imgInput" accept="image/*" onchange="handleImgChange(event)">
+      <div class="img-upload-text">
+        <strong>🖼️</strong>
+        點此選擇圖片，或將圖片拖曳至此
+      </div>
+      <div class="hint" style="margin-top:6px">建議尺寸 1024×576（16:9），1MB 以內 · 支援 JPG / PNG</div>
+    </div>
+    <img id="imgPreview" class="img-preview" alt="預覽">
+    <p id="imgUrlDisplay"></p>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">或貼上圖片 URL：</span>
+      <input type="text" id="fImageUrl" placeholder="https://drive.google.com/uc?export=view&id=..." style="flex:1;min-width:200px;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px" oninput="previewFromUrl(this.value)">
+    </div>
+    <div id="uploadProgress" style="display:none;margin-top:8px;font-size:13px;color:var(--blue)">⏳ 上傳中…</div>
+  </div>
+
+  <!-- 區塊三：問券 Builder -->
+  <div class="section">
+    <div class="section-title">
+      📝 問券設計
+      <span style="font-size:12px;color:var(--muted);font-weight:500;margin-left:4px">（里民報名時依序回答）</span>
+    </div>
+    <div id="warnMaxQ" style="display:none;padding:10px 14px;background:var(--gold-soft);border-radius:10px;font-size:13px;color:var(--gold);margin-bottom:12px">⚠️ 問題數已達上限（10 題），如需修改請先刪除舊題。</div>
+    <div class="questions-list" id="questionsList"></div>
+    <button class="add-q-btn" id="addQBtn" onclick="addQuestion()" style="margin-top:12px">＋ 新增問題</button>
+    <p class="hint" style="margin-top:8px">單選：Quick Reply 按鈕（最多 10 個選項）・複選：可複選（最多 11 個選項）・簡答：里民直接輸入文字</p>
+  </div>
+
+  <!-- 區塊四：問券設定 -->
+  <div class="section">
+    <div class="section-title">📨 活動後問券設定</div>
+    <div class="survey-select-wrap">
+      <div class="form-row">
+        <label>選擇問券</label>
+        <select id="fSurveyId" onchange="onSurveyChange()">
+          <option value="">不寄送問券</option>
+        </select>
+      </div>
+      <div class="form-row" id="surveyTimingRow" style="display:none">
+        <label>推播時間（活動結束後幾分鐘／小時）</label>
+        <select id="fSurveyDelay">
+          <option value="0">活動結束後立即</option>
+          <option value="30">30 分鐘後</option>
+          <option value="60" selected>1 小時後</option>
+          <option value="120">2 小時後</option>
+          <option value="360">6 小時後</option>
+          <option value="720">12 小時後</option>
+          <option value="1440">隔天（24 小時後）</option>
+        </select>
+      </div>
+      <div class="form-row" id="surveyTargetRow" style="display:none">
+        <label>寄送對象</label>
+        <div class="survey-target-row">
+          <label><input type="radio" name="surveyTarget" value="全部報名" checked> 全部報名者</label>
+          <label><input type="radio" name="surveyTarget" value="已簽到"> 僅已簽到者</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 區塊五：報名統計（編輯模式才顯示） -->
+  <div class="section stats-section" id="statsSection">
+    <div class="section-title">📊 報名統計</div>
+    <div id="statsContent"><p style="color:var(--muted);font-size:14px">載入中…</p></div>
+  </div>
+</div>
+
+<!-- ── 底部操作欄 ── -->
+<div class="action-bar" id="actionBar" style="display:none">
+  <button class="btn ghost" onclick="saveDraft()" id="saveDraftBtn">💾 儲存草稿</button>
+  <button class="btn primary" onclick="saveAndPublish()" id="savePublishBtn">🚀 儲存並開放報名</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="./config.js"></script>
+<script src="utils.js"></script>
+<script>
+(function(){
+  var ua=navigator.userAgent||'';
+  if(/Line\//i.test(ua)&&!/Chrome\//i.test(ua)){
+    location.href='intent://'+location.href.replace(/^https?:\/\//,'')+'#Intent;scheme=https;action=android.intent.action.VIEW;end';
+  }
+})();
+
+const SCRIPT_URL = CONFIG.SCRIPT_URL;
+const EVENT_API_URL = CONFIG.EVENT_API_URL || '';
+const EVENT_API_ACTIONS = new Set([
+  'getEvent',
+  'getEventDetailBundle',
+  'createEvent',
+  'updateEvent',
+  'getEventStats',
+  'getSurveys',
+  'resetReminderSent',
+  'uploadEventImage',
+]);
+const MAX_Q = 10;
+let SESSION = null;
+let editId = null;
+let questions = []; // [{type,label,required,options,maxLength}]
+let requireConsent = false;
+let checkinLocationRequired = false;
+let uploadedImageUrl = '';
+let legacyEventDate = '';
+let googleScriptLoading = false;
+let allSurveysData = [];
+
+function backendUrlForAction(action){
+  return EVENT_API_URL && EVENT_API_ACTIONS.has(action) ? EVENT_API_URL : SCRIPT_URL;
+}
+function postBackend(action, payload){
+  const body = Object.assign({action}, payload || {});
+  if(SESSION && SESSION.id_token && EVENT_API_URL && EVENT_API_ACTIONS.has(action)){
+    body.id_token = SESSION.id_token;
+  }
+  return fetch(backendUrlForAction(action), {
+    method:'POST',
+    body:JSON.stringify(body)
+  });
+}
+
+// ── 登入 ──
+function initGoogle(){
+  if(typeof google==='undefined'){
+    if(googleScriptLoading) return;
+    googleScriptLoading = true;
+    const s = document.createElement('script');
+    s.id = 'googleIdentityScript';
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.onload = function(){ googleScriptLoading = false; initGoogle(); };
+    s.onerror = function(){ googleScriptLoading = false; showLoginError('Google 登入元件載入失敗，請重新整理頁面。'); };
+    document.head.appendChild(s);
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: onGoogleLogin,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(document.getElementById('loginBtnWrap'),{
+    type:'standard', theme:'outline', size:'large', text:'signin_with', locale:'zh-TW', width:300
+  });
+}
+function tryRestoreSession(){
+  try{
+    const raw=localStorage.getItem(SESSION_KEY);
+    if(!raw) return false;
+    const data=JSON.parse(raw);
+    if(!data.sessionToken||Date.now()-data.ts>SESSION_TTL){localStorage.removeItem(SESSION_KEY);return false;}
+    SESSION=data;
+    enterApp();
+    return true;
+  }catch(e){return false;}
+}
+function enterApp(){
+  document.getElementById('loginShell').style.display='none';
+  document.getElementById('mainPage').style.display='block';
+  document.getElementById('actionBar').style.display='flex';
+  init();
+}
+function initDtSelects(){
+  var IDS=['fRegStart','fRegEnd','fEventStart','fEventEnd','fReminderTime'];
+  var opts='<option value="">-- 時間 --</option>';
+  for(var h=0;h<24;h++){
+    ['00','30'].forEach(function(m){
+      var v=String(h).padStart(2,'0')+':'+m;
+      opts+='<option value="'+v+'">'+v+'</option>';
+    });
+  }
+  IDS.forEach(function(id){
+    var sel=document.getElementById(id+'T');
+    if(sel) sel.innerHTML=opts;
+  });
+}
+function getDtVal(id){
+  var d=document.getElementById(id+'D');
+  var t=document.getElementById(id+'T');
+  if(!d||!t||!d.value||!t.value) return '';
+  return d.value+'T'+t.value;
+}
+function setDtVal(id,isoStr){
+  var d=document.getElementById(id+'D');
+  var t=document.getElementById(id+'T');
+  if(!d||!t) return;
+  if(!isoStr){d.value='';t.value='';return;}
+  var parts=isoStr.split('T');
+  d.value=parts[0]||'';
+  var timePart=(parts[1]||'00:00').slice(0,5);
+  var arr=timePart.split(':').map(Number);
+  var h=arr[0],m=arr[1];
+  var snapped=m<15?0:m<45?30:0;
+  var hAdj=m>=45?(h+1)%24:h;
+  t.value=String(hAdj).padStart(2,'0')+':'+String(snapped).padStart(2,'0');
+}
+document.addEventListener('DOMContentLoaded',function(){
+  initDtSelects();
+  if(!tryRestoreSession()) initGoogle();
+});
+
+function onGoogleLogin(res){
+  fetch(EVENT_API_URL || SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'login',id_token:res.credential})})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){showLoginError(d.error||'登入失敗');return;}
+      SESSION=Object.assign(d,{id_token:res.credential});
+      localStorage.setItem(SESSION_KEY,JSON.stringify({sessionToken:d.sessionToken,email:d.email,name:d.name,role:d.role,id_token:res.credential,ts:Date.now()}));
+      enterApp();
+    }).catch(()=>showLoginError('網路錯誤'));
+}
+function showLoginError(msg){const el=document.getElementById('loginError');el.textContent=msg;el.style.display='block';}
+
+// ── 初始化 ──
+function init(){
+  const params=new URLSearchParams(location.search);
+  editId=params.get('id')||null;
+  if(editId){
+    document.getElementById('pageTitle').textContent='編輯活動';
+    document.getElementById('pageSubtitle').textContent='修改活動資訊與問券內容';
+    loadEvent();
+  } else {
+    loadSurveyOptions();
+    renderQuestions();
+  }
+}
+
+function loadSurveyOptions(selectedId, selectedTarget, selectedDelay, prefetchedSurveys){
+  const p = prefetchedSurveys
+    ? Promise.resolve({surveys: prefetchedSurveys})
+    : postBackend('getSurveys',{sessionToken:SESSION.sessionToken}).then(r=>r.json());
+  p.then(d=>{
+    allSurveysData = d.surveys||[];
+    const sel=document.getElementById('fSurveyId');
+    sel.innerHTML='<option value="">不寄送問券</option>'+
+      allSurveysData.map(sv=>`<option value="${esc(sv.surveyId)}">${esc(sv.surveyName)}</option>`).join('');
+    if(selectedId) sel.value=selectedId;
+    if(selectedTarget){
+      const radios=document.querySelectorAll('input[name="surveyTarget"]');
+      radios.forEach(r=>{ r.checked = r.value === selectedTarget; });
+    }
+    if(selectedDelay !== undefined && selectedDelay !== null){
+      document.getElementById('fSurveyDelay').value = String(selectedDelay);
+    }
+    onSurveyChange();
+  }).catch(()=>{});
+}
+function onSurveyChange(){
+  const hasSurvey = !!document.getElementById('fSurveyId').value;
+  document.getElementById('surveyTimingRow').style.display = hasSurvey ? '' : 'none';
+  document.getElementById('surveyTargetRow').style.display = hasSurvey ? '' : 'none';
+}
+
+function onReminderModeChange(){
+  const isCustom = document.getElementById('rReminderCustom').checked;
+  document.getElementById('reminderTimeRow').style.display = isCustom ? '' : 'none';
+}
+
+function loadReminderTime(reminderTime, reminderSentAt){
+  if(reminderTime && reminderTime !== 'none'){
+    document.getElementById('rReminderCustom').checked = true;
+    document.getElementById('rReminderNone').checked = false;
+    document.getElementById('reminderTimeRow').style.display = '';
+    setDtVal('fReminderTime', toDatetimeLocal(reminderTime));
+  } else {
+    document.getElementById('rReminderNone').checked = true;
+    document.getElementById('rReminderCustom').checked = false;
+    document.getElementById('reminderTimeRow').style.display = 'none';
+    setDtVal('fReminderTime', '');
+  }
+  const resetBtn = document.getElementById('resetReminderBtn');
+  if(resetBtn) resetBtn.style.display = (reminderSentAt && editId) ? '' : 'none';
+}
+
+function resetReminderSent(){
+  if(!editId){return;}
+  postBackend('resetReminderSent',{sessionToken:SESSION.sessionToken,eventId:editId})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){alert('重設失敗：'+(d.error||''));return;}
+      document.getElementById('resetReminderBtn').style.display='none';
+      showSaveMsg('提醒狀態已重設，下個 cron 週期會重新推播');
+    }).catch(()=>alert('網路錯誤'));
+}
+
+function loadEvent(){
+  postBackend('getEventDetailBundle',{sessionToken:SESSION.sessionToken,eventId:editId})
+    .then(r=>r.json())
+    .then(function(d){
+      if(!d.success){showToast('載入失敗：'+d.error);return;}
+      const ev=d.event;
+      legacyEventDate=ev.eventDate||'';
+      document.getElementById('fName').value=ev.eventName||'';
+      setDtVal('fRegStart',toDatetimeLocal(ev.registrationStart));
+      setDtVal('fRegEnd',toDatetimeLocal(ev.registrationEnd));
+      setDtVal('fEventStart',toDatetimeLocal(ev.eventStart));
+      setDtVal('fEventEnd',toDatetimeLocal(ev.eventEnd));
+      document.getElementById('fLocation').value=ev.eventLocation||'';
+      document.getElementById('fMapUrl').value=ev.mapUrl||'';
+      checkinLocationRequired=!!ev.checkinLocationRequired;
+      document.getElementById('fCheckinLat').value=ev.checkinLatitude||'';
+      document.getElementById('fCheckinLng').value=ev.checkinLongitude||'';
+      updateCheckinLocationToggle();
+      document.getElementById('fDesc').value=ev.description||'';
+      document.getElementById('fQuota').value=ev.quota||'';
+      document.getElementById('fStatus').value=ev.status||'草稿';
+      document.getElementById('fImageUrl').value=ev.imageUrl||'';
+      uploadedImageUrl=ev.imageUrl||'';
+      if(ev.imageUrl) previewFromUrl(ev.imageUrl);
+      requireConsent=!!ev.requireConsent;
+      updateConsentToggle();
+      questions=JSON.parse(JSON.stringify(ev.questions||[])).map((q,i)=>Object.assign({id:'idx_'+i},q));
+      renderQuestions();
+      loadSurveyOptions(ev.surveyId||'', ev.surveyTarget||'全部報名',
+        ev.surveyDelay !== undefined ? ev.surveyDelay : 60, d.surveys);
+      loadReminderTime(ev.reminderTime||'', ev.reminderSentAt||'');
+      document.getElementById('statsSection').style.display='block';
+      renderStats({success:true, stats:d.stats});
+    }).catch(()=>showToast('網路錯誤'));
+}
+
+function loadStats(){
+  postBackend('getEventStats',{sessionToken:SESSION.sessionToken,eventId:editId})
+    .then(r=>r.json()).then(d=>renderStats(d))
+    .catch(()=>{document.getElementById('statsContent').innerHTML='<p style="color:var(--muted);font-size:13px">無法載入統計</p>';});
+}
+
+function renderStats(d){
+      if(!d.success){document.getElementById('statsContent').innerHTML='<p style="color:var(--muted);font-size:13px">無法載入統計</p>';return;}
+      const s=d.stats;
+      let html=`<p style="font-size:14px;margin-bottom:12px">共 <strong>${s.total}</strong> 人報名`;
+      if(s.totalRegistrations!==undefined) html+=`（${s.totalRegistrations} 筆資料）`;
+      if(s.total>0) html+=`，肖像權同意率 <strong>${s.consentRate}%</strong>`;
+      html+='</p>';
+      for(const label in s.answers){
+        const counts=s.answers[label];
+        const total=Object.values(counts).reduce((a,b)=>a+b,0)||1;
+        html+=`<div style="margin-bottom:14px"><p style="font-size:13px;font-weight:700;margin-bottom:6px">${esc(label)}</p>`;
+        for(const opt in counts){
+          const pct=Math.round(counts[opt]/total*100);
+          html+=`<div class="stat-bar-wrap"><div class="stat-bar-label"><span>${esc(opt)}</span><span>${counts[opt]} 票 (${pct}%)</span></div><div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%"></div></div></div>`;
+        }
+        html+='</div>';
+      }
+      document.getElementById('statsContent').innerHTML=html||'<p style="color:var(--muted);font-size:13px">尚無答題統計</p>';
+}
+
+// ── 問券 Builder ──
+function renderQuestions(){
+  const list=document.getElementById('questionsList');
+  list.innerHTML=questions.map((q,i)=>qCardHTML(q,i)).join('');
+  document.getElementById('addQBtn').style.display=questions.length>=MAX_Q?'none':'block';
+  document.getElementById('warnMaxQ').style.display=questions.length>=MAX_Q?'block':'none';
+}
+
+function qCardHTML(q,i){
+  const typeOpts=['single','multi','text'].map(t=>`<option value="${t}"${q.type===t?' selected':''}>${{single:'單選',multi:'複選',text:'簡答'}[t]}</option>`).join('');
+  let optionsHtml='';
+  if(q.type==='single'||q.type==='multi'){
+    const maxOpts=q.type==='single'?10:11;
+    optionsHtml=`
+      <div class="options-list" id="opts-${i}">
+        ${(q.options||[]).map((o,oi)=>optRowHTML(i,oi,o)).join('')}
+      </div>
+      ${(q.options||[]).length<maxOpts?`<button class="add-option-btn" onclick="addOption(${i})">＋ 新增選項</button>`:''}
+      ${(q.options||[]).length>maxOpts?`<p style="font-size:11px;color:var(--gold);margin-top:4px">⚠️ 超過建議上限（LINE 最多顯示 ${maxOpts} 個），請減少選項</p>`:''}
+    `;
+  } else {
+    optionsHtml=`<div class="maxlen-row">最大字數：<input class="maxlen-input" type="number" min="1" max="500" value="${q.maxLength||100}" onchange="setMaxLen(${i},this.value)"></div>`;
+  }
+  return `
+<div class="q-card" id="qcard-${i}" ondragover="onQDragOver(event)" ondrop="onQDrop(event,${i})">
+  <div class="q-card-header">
+    <span class="q-drag" title="拖曳排序" draggable="true" ondragstart="onQDragStart(event,${i})" ondragend="onQDragEnd(event)">☰</span>
+    <span class="q-num">Q${i+1}</span>
+    <select onchange="setQType(${i},this.value)">${typeOpts}</select>
+    <button class="q-remove" onclick="removeQuestion(${i})">✕</button>
+  </div>
+  <textarea class="q-label-input" placeholder="問題內容（可換行，例如條列注意事項）" oninput="setQLabel(${i},this.value)" maxlength="300">${esc(q.label||'')}</textarea>
+  ${optionsHtml}
+  <div class="q-required-row">
+    <input type="checkbox" id="req-${i}" ${q.required?'checked':''} onchange="setRequired(${i},this.checked)">
+    <label for="req-${i}">必填（不允許略過）</label>
+  </div>
+</div>`;
+}
+
+function optRowHTML(qi,oi,val){
+  return `<div class="option-row" id="optrow-${qi}-${oi}">
+    <input class="option-input" type="text" value="${esc(val)}" placeholder="選項 ${oi+1}" maxlength="20" oninput="setOption(${qi},${oi},this.value)">
+    <button class="option-del" onclick="removeOption(${qi},${oi})">✕</button>
+  </div>`;
+}
+
+function addQuestion(){
+  if(questions.length>=MAX_Q) return;
+  questions.push({id:'q_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),type:'single',label:'',required:true,options:['',''],maxLength:100});
+  renderQuestions();
+}
+
+function removeQuestion(i){
+  questions.splice(i,1);
+  renderQuestions();
+}
+
+function setQType(i,type){
+  questions[i].type=type;
+  if(!questions[i].options) questions[i].options=['',''];
+  if(!questions[i].maxLength) questions[i].maxLength=100;
+  renderQuestions();
+}
+
+function setQLabel(i,v){ questions[i].label=v; }
+function setRequired(i,v){ questions[i].required=v; }
+function setMaxLen(i,v){ questions[i].maxLength=Math.min(500,Math.max(1,parseInt(v)||100)); }
+
+function addOption(i){
+  const q=questions[i];
+  const maxOpts=q.type==='single'?10:11;
+  if((q.options||[]).length>=maxOpts) return;
+  q.options=q.options||[];
+  q.options.push('');
+  renderQuestions();
+}
+
+function removeOption(qi,oi){
+  questions[qi].options.splice(oi,1);
+  renderQuestions();
+}
+
+function setOption(qi,oi,v){ questions[qi].options[oi]=v; }
+
+let dragQIndex = null;
+function onQDragStart(e,i){
+  dragQIndex=i;
+  document.getElementById('qcard-'+i).classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+}
+function onQDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+function onQDrop(e,targetIndex){
+  e.preventDefault();
+  if(dragQIndex===null||dragQIndex===targetIndex) return;
+  const moved=questions.splice(dragQIndex,1)[0];
+  questions.splice(targetIndex,0,moved);
+  dragQIndex=null;
+  renderQuestions();
+}
+function onQDragEnd(e){
+  if(dragQIndex!==null){
+    const card=document.getElementById('qcard-'+dragQIndex);
+    if(card) card.classList.remove('dragging');
+  }
+  dragQIndex=null;
+}
+
+// ── 肖像權 Toggle ──
+function toggleConsent(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  requireConsent=!requireConsent;
+  updateConsentToggle();
+}
+function updateConsentToggle(){
+  document.getElementById('consentToggle').className='toggle'+(requireConsent?' on':'');
+}
+
+// ── 里民簽到定位限制 ──
+function toggleCheckinLocation(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  checkinLocationRequired=!checkinLocationRequired;
+  updateCheckinLocationToggle();
+}
+function updateCheckinLocationToggle(){
+  document.getElementById('checkinLocationToggle').className='toggle'+(checkinLocationRequired?' on':'');
+  document.getElementById('checkinLocationFields').style.display=checkinLocationRequired?'grid':'none';
+}
+function parseLatLngFromMapUrl(url){
+  const raw=String(url||'');
+  let m=raw.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  if(!m) m=raw.match(/[?&](?:q|query|ll)=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  if(!m) m=raw.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
+  if(!m) return null;
+  const lat=parseFloat(m[1]), lng=parseFloat(m[2]);
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180) return null;
+  return {lat,lng};
+}
+function setCheckinCenter(lat,lng){
+  document.getElementById('fCheckinLat').value=Number(lat).toFixed(6);
+  document.getElementById('fCheckinLng').value=Number(lng).toFixed(6);
+}
+function fillCheckinCenterFromMap(){
+  const parsed=parseLatLngFromMapUrl(document.getElementById('fMapUrl').value);
+  if(!parsed){showToast('這個地圖連結沒有可讀取的座標，請改貼完整 Google Maps 連結或手動填座標');return;}
+  setCheckinCenter(parsed.lat, parsed.lng);
+  showToast('已帶入簽到中心座標');
+}
+function fillCheckinCenterFromCurrentLocation(){
+  if(!navigator.geolocation){showToast('此裝置不支援定位');return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    setCheckinCenter(pos.coords.latitude, pos.coords.longitude);
+    showToast('已使用目前位置');
+  }, function(){
+    showToast('無法取得目前位置，請確認瀏覽器定位權限');
+  }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+}
+
+// ── 圖片上傳 ──
+function triggerUpload(){ document.getElementById('imgInput').click(); }
+
+function handleImgChange(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  compressAndUpload(file);
+}
+
+function toDriveImgUrl(url){
+  if(!url) return url;
+  var m=url.match(/[?&]id=([^&]+)/);
+  if(m&&url.includes('drive.google.com')) return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1000';
+  return url;
+}
+function previewFromUrl(url){
+  uploadedImageUrl=url;
+  const img=document.getElementById('imgPreview');
+  if(url){ img.src=toDriveImgUrl(url); img.style.display='block'; }
+  else { img.style.display='none'; }
+}
+
+function compressAndUpload(file){
+  const maxSize=1*1024*1024;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      let w=img.width, h=img.height;
+      const maxW=1024, maxH=768;
+      if(w>maxW||h>maxH){
+        const ratio=Math.min(maxW/w,maxH/h);
+        w=Math.round(w*ratio); h=Math.round(h*ratio);
+      }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const mimeType=file.type==='image/png'?'image/png':'image/jpeg';
+      const b64=canvas.toDataURL(mimeType,.85).split(',')[1];
+      if(b64.length*0.75>maxSize*1.5){showToast('圖片壓縮後仍過大，請使用較小的圖片');return;}
+      doUpload(b64,mimeType);
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('imgPreview').src=URL.createObjectURL(file);
+  document.getElementById('imgPreview').style.display='block';
+}
+
+function doUpload(b64,mimeType){
+  document.getElementById('uploadProgress').style.display='block';
+  postBackend('uploadEventImage',{sessionToken:SESSION.sessionToken,imageBase64:b64,mimeType})
+    .then(r=>r.json()).then(d=>{
+      document.getElementById('uploadProgress').style.display='none';
+      if(!d.success){showToast('上傳失敗：'+d.error);return;}
+      uploadedImageUrl=d.url;
+      document.getElementById('fImageUrl').value=d.url;
+      document.getElementById('imgUrlDisplay').textContent='✅ 已上傳：'+d.url;
+      showToast('圖片上傳成功');
+    }).catch(()=>{document.getElementById('uploadProgress').style.display='none';showToast('上傳失敗，請稍後再試');});
+}
+
+// ── 儲存 ──
+function collectData(status){
+  const name=(document.getElementById('fName').value||'').trim();
+  if(!name){showToast('請輸入活動名稱');return null;}
+  const regStart=getDtVal('fRegStart');
+  const regEnd=getDtVal('fRegEnd');
+  const eventStart=getDtVal('fEventStart');
+  const eventEnd=getDtVal('fEventEnd');
+  const mapUrl=document.getElementById('fMapUrl').value.trim();
+  if(regStart&&regEnd&&new Date(regStart)>new Date(regEnd)){showToast('報名結束時間不可早於開始時間');return null;}
+  if(eventStart&&eventEnd&&new Date(eventStart)>new Date(eventEnd)){showToast('活動結束時間不可早於開始時間');return null;}
+  if(mapUrl&&!/^https?:\/\//i.test(mapUrl)){showToast('Google Map 連結需以 http:// 或 https:// 開頭');return null;}
+  // 驗證問題
+  const usedLabels={};
+  for(let i=0;i<questions.length;i++){
+    const q=questions[i];
+    if(!(q.label||'').trim()){showToast('第 '+(i+1)+' 題未填入問題內容');return null;}
+    const labelKey=(q.label||'').trim();
+    if(usedLabels[labelKey]){showToast('第 '+(i+1)+' 題與前面題目名稱重複，請調整題目文字');return null;}
+    usedLabels[labelKey]=true;
+    if((q.type==='single'||q.type==='multi')&&!(q.options||[]).filter(o=>o.trim()).length){showToast('第 '+(i+1)+' 題需要至少一個選項');return null;}
+  }
+  const cleanedQ=questions.map((q,i)=>Object.assign({},q,{id:q.id||('idx_'+i),options:(q.options||[]).filter(o=>o.trim())}));
+  const imageUrl=document.getElementById('fImageUrl').value.trim()||uploadedImageUrl;
+  const surveyDelayRaw=document.getElementById('fSurveyDelay').value;
+  const surveyDelay=surveyDelayRaw===''?60:parseInt(surveyDelayRaw,10);
+  const checkinLat=document.getElementById('fCheckinLat').value.trim();
+  const checkinLng=document.getElementById('fCheckinLng').value.trim();
+  const latNum=parseFloat(checkinLat), lngNum=parseFloat(checkinLng);
+  if(checkinLocationRequired){
+    const hasCoords=Number.isFinite(latNum)&&Number.isFinite(lngNum)&&Math.abs(latNum)<=90&&Math.abs(lngNum)<=180;
+    if(!hasCoords && !mapUrl){
+      showToast('開啟簽到地點限制時，請填寫 Google Map 連結或中心點座標');
+      return null;
+    }
+  }
+  return {
+    eventName:name,
+    eventDate:formatDateRangeText(eventStart,eventEnd)||legacyEventDate,
+    registrationStart:regStart,
+    registrationEnd:regEnd,
+    eventStart:eventStart,
+    eventEnd:eventEnd,
+    eventLocation:document.getElementById('fLocation').value.trim(),
+    mapUrl:mapUrl,
+    description:document.getElementById('fDesc').value.trim(),
+    quota:document.getElementById('fQuota').value.trim(),
+    status:status||document.getElementById('fStatus').value,
+    requireConsent:requireConsent,
+    checkinLocationRequired:checkinLocationRequired,
+    checkinLatitude:checkinLocationRequired&&Number.isFinite(latNum)?latNum:'',
+    checkinLongitude:checkinLocationRequired&&Number.isFinite(lngNum)?lngNum:'',
+    checkinRadiusMeters:100,
+    imageUrl:imageUrl,
+    questions:cleanedQ,
+    surveyId:document.getElementById('fSurveyId').value||'',
+    surveyTarget:(document.querySelector('input[name="surveyTarget"]:checked')||{}).value||'全部報名',
+    surveyDelay:Number.isFinite(surveyDelay)&&surveyDelay>=0?surveyDelay:60,
+    reminderTime:document.getElementById('rReminderCustom').checked
+      ? (getDtVal('fReminderTime')||'')
+      : 'none'
+  };
+}
+
+function saveDraft(){
+  const d=collectData('草稿'); if(!d) return;
+  save(d,'草稿');
+}
+
+function saveAndPublish(){
+  const d=collectData('報名中'); if(!d) return;
+  save(d,'報名中');
+}
+
+function save(payload,statusLabel){
+  setSaving(true);
+  const wasEdit = !!editId;
+  const action=editId?'updateEvent':'createEvent';
+  const body=Object.assign({},payload,{action,sessionToken:SESSION.sessionToken,createdBy:SESSION.email});
+  if(editId) body.eventId=editId;
+  postBackend(action, body)
+    .then(r=>r.json()).then(d=>{
+      setSaving(false);
+      if(!d.success){showToast('儲存失敗：'+d.error);return;}
+      if(!editId) editId=d.eventId;
+      updateEventListCache(d.event || Object.assign({}, payload, wasEdit ? {eventId:editId} : {eventId:editId, registeredCount:0}));
+      showToast('✅ 已儲存（'+(statusLabel||payload.status)+'）');
+      setTimeout(()=>location.href='./eventlist.html',450);
+    }).catch(()=>{setSaving(false);showToast('網路錯誤，請稍後再試');});
+}
+
+function updateEventListCache(eventData){
+  try{
+    const key='hpnbhs_eventlist_cache_v2';
+    const raw=sessionStorage.getItem(key);
+    const cache=raw?JSON.parse(raw):{events:[]};
+    if(!cache || !Array.isArray(cache.events)) return;
+    const idx=cache.events.findIndex(e=>e.eventId===eventData.eventId);
+    if(idx>=0) cache.events[idx]=Object.assign({}, cache.events[idx], eventData);
+    else cache.events.unshift(eventData);
+    cache.savedAt=Date.now();
+    sessionStorage.setItem(key, JSON.stringify(cache));
+  }catch(e){}
+}
+
+function setSaving(v){
+  document.getElementById('saveDraftBtn').disabled=v;
+  document.getElementById('savePublishBtn').disabled=v;
+  document.getElementById('saveDraftBtn').textContent=v?'儲存中…':'💾 儲存草稿';
+}
+
+// ── 工具 ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+function toDatetimeLocal(value){
+  if(!value) return '';
+  const s=String(value);
+  const pad=n=>String(n).padStart(2,'0');
+  // UTC ISO string (GAS/Sheets 回傳帶 Z) → 轉台灣時間 +8h
+  if(/Z$/.test(s)||/[+-]\d{2}:\d{2}$/.test(s)){
+    const d=new Date(s);
+    if(Number.isNaN(d.getTime())) return '';
+    const tw=new Date(d.getTime()+8*60*60*1000);
+    return tw.getUTCFullYear()+'-'+pad(tw.getUTCMonth()+1)+'-'+pad(tw.getUTCDate())+'T'+pad(tw.getUTCHours())+':'+pad(tw.getUTCMinutes());
+  }
+  // 無時區標記（datetime-local 的 value，已是本地時間）→ 直接用
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) return s.slice(0,16);
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return '';
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function formatDateTimeText(value){
+  if(!value) return '';
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(value))){
+    const s=String(value);
+    return s.slice(0,10).replace(/-/g,'/')+' '+s.slice(11,16);
+  }
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return value;
+  const pad=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function formatDateRangeText(start,end){
+  const s=formatDateTimeText(start), e=formatDateTimeText(end);
+  if(s&&e) return s+' - '+e;
+  return s||e||'';
+}
+</script>
+</body>
+</html>

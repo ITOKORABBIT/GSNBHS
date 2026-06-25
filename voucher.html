@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>舊社里 里民憑證</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#5B9B7B">
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-50:  #F4F9F5;
+  --green-100: #E8F1EB;
+  --green-300: #B4D8C2;
+  --green-500: #5B9B7B;
+  --green-600: #4A8568;
+  --green-700: #3A6952;
+  --green-800: #2D5240;
+  --ink-700: #4A5C52;
+  --ink-500: #6B7C73;
+  --ink-300: #9CADAB;
+  --shadow-md: 0 8px 24px rgba(45, 82, 64, 0.12);
+  --shadow-lg: 0 16px 48px rgba(45, 82, 64, 0.18);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+  color: var(--green-800);
+  background: linear-gradient(160deg, #9FCFB3 0%, #7BB596 50%, #5B9B7B 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 32px;
+  position: relative;
+  overflow-x: hidden;
+}
+body::before, body::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+body::before { width: 280px; height: 280px; top: -80px; right: -80px; }
+body::after  { width: 220px; height: 220px; bottom: -60px; left: -60px; background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 60%); }
+
+.voucher {
+  width: 100%;
+  max-width: 380px;
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 32px 28px 28px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  z-index: 1;
+  border: 3px solid rgba(255,255,255,0.6);
+  animation: cardIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.brand-mark {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px dashed var(--green-300);
+}
+.logo-ring {
+  width: 124px; height: 124px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-100), #FFFFFF);
+  border: 2.5px solid var(--green-500);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(91, 155, 123, 0.22), inset 0 0 0 4px rgba(255,255,255,0.7);
+}
+.logo-ring img {
+  width: 92px; height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(45, 82, 64, 0.12));
+}
+.brand-title {
+  font-size: 22px; font-weight: 900; letter-spacing: 2px;
+  color: var(--green-800);
+}
+.brand-sub {
+  font-size: 12px; font-weight: 500; letter-spacing: 4px;
+  color: var(--green-600);
+  text-transform: uppercase;
+}
+
+.body-info { padding: 22px 0 10px; text-align: center; }
+.cert-label {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--green-500);
+  color: #FFFFFF;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+}
+.cert-name {
+  font-size: 26px; font-weight: 900;
+  color: var(--green-800);
+  letter-spacing: 1px;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.cert-desc {
+  font-size: 13.5px;
+  color: var(--ink-500);
+  line-height: 1.7;
+  padding: 0 4px;
+}
+
+.tip-box {
+  margin-top: 22px;
+  padding: 14px 16px;
+  background: var(--green-50);
+  border: 1.5px dashed var(--green-300);
+  border-radius: 14px;
+}
+.tip-box .tip-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700;
+  color: var(--green-700);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.tip-box .tip-title svg { width: 14px; height: 14px; }
+.tip-box .tip-text {
+  font-size: 12px; color: var(--ink-700);
+  line-height: 1.65;
+}
+
+.live-time {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+.live-time .dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22C55E;
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: pulse 1.4s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+  50%      { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}
+
+.actions {
+  margin-top: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px 16px;
+  border: none; border-radius: 14px;
+  font-family: inherit; font-size: 14.5px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 1px;
+}
+.btn svg { width: 16px; height: 16px; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--green-500), var(--green-600));
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(91, 155, 123, 0.32);
+}
+.btn-primary:active { transform: translateY(1px); box-shadow: 0 2px 6px rgba(91, 155, 123, 0.32); }
+.btn-secondary {
+  background: var(--green-50);
+  color: var(--green-700);
+  border: 1.5px solid var(--green-300);
+}
+.btn-secondary:active { background: var(--green-100); }
+
+.footer {
+  margin-top: 22px; text-align: center;
+  font-size: 11px; color: rgba(255,255,255,0.85);
+  letter-spacing: 1px;
+  z-index: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="voucher" role="img" aria-label="舊社里里民憑證">
+  <div class="brand-mark">
+    <div class="logo-ring">
+      <img src="./HP_logo.png?v=5" alt="舊社里 logo">
+    </div>
+    <div class="brand-title">舊社里 里民憑證</div>
+    <div class="brand-sub">HEPING RESIDENT VOUCHER</div>
+  </div>
+
+  <div class="body-info">
+    <span class="cert-label">美食地圖專用</span>
+    <div class="cert-name">出示此頁面<br>即可享美食地圖優惠</div>
+    <div class="cert-desc">請於消費前主動向店家出示本憑證，並依各商家公告之活動辦法享有優惠。</div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">
+      <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      使用須知
+    </div>
+    <div class="tip-text">
+      ・憑證僅限舊社里里民使用<br>
+      ・需達成商家指定條件方可享優惠<br>
+      ・各活動辦法以店家最終解釋為準
+    </div>
+  </div>
+
+  <div class="live-time" id="liveTime">
+    <span class="dot"></span><span id="timeText">—</span>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" type="button" onclick="goStores()">
+      <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      查看美食地圖商家清單
+    </button>
+    <button class="btn btn-secondary" type="button" onclick="window.close()">
+      關閉
+    </button>
+  </div>
+</div>
+
+<div class="footer">舊社里里長辦公室</div>
+
+<script>
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function tickTime() {
+  var t = new Date();
+  var s = t.getFullYear() + '/' + pad2(t.getMonth() + 1) + '/' + pad2(t.getDate())
+        + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ':' + pad2(t.getSeconds());
+  var el = document.getElementById('timeText');
+  if (el) el.textContent = s;
+}
+tickTime();
+setInterval(tickTime, 1000);
+
+function goStores() {
+  window.location.href = 'storeopenlist.html';
+}
+</script>
+
+</body>
+</html>

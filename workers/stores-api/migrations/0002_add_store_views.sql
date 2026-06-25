@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS store_views (
+  store_id   TEXT PRIMARY KEY,
+  view_count INTEGER NOT NULL DEFAULT 0
+);

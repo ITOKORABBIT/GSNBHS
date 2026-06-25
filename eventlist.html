@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活動報名管理 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei',sans-serif;background:#f3f0ea;color:#2b231b;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+:root{
+  --card:#fff;--border:#e4d9ce;--muted:#8d7968;--text:#2b231b;--heading:#18120d;
+  --accent:#b95353;--accent-soft:#fff1ef;
+  --green:#2f6836;--green-soft:#eaf3eb;
+  --blue:#1a73e8;--blue-soft:#e8f0fe;
+  --gold:#9b6112;--gold-soft:#fff4df;
+  --gray:#6f645a;--gray-soft:#f2efea;
+  --shadow:0 14px 40px rgba(43,35,27,.08);--radius:18px;
+}
+
+/* ── 登入畫面 ── */
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login-card{width:min(100%,420px);padding:30px 26px;border:1px solid var(--border);border-radius:24px;background:#fff;box-shadow:var(--shadow)}
+.login-badge{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:800;margin-bottom:16px}
+.login-title{font-size:28px;font-weight:800;color:var(--heading);margin-bottom:10px}
+.login-sub{color:var(--muted);line-height:1.7;margin-bottom:22px}
+.login-error{display:none;margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:14px}
+
+/* ── 主畫面 ── */
+.page{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;padding:22px 24px;border:1px solid rgba(228,217,206,.8);border-radius:24px;background:radial-gradient(circle at top right,rgba(185,83,83,.08),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,251,247,.92));box-shadow:var(--shadow)}
+.title-wrap h1{font-size:28px;font-weight:800;color:var(--heading);margin-bottom:4px}
+.title-wrap p{color:var(--muted);line-height:1.6;font-size:14px}
+.top-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* ── 按鈕 ── */
+.btn{padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:14px;transition:transform .18s,box-shadow .18s,border-color .18s,background .18s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,35,27,.1)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#1557b0}
+.btn.danger{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{background:#fbf7f2}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* ── 統計列 ── */
+.stats-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-chip{padding:8px 16px;border-radius:12px;border:1px solid var(--border);background:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.stat-chip.green{background:var(--green-soft);border-color:#c8e0cb;color:var(--green)}
+.stat-chip.gray{background:var(--gray-soft);border-color:#ddd;color:var(--gray)}
+.stat-chip.red{background:var(--accent-soft);border-color:#f0c2c2;color:var(--accent)}
+
+/* ── 篩選列 ── */
+.filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:7px 16px;border-radius:999px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--gray);transition:.15s}
+.filter-btn:hover{border-color:var(--blue);color:var(--blue)}
+.filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ── 卡片 ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.event-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s;cursor:grab}
+.event-card:hover{transform:translateY(-2px);box-shadow:0 20px 48px rgba(43,35,27,.12)}
+.sortable-ghost{opacity:.3}
+.sortable-drag{box-shadow:0 12px 40px rgba(0,0,0,.25)!important;cursor:grabbing!important;transform:rotate(.5deg) scale(1.02)}
+.card-thumb{width:100%;height:160px;object-fit:cover;background:#f0ece6;display:block}
+.card-thumb-placeholder{width:100%;height:160px;background:linear-gradient(135deg,#f0ece6,#e8e0d8);display:flex;align-items:center;justify-content:center;font-size:48px;color:#c4b8aa}
+.card-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:6px}
+.card-name{font-size:16px;font-weight:800;color:var(--heading);line-height:1.4}
+.card-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.card-meta span{display:flex;align-items:center;gap:3px}
+.card-quota{font-size:12px;font-weight:600;margin-top:2px}
+.card-quota.ok{color:var(--green)}
+.card-quota.warn{color:var(--gold)}
+.card-quota.full{color:var(--accent)}
+.card-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── 狀態 badge ── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.badge.green{background:var(--green-soft);color:var(--green)}
+.badge.gray{background:var(--gray-soft);color:var(--gray)}
+.badge.red{background:var(--accent-soft);color:var(--accent)}
+
+/* ── 下拉選單 ── */
+.status-select{padding:5px 8px;border-radius:8px;border:1px solid var(--border);font-size:12px;font-weight:600;background:#fff;color:var(--text)}
+
+/* ── 空態 ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:15px;line-height:1.7}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);padding:12px 20px;border-radius:14px;background:#1e1815;color:#fff;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;place-items:center;padding:20px}
+.modal-overlay.open{display:grid}
+#editRegModal{z-index:1200}
+.modal{background:#fff;border-radius:24px;padding:28px;width:min(100%,440px);box-shadow:0 24px 60px rgba(0,0,0,.18)}
+.modal h3{font-size:20px;font-weight:800;margin-bottom:10px}
+.modal p{color:var(--muted);line-height:1.7;margin-bottom:20px;font-size:14px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* ── 報名清單抽屜 ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1100;display:none;place-items:center;padding:20px}
+.drawer-overlay.open{display:grid}
+.drawer{width:min(96vw,1360px);max-height:min(88vh,800px);background:#fff;z-index:1101;box-shadow:0 24px 70px rgba(0,0,0,.22);display:none;flex-direction:column;border-radius:24px;overflow:hidden}
+.drawer.open{display:flex}
+.drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.drawer-head h2{font-size:18px;font-weight:800}
+.drawer-close{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted)}
+.drawer-body{flex:1;overflow-y:auto;padding:16px 22px 22px}
+.reg-table-wrap{overflow:auto;max-height:58vh;border:1px solid var(--border);border-radius:14px;background:#fff}
+.reg-table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.reg-table th{text-align:left;padding:8px 6px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:700;white-space:normal;word-break:break-all;background:#fbf7f2;position:sticky;top:0;z-index:2}
+.reg-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;word-break:break-word;min-width:80px;max-width:220px;line-height:1.55;background:#fff}
+.reg-table .reg-action-col{position:sticky;right:0;z-index:3;min-width:72px;max-width:72px;background:#fff;box-shadow:-2px 0 4px rgba(0,0,0,.07)}
+.reg-table th.reg-action-col{background:#f4ede5;z-index:4}
+.reg-col-checkin{width:48px;min-width:48px;max-width:48px;white-space:nowrap;text-align:center;position:sticky;left:0;z-index:3;background:#fff;box-shadow:2px 0 4px rgba(0,0,0,.07)}
+.reg-table th.reg-col-checkin{background:#f4ede5;z-index:4}
+.reg-col-reminder{width:48px;min-width:48px;max-width:48px;white-space:nowrap;text-align:center}
+.reg-col-name{width:120px;min-width:90px;max-width:150px}
+.reg-col-note{width:200px;min-width:170px;max-width:240px}
+.reg-col-consent{width:70px;min-width:70px;max-width:70px;text-align:center}
+.reg-col-time{width:130px;min-width:130px;max-width:130px;white-space:nowrap;font-size:12px;color:var(--muted)}
+.reg-note-input{width:100%;font-size:12px;border:1.5px solid var(--border);border-radius:8px;padding:5px 8px;resize:none;line-height:1.5;color:var(--text);background:#fff;box-sizing:border-box}
+.reg-note-input:focus{outline:none;border-color:var(--blue)}
+.reg-note-save-btn{margin-top:5px;padding:3px 10px;border-radius:7px;border:1px solid #c7d7fe;background:var(--blue-soft);color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.reg-actions{display:flex;gap:4px;align-items:center;flex-wrap:nowrap}
+.reg-table tr:last-child td{border-bottom:none}
+.reg-del-btn{padding:5px 9px;border-radius:8px;border:1px solid #f0c2c2;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:700;white-space:nowrap}
+.reg-edit-btn{padding:5px 9px;border-radius:8px;border:1px solid #c7d7fe;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:700;white-space:nowrap}
+.reg-checkin-btn{padding:5px 4px;border-radius:8px;border:1px solid #c8e0cb;background:var(--green-soft);color:var(--green);font-size:16px;font-weight:700;white-space:nowrap;transition:background .12s,color .12s,border-color .12s,transform .08s,box-shadow .12s;display:block;width:100%;text-align:center;line-height:1}
+.reg-checkin-btn.checked{background:var(--green);color:#fff;border-color:var(--green)}
+.reg-checkin-btn:active{transform:scale(.97)}
+.reg-checkin-btn.syncing{box-shadow:0 0 0 3px rgba(47,104,54,.14)}
+.reg-del-btn:disabled,.reg-checkin-btn:disabled{opacity:.55;pointer-events:none}
+.edit-form{display:flex;flex-direction:column;gap:12px;max-height:62vh;overflow-y:auto;padding-right:2px}
+.edit-field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.edit-field input,.edit-field textarea,.edit-field select{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-size:14px}
+.edit-field textarea{min-height:74px;resize:vertical;line-height:1.55}
+
+/* ── 問券管理 Modal ── */
+.survey-modal{width:min(100%,1360px);max-height:min(90vh,820px);padding:0;overflow:hidden;display:flex;flex-direction:column}
+.survey-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:28px 28px 16px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0}
+.survey-modal-body{overflow-y:auto;padding:20px 28px 28px}
+.survey-list-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:8px}
+.survey-list-item:hover{background:#faf7f2}
+.survey-item-name{flex:1;font-size:14px;font-weight:700}
+.survey-item-meta{font-size:12px;color:var(--muted)}
+.survey-item-actions{display:flex;gap:6px;flex-shrink:0}
+.srv-edit-btn{padding:5px 10px;border-radius:8px;border:1px solid #c7d7fe;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:700}
+.srv-del-btn{padding:4px 8px;border-radius:8px;border:1px solid #fecaca;background:#fff5f5;color:#dc2626;font-size:14px;cursor:pointer;line-height:1}
+.srv-del-btn{padding:5px 10px;border-radius:8px;border:1px solid #f0c2c2;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:700}
+.srv-response-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+.srv-response-tools input,.srv-response-tools select{padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:13px}
+.srv-response-summary{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.srv-chip{padding:5px 10px;border-radius:999px;background:var(--gray-soft);color:var(--gray);font-size:12px;font-weight:800}
+.srv-chip.ok{background:var(--green-soft);color:var(--green)}
+.srv-chip.warn{background:var(--gold-soft);color:var(--gold)}
+.srv-chip.miss{background:var(--accent-soft);color:var(--accent)}
+.srv-response-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px;max-height:54vh;background:#fff}
+.srv-response-table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.srv-response-table th{position:sticky;top:0;z-index:2;background:#fbf7f2;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);white-space:nowrap}
+.srv-response-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55;max-width:260px;word-break:break-word}
+.srv-response-table th.answer-col,.srv-response-table td.answer-col{min-width:180px;max-width:260px}
+.srv-note-input{width:140px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:12px}
+.srv-q-card{background:#f8f5f0;border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;position:relative}
+.srv-q-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.srv-q-header select{padding:5px 8px;border-radius:8px;border:1px solid var(--border);font-size:13px;font-weight:600;background:#fff}
+.srv-q-num{font-size:12px;font-weight:800;color:var(--blue);background:var(--blue-soft);padding:2px 8px;border-radius:999px;flex-shrink:0}
+.srv-q-title{font-size:13px;font-weight:800;color:var(--heading)}
+.srv-q-remove{margin-left:auto;background:none;border:none;color:var(--accent);font-size:13px;padding:4px 6px;border-radius:6px;cursor:pointer}
+.srv-q-remove:hover{color:var(--accent);background:var(--accent-soft)}
+.srv-q-text{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:8px;background:#fff;box-sizing:border-box}
+.srv-q-text:focus,.srv-opt-input:focus{outline:none;border-color:var(--blue)}
+.srv-opt-input{flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:#fff}
+.srv-opt-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.srv-opt-del{background:none;border:none;color:var(--muted);font-size:15px;padding:3px}
+.srv-opt-del:hover{color:var(--accent)}
+.srv-add-opt{font-size:12px;color:var(--blue);background:none;border:none;font-weight:700;padding:2px 0;margin-top:3px}
+.srv-add-opt:hover{text-decoration:underline}
+.srv-other-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);margin-top:6px}
+.srv-other-row input{width:14px;height:14px;accent-color:var(--blue)}
+.srv-add-q-btn{border:2px dashed var(--border);background:#faf7f2;border-radius:12px;padding:11px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);width:100%;margin-top:10px;transition:.2s}
+.srv-add-q-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.srv-req-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);margin-top:6px}
+.srv-req-row input[type=checkbox]{width:14px;height:14px;accent-color:var(--blue)}
+
+/* ── 報名查詢 Modal ── */
+.history-modal{width:min(100%,760px);max-height:min(90vh,860px);display:flex;flex-direction:column}
+.history-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px;flex:1}
+.history-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.history-table th{text-align:left;padding:9px 12px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:700;background:#fbf7f2;white-space:nowrap;position:sticky;top:0;z-index:2}
+.history-table td{padding:9px 12px;border-bottom:1px solid var(--border);word-break:break-word;line-height:1.5}
+.history-table tr:last-child td{border-bottom:none}
+.search-row{display:flex;gap:8px;margin-bottom:14px}
+.search-row input{flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:12px;font-size:14px}
+.search-row input:focus{outline:none;border-color:var(--blue)}
+
+@media(max-width:600px){
+  .topbar{flex-direction:column;align-items:flex-start}
+  .cards-grid{grid-template-columns:1fr}
+  .drawer-overlay{padding:0}
+  .drawer{width:100%;height:100dvh;max-height:100dvh;border-radius:0}
+  .drawer-body{padding:10px 8px}
+  .reg-table td{padding:8px 8px}
+}
+
+/* ── QR Modal ── */
+.qr-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:1300;display:none;align-items:center;justify-content:center;
+}
+.qr-backdrop.open{display:flex;}
+.qr-box{
+  background:#fff;border-radius:20px;
+  padding:24px 24px 20px;width:min(320px,90vw);
+  text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.qr-title{font-size:14px;font-weight:700;color:#1E160E;margin-bottom:4px;line-height:1.4;}
+.qr-sub{font-size:12px;color:#8C7B6A;margin-bottom:18px;}
+#qrCanvas{display:flex;justify-content:center;margin-bottom:16px;}
+#qrCanvas canvas,#qrCanvas img{border-radius:8px;}
+.qr-pin-wrap{background:#F5F2EE;border-radius:12px;padding:14px;margin-bottom:16px;}
+.qr-pin-label{font-size:11px;color:#8C7B6A;margin-bottom:8px;}
+.qr-pin-number{font-size:52px;font-weight:900;color:#1E160E;letter-spacing:10px;line-height:1;}
+.qr-btn-row{display:flex;gap:8px;margin-bottom:0;}
+.qr-print-btn{flex:1;padding:10px;border-radius:10px;border:1px solid #D4C9BE;background:#fff;font-size:13px;font-weight:600;color:#5C4A35;cursor:pointer;}
+.qr-print-btn:hover{background:#F5F2EE;}
+.qr-close{flex:1;padding:10px;border-radius:10px;border:1px solid #E2D9CF;background:#F5F2EE;font-size:13px;font-weight:600;color:#8C7B6A;cursor:pointer;}
+.qr-close:hover{background:#EDE7DF;}
+/* 列印用高解析 QR 容器，平時隱藏 */
+#qrPrintCanvas{display:none;}
+@media print{
+  body>*:not(#qrBackdrop){display:none!important;}
+  @page{size:A4 portrait;margin:15mm;}
+  #qrBackdrop{position:static!important;background:none!important;display:flex!important;align-items:flex-start;justify-content:center;}
+  .qr-box{box-shadow:none!important;border:none!important;width:100%!important;max-width:100%!important;padding:0!important;border-radius:0!important;}
+  .qr-btn-row{display:none!important;}
+  .qr-title{font-size:36px!important;font-weight:900!important;margin-bottom:6mm!important;color:#1E160E!important;}
+  .qr-sub{font-size:18px!important;color:#555!important;margin-bottom:10mm!important;}
+  #qrCanvas{display:none!important;}
+  #qrPrintCanvas{display:flex!important;justify-content:center!important;width:100%!important;height:auto!important;margin-bottom:10mm!important;}
+  #qrPrintCanvas canvas,#qrPrintCanvas img{width:160mm!important;height:160mm!important;border-radius:0!important;image-rendering:pixelated;}
+  .qr-pin-wrap{width:100%!important;border-radius:0!important;padding:8mm 0!important;margin-bottom:0!important;background:#f5f5f5!important;}
+  .qr-pin-label{font-size:18px!important;margin-bottom:4mm!important;}
+  .qr-pin-number{font-size:120px!important;letter-spacing:20px!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── 登入畫面 ── -->
+<div class="login-shell" id="loginShell">
+  <div class="login-card">
+    <div class="login-badge">🎪 活動報名管理</div>
+    <h1 class="login-title">里長後台</h1>
+    <p class="login-sub">請使用 Google 帳號登入以管理活動報名。</p>
+    <div id="loginBtnWrap"></div>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── 主畫面 ── -->
+<div class="page" id="mainPage" style="display:none">
+  <div class="topbar">
+    <div class="title-wrap">
+      <h1>🎪 活動報名管理</h1>
+      <p>建立活動、管理問券，查看報名資料</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn" style="background:var(--blue-soft);border-color:#c7d7fe;color:var(--blue)" onclick="openHistoryModal()">🔍 報名查詢</button>
+      <button class="btn" style="background:var(--green-soft);border-color:#c8e0cb;color:var(--green)" onclick="openSurveyModal()">📋 問券管理</button>
+      <button class="btn primary" onclick="goCreate()">＋ 新增活動</button>
+    </div>
+  </div>
+
+  <!-- 統計 -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-chip green" id="statActive">🟢 報名中 0</div>
+    <div class="stat-chip gray"  id="statDraft">📝 草稿 0</div>
+    <div class="stat-chip red"   id="statClosed">🔴 已截止 0</div>
+  </div>
+
+  <!-- 篩選 -->
+  <div class="filter-row">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">全部</button>
+    <button class="filter-btn" data-filter="報名中" onclick="setFilter('報名中',this)">報名中</button>
+    <button class="filter-btn" data-filter="草稿" onclick="setFilter('草稿',this)">草稿</button>
+    <button class="filter-btn" data-filter="已截止" onclick="setFilter('已截止',this)">已截止</button>
+  </div>
+
+  <!-- 卡片列表 -->
+  <div class="cards-grid" id="cardsGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="icon">🎪</div>
+    <p>還沒有活動<br>點右上角「新增活動」開始建立</p>
+  </div>
+</div>
+
+<!-- ── 刪除確認 Modal ── -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>確認刪除？</h3>
+    <p id="deleteMsg">刪除後無法還原。</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeDeleteModal()">取消</button>
+      <button class="btn danger" id="confirmDeleteBtn" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 編輯報名 Modal ── -->
+<div class="modal-overlay" id="editRegModal">
+  <div class="modal" style="width:min(100%,560px)">
+    <h3>編輯報名資料</h3>
+    <div class="edit-form" id="editRegForm"></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeEditRegModal()">取消</button>
+      <button class="btn primary" id="saveRegBtn" onclick="saveRegistrationEdit()">儲存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 報名清單抽屜 ── -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+  <div class="drawer" id="drawer" onclick="event.stopPropagation()">
+    <div class="drawer-head">
+      <h2 id="drawerTitle">報名名單</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="surveyQrBtn" class="btn ghost" style="padding:7px 10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700" title="問券 QR Code" onclick="showSurveyQrModal()">📋 QR</button>
+        <button class="btn ghost" style="padding:7px 10px;display:flex;align-items:center;justify-content:center" title="現場報名 QR Code" onclick="addWalkInRegistration()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></svg></button>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      </div>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <p style="color:var(--muted);text-align:center;padding:40px">載入中…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 問券管理 Modal ── -->
+<div class="modal-overlay" id="surveyModal">
+  <div class="modal survey-modal">
+    <div class="survey-modal-head">
+      <h3 id="surveyModalTitle" style="font-size:18px;font-weight:800;color:var(--heading)">📋 問券管理</h3>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="surveyAddBtn" class="btn primary" style="font-size:13px;padding:8px 14px;display:none" onclick="openSurveyEdit(null)">＋ 新增問券</button>
+        <button class="drawer-close" onclick="closeSurveyModal()">✕</button>
+      </div>
+    </div>
+    <div class="survey-modal-body" id="surveyModalBody">
+      <p style="color:var(--muted);text-align:center;padding:30px">載入中…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 報名查詢 Modal ── -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal history-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3>🔍 報名記錄查詢</h3>
+      <button class="drawer-close" onclick="closeHistoryModal()">✕</button>
+    </div>
+    <div class="search-row">
+      <input type="text" id="historySearchInput" placeholder="輸入姓名或 LINE ID 搜尋…" onkeydown="if(event.key==='Enter')searchHistory()">
+      <button class="btn primary" onclick="searchHistory()">搜尋</button>
+    </div>
+    <div id="historyBody" style="flex:1;overflow-y:auto">
+      <p style="text-align:center;color:var(--muted);padding:30px">請輸入姓名或 LINE ID 查詢報名記錄</p>
+    </div>
+  </div>
+</div>
+
+<!-- QR Modal -->
+<div class="qr-backdrop" id="qrBackdrop" onclick="closeQrModal()">
+  <div class="qr-box" onclick="event.stopPropagation()">
+    <div class="qr-title" id="qrModalTitle">現場報名</div>
+    <div class="qr-sub" id="qrModalSub">① 掃碼開啟 LINE 官方帳號 → ② 輸入下方報名碼送出</div>
+    <div id="qrCanvas"></div>
+    <div id="qrPrintCanvas"></div>
+    <div class="qr-pin-wrap" id="qrPinWrap">
+      <div class="qr-pin-label">步驟 ②｜在 LINE 對話框輸入報名碼送出</div>
+      <div class="qr-pin-number" id="qrPin">0000</div>
+    </div>
+    <div class="qr-btn-row">
+      <button class="qr-print-btn" onclick="copyQrModalLink()">複製連結</button>
+      <button class="qr-print-btn" onclick="printQrModal()">列印</button>
+      <button class="qr-close" onclick="closeQrModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="./config.js"></script>
+<script src="utils.js"></script>
+<script>
+(function(){
+  // LINE WebView 強制開外部瀏覽器
+  var ua = navigator.userAgent||'';
+  if(/Line\//i.test(ua)&&!/Chrome\//i.test(ua)){
+    location.href='intent://'+location.href.replace(/^https?:\/\//,'')+'#Intent;scheme=https;action=android.intent.action.VIEW;end';
+  }
+})();
+
+const SCRIPT_URL = CONFIG.SCRIPT_URL;
+const EVENT_API_URL = CONFIG.EVENT_API_URL || '';
+const EVENT_API_ACTIONS = new Set([
+  'getEvents',
+  'getRegistrations',
+  'checkInRegistration',
+  'updateEventStatus',
+  'deleteEvent',
+  'updateRegistration',
+  'addWalkInRegistration',
+  'deleteRegistration',
+  'getSurveys',
+  'createSurvey',
+  'updateSurvey',
+  'deleteSurvey',
+  'getSurveyResponses',
+  'updateSurveyResidentNote',
+  'addSurveyWalkInAttendance',
+  'getLineUserRegistrationHistory',
+  'resetReminderSent',
+  'resetSurveySentAt',
+  'deleteSurveyEntry',
+  'reorderEvents'
+]);
+let SESSION = null;
+/* SESSION_KEY, SESSION_TTL — moved to utils.js */
+const EVENTS_CACHE_KEY = 'hpnbhs_eventlist_cache_v2';
+const REGISTRATIONS_CACHE_PREFIX = 'hpnbhs_event_regs_';
+let allEvents = [];
+let currentFilter = 'all';
+let sortableEventsInstance = null;
+let pendingDeleteId = null;
+let pendingDeleteHasReg = false;
+let currentDrawerEventId = null;
+let currentDrawerEventName = '';
+let currentDrawerSurveyId = null;
+var _currentQrUrl = '';
+var _currentQrPin = '';
+let currentRegs = [];
+let currentRegHeaders = [];
+let registrationLocalOverrides = {};
+let editingRegIndex = null;
+let googleScriptLoading = false;
+let allSurveys = [];
+let surveyModalView = 'list';
+const SURVEYS_CACHE_KEY = 'hpnbhs_surveys_cache_v1';
+let currentSurveyId = null;
+let currentSurveyResponses = [];
+let currentSurveyResponseEvents = [];
+let currentSurveyResponseSurvey = null;
+
+function backendUrlForAction(action){
+  return EVENT_API_URL && EVENT_API_ACTIONS.has(action) ? EVENT_API_URL : SCRIPT_URL;
+}
+function postBackend(action, payload){
+  const body = Object.assign({action}, payload || {});
+  if(SESSION && SESSION.id_token && EVENT_API_URL && EVENT_API_ACTIONS.has(action)){
+    body.id_token = SESSION.id_token;
+  }
+  return fetch(backendUrlForAction(action), {
+    method:'POST',
+    body:JSON.stringify(body)
+  });
+}
+
+// ── 登入 ──
+function initGoogle(){
+  if(typeof google==='undefined'){
+    if(googleScriptLoading) return;
+    googleScriptLoading = true;
+    const s = document.createElement('script');
+    s.id = 'googleIdentityScript';
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.onload = function(){ googleScriptLoading = false; initGoogle(); };
+    s.onerror = function(){ googleScriptLoading = false; showLoginError('Google 登入元件載入失敗，請重新整理頁面。'); };
+    document.head.appendChild(s);
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: onGoogleLogin,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(document.getElementById('loginBtnWrap'),{
+    type:'standard', theme:'outline', size:'large', text:'signin_with', locale:'zh-TW', width:300
+  });
+}
+function tryRestoreSession(){
+  try{
+    const raw=localStorage.getItem(SESSION_KEY);
+    if(!raw) return false;
+    const data=JSON.parse(raw);
+    if(!data.sessionToken||Date.now()-data.ts>SESSION_TTL){localStorage.removeItem(SESSION_KEY);return false;}
+    SESSION=data;
+    enterApp();
+    return true;
+  }catch(e){return false;}
+}
+function enterApp(){
+  document.getElementById('loginShell').style.display='none';
+  document.getElementById('mainPage').style.display='block';
+  const hasCache = renderCachedEvents();
+  if(!hasCache) renderEmptyEvents();
+  loadEvents({ keepExisting: true });
+}
+document.addEventListener('DOMContentLoaded',function(){if(!tryRestoreSession()) initGoogle();});
+
+function onGoogleLogin(res){
+  fetch(EVENT_API_URL || SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'login',id_token:res.credential})})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){showLoginError(d.error||'登入失敗');return;}
+      SESSION=Object.assign(d,{id_token:res.credential});
+      localStorage.setItem(SESSION_KEY,JSON.stringify({sessionToken:d.sessionToken,email:d.email,name:d.name,role:d.role,id_token:res.credential,ts:Date.now()}));
+      enterApp();
+    }).catch(()=>showLoginError('網路錯誤，請稍後再試'));
+}
+function showLoginError(msg){
+  const el=document.getElementById('loginError');
+  el.textContent=msg; el.style.display='block';
+}
+
+// ── 載入活動 ──
+function renderCachedEvents(){
+  try{
+    const raw = sessionStorage.getItem(EVENTS_CACHE_KEY);
+    if(!raw) return false;
+    const cache = JSON.parse(raw);
+    if(!cache || !Array.isArray(cache.events)) return false;
+    allEvents = cache.events;
+    renderStats();
+    renderCards();
+    return true;
+  }catch(e){
+    sessionStorage.removeItem(EVENTS_CACHE_KEY);
+    return false;
+  }
+}
+
+function saveEventsCache(events){
+  try{
+    sessionStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      events: events || []
+    }));
+  }catch(e){}
+}
+
+function registrationsCacheKey(eventId){
+  return REGISTRATIONS_CACHE_PREFIX + String(eventId || '');
+}
+
+function getCachedRegistrations(eventId){
+  try{
+    const raw = sessionStorage.getItem(registrationsCacheKey(eventId));
+    if(!raw) return null;
+    const cache = JSON.parse(raw);
+    if(!cache || !Array.isArray(cache.registrations)) return null;
+    return cache;
+  }catch(e){
+    sessionStorage.removeItem(registrationsCacheKey(eventId));
+    return null;
+  }
+}
+
+function saveRegistrationsCache(eventId, payload){
+  try{
+    sessionStorage.setItem(registrationsCacheKey(eventId), JSON.stringify({
+      savedAt: Date.now(),
+      registrations: payload.registrations || [],
+      totalHeadcount: parseInt(payload.totalHeadcount) || (payload.registrations || []).length,
+      registrationSheet: payload.registrationSheet || ''
+    }));
+  }catch(e){}
+}
+
+function updateCachedRegistration(eventId, regId, updates){
+  const cache = getCachedRegistrations(eventId);
+  if(!cache) return;
+  const reg = cache.registrations.find(r => String(r.regId || '') === String(regId || ''));
+  if(!reg) return;
+  Object.assign(reg, updates || {});
+  saveRegistrationsCache(eventId, cache);
+}
+
+function removeCachedRegistration(eventId, regId){
+  const cache = getCachedRegistrations(eventId);
+  if(!cache) return;
+  cache.registrations = cache.registrations.filter(r => String(r.regId || '') !== String(regId || ''));
+  cache.totalHeadcount = cache.registrations.length;
+  saveRegistrationsCache(eventId, cache);
+}
+
+function registrationOverrideKey(eventId, regId){
+  return String(eventId || '') + '::' + String(regId || '');
+}
+
+function setRegistrationOverride(eventId, regId, updates){
+  registrationLocalOverrides[registrationOverrideKey(eventId, regId)] = Object.assign(
+    {},
+    registrationLocalOverrides[registrationOverrideKey(eventId, regId)] || {},
+    updates || {}
+  );
+}
+
+function applyRegistrationOverrides(eventId, regs){
+  (regs || []).forEach(r => {
+    const updates = registrationLocalOverrides[registrationOverrideKey(eventId, r.regId)];
+    if(updates) Object.assign(r, updates);
+  });
+  return regs;
+}
+
+function loadEvents(options){
+  const keepExisting = options && options.keepExisting;
+  if(!keepExisting) cardsGrid.innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">載入中…</p>';
+  postBackend('getEvents',{sessionToken:SESSION.sessionToken})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){showToast('載入失敗：'+d.error);return;}
+      allEvents = d.events||[];
+      saveEventsCache(allEvents);
+      renderStats();
+      renderCards();
+    }).catch(()=>showToast('網路錯誤'));
+}
+
+function renderEmptyEvents(){
+  allEvents = [];
+  renderStats();
+  renderCards();
+}
+
+function renderStats(){
+  let active=0,draft=0,closed=0;
+  allEvents.forEach(e=>{
+    if(e.status==='報名中') active++;
+    else if(e.status==='草稿') draft++;
+    else closed++;
+  });
+  document.getElementById('statActive').textContent='🟢 報名中 '+active;
+  document.getElementById('statDraft').textContent='📝 草稿 '+draft;
+  document.getElementById('statClosed').textContent='🔴 已截止 '+closed;
+}
+
+function setFilter(f, btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+function renderCards(){
+  const grid = document.getElementById('cardsGrid');
+  const empty = document.getElementById('emptyState');
+  const filtered = currentFilter==='all' ? allEvents : allEvents.filter(e=>e.status===currentFilter);
+  if(!filtered.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = filtered.map(e=>cardHTML(e)).join('');
+  if(sortableEventsInstance){ try{ sortableEventsInstance.destroy(); }catch(e){} }
+  if(typeof Sortable !== 'undefined'){
+    sortableEventsInstance = Sortable.create(grid, {
+      animation: 150,
+      delay: 200,
+      delayOnTouchOnly: true,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      onEnd: onSortEnd
+    });
+  }
+}
+
+function onSortEnd(){
+  const grid = document.getElementById('cardsGrid');
+  const cards = grid.querySelectorAll('.event-card[data-event-id]');
+  const orders = [];
+  cards.forEach(function(card, i){
+    const eventId = card.getAttribute('data-event-id');
+    const sortOrder = (i + 1) * 10;
+    orders.push({ eventId, sortOrder });
+    const ev = allEvents.find(e => e.eventId === eventId);
+    if(ev) ev.sortOrder = sortOrder;
+  });
+  postBackend('reorderEvents', { sessionToken: SESSION.sessionToken, orders })
+    .catch(function(){});
+}
+
+function toDriveImgUrl(url){
+  if(!url) return url;
+  var m=url.match(/[?&]id=([^&]+)/);
+  if(m&&url.includes('drive.google.com')) return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1000';
+  return url;
+}
+
+function cardHTML(e){
+  const quota = e.quota>0
+    ? (e.registeredCount>=e.quota
+        ? `<span class="card-quota full">🔴 ${e.registeredCount}/${e.quota} 已額滿</span>`
+        : (e.registeredCount>=e.quota*0.8
+            ? `<span class="card-quota warn">🟡 ${e.registeredCount}/${e.quota} 即將額滿</span>`
+            : `<span class="card-quota ok">🟢 ${e.registeredCount}/${e.quota} 人</span>`))
+    : `<span class="card-quota ok">🟢 ${e.registeredCount} 人報名（不限名額）</span>`;
+  const badge = e.status==='報名中'
+    ? '<span class="badge green">報名中</span>'
+    : e.status==='草稿'
+    ? '<span class="badge gray">草稿</span>'
+    : '<span class="badge red">已截止</span>';
+  const thumb = e.imageUrl
+    ? `<img class="card-thumb" src="${toDriveImgUrl(e.imageUrl)}" alt="${esc(e.eventName)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+`<div class="card-thumb-placeholder" style="display:none">🎪</div>`
+    : `<div class="card-thumb-placeholder">🎪</div>`;
+  const statusOptions=['草稿','報名中','已截止'].map(s=>`<option${s===e.status?' selected':''}>${s}</option>`).join('');
+  return `
+<div class="event-card" id="card-${e.eventId}" data-event-id="${e.eventId}">
+  ${thumb}
+  <div class="card-body">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+      <span class="card-name">${esc(e.eventName)}</span>
+      ${badge}
+    </div>
+    ${e.eventDate?`<div class="card-meta"><span>📅 ${esc(e.eventDate)}</span></div>`:''}
+    ${e.eventLocation?`<div class="card-meta"><span>📍 ${esc(e.eventLocation)}</span></div>`:''}
+    ${(e.registrationStart||e.registrationEnd)?`<div class="card-meta"><span>🕒 報名：${esc(formatDateRangeText(e.registrationStart,e.registrationEnd)||'未設定')}</span></div>`:''}
+    ${quota}
+    ${e.questions&&e.questions.length?`<div style="font-size:12px;color:var(--muted);margin-top:2px">📋 ${e.questions.length} 道問題</div>`:''}
+    ${e.surveyId&&e.surveySentAt?`<div style="font-size:11px;color:var(--muted);margin-top:2px">📨 問券已推播 <button onclick="resetSurveySentAt('${e.eventId}')" style="font-size:11px;color:#b45309;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline">重置</button></div>`:''}
+  </div>
+  <div class="card-footer">
+    <select class="status-select" onchange="changeStatus('${e.eventId}',this.value)">
+      ${statusOptions}
+    </select>
+    <button class="btn" style="font-size:12px;padding:7px 12px" onclick="goEdit('${e.eventId}')">✏️ 編輯</button>
+    <button class="btn" style="font-size:12px;padding:7px 12px" onclick="openRegistrations('${e.eventId}','${esc(e.eventName)}','${esc(e.surveyId||'')}')">👥 名單</button>
+    <button class="btn danger" style="font-size:12px;padding:7px 12px;margin-left:auto" onclick="askDelete('${e.eventId}',${e.registeredCount})">刪除</button>
+  </div>
+</div>`;
+}
+
+// ── 重置問券推播 ──
+function resetSurveySentAt(eventId){
+  if(!confirm('確定要重置問券推播記錄？下次排程執行時將重新推播。')) return;
+  postBackend('resetSurveySentAt',{sessionToken:SESSION.sessionToken,eventId})
+    .then(r=>r.json()).then(d=>{
+      if(d.success){
+        const ev=allEvents.find(e=>e.eventId===eventId);
+        if(ev) ev.surveySentAt='';
+        saveEventsCache(allEvents);
+        renderCards();
+        showToast('已重置，下次排程將重新推播問券');
+      } else showToast('重置失敗：'+(d.error||''));
+    }).catch(()=>showToast('網路錯誤'));
+}
+
+// ── 狀態切換 ──
+function changeStatus(eventId, status){
+  postBackend('updateEventStatus',{sessionToken:SESSION.sessionToken,eventId,status})
+    .then(r=>r.json()).then(d=>{
+      if(d.success){
+        const ev=allEvents.find(e=>e.eventId===eventId);
+        if(ev) ev.status=status;
+        saveEventsCache(allEvents);
+        renderStats(); renderCards();
+        showToast('狀態已更新為：'+status);
+      } else showToast('更新失敗：'+d.error);
+    }).catch(()=>showToast('網路錯誤'));
+}
+
+// ── 刪除 ──
+function askDelete(eventId, regCount){
+  pendingDeleteId=eventId; pendingDeleteHasReg=regCount>0;
+  const msg = regCount>0
+    ? `此活動已有 ${regCount} 筆報名資料，刪除後無法還原，確定要刪除？`
+    : '刪除後無法還原，確定要刪除？';
+  document.getElementById('deleteMsg').textContent=msg;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal(){ document.getElementById('deleteModal').classList.remove('open'); }
+function confirmDelete(){
+  if(!pendingDeleteId) return;
+  document.getElementById('confirmDeleteBtn').disabled=true;
+  postBackend('deleteEvent',{sessionToken:SESSION.sessionToken,eventId:pendingDeleteId,force:true})
+    .then(r=>r.json()).then(d=>{
+      document.getElementById('confirmDeleteBtn').disabled=false;
+      closeDeleteModal();
+      if(d.success){
+        allEvents=allEvents.filter(e=>e.eventId!==pendingDeleteId);
+        saveEventsCache(allEvents);
+        renderStats(); renderCards();
+        showToast('活動已刪除');
+      } else showToast('刪除失敗：'+d.error);
+    }).catch(()=>{document.getElementById('confirmDeleteBtn').disabled=false;showToast('網路錯誤');});
+}
+
+// ── 報名名單 ──
+const REG_COL_MAP={displayName:'LINE姓名',consentGiven:'肖像同意',submittedAt:'報名時間',checkedIn:'簽到',residentNote:'備註',lineReminderOptIn:'LINE提醒'};
+const REG_COL_CLASS={checkedIn:'reg-col-checkin',displayName:'reg-col-name',residentNote:'reg-col-note',consentGiven:'reg-col-consent',submittedAt:'reg-col-time',lineReminderOptIn:'reg-col-reminder'};
+const REG_HIDDEN=new Set(['lineUserId','regId','eventId','headcount']);
+const REG_FIRST=['checkedIn','displayName'];
+const REG_LAST=['lineReminderOptIn','consentGiven','submittedAt','residentNote'];
+const REG_FIXED=new Set([...REG_FIRST,...REG_LAST]);
+
+function normalizeRegKeys(reg, labelToQId){
+  // Convert text-key answers to stable q_id keys so old+new records share the same columns
+  const norm={...reg};
+  for(const [label,qId] of Object.entries(labelToQId)){
+    if(label in norm && !(qId in norm)){norm[qId]=norm[label];delete norm[label];}
+  }
+  return norm;
+}
+function buildRegTableHTML(eventId, regs){
+  const evt=(allEvents||[]).find(e=>e.eventId===eventId);
+  const qIdMap={};
+  const labelToQId={};
+  for(const q of (evt?.questions||[])){
+    if(q.id){qIdMap[q.id]=q.label;if(q.label)labelToQId[q.label]=q.id;}
+  }
+  const getColLabel=h=>REG_COL_MAP[h]||qIdMap[h]||h;
+  // Normalize all regs to q_id keys for consistent column mapping
+  const normRegs=Object.keys(labelToQId).length?regs.map(r=>normalizeRegKeys(r,labelToQId)):regs;
+  // Update currentRegs to normalized so edit modal reads correct keys
+  for(let i=0;i<normRegs.length;i++)currentRegs[i]=normRegs[i];
+  const dataKeys=new Set(normRegs.flatMap(r=>Object.keys(r)));
+  // Sort custom cols by question order so columns follow Q1→Q2→Q3 regardless of JSON key position
+  const qOrder=(evt?.questions||[]).map(q=>q.id);
+  const customCols=[...dataKeys].filter(h=>!REG_HIDDEN.has(h)&&!REG_FIXED.has(h))
+    .sort((a,b)=>{const ia=qOrder.indexOf(a),ib=qOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+  const headers=[...REG_FIRST,...customCols,...REG_LAST.filter(h=>dataKeys.has(h))];
+  currentRegHeaders=headers;
+  const thHtml=headers.map(h=>`<th class="${REG_COL_CLASS[h]||''}">${esc(getColLabel(h))}</th>`).join('')+`<th class="reg-action-col">操作</th>`;
+  const rowsHtml=normRegs.map((r,idx)=>{
+    const rid=esc(String(r.regId||''));
+    const actionHtml=`<td class="reg-action-col"><div class="reg-actions"><button class="reg-edit-btn" onclick="openRegistrationEdit(${idx})">編</button><button class="reg-del-btn" onclick="deleteRegistration('${eventId}','${rid}',this)">刪</button></div></td>`;
+    const cellsHtml=headers.map(h=>{
+      const cls=REG_COL_CLASS[h]?` class="${REG_COL_CLASS[h]}"`:''
+      if(h==='checkedIn'){
+        const chk=(r[h]||'FALSE')==='TRUE';
+        return `<td${cls}><button class="reg-checkin-btn${chk?' checked':''}" onclick="checkIn('${eventId}','${rid}','${chk?'TRUE':'FALSE'}',this)">${chk?'✅':'⬜'}</button></td>`;
+      }
+      if(h==='lineReminderOptIn'){
+        const on=(r[h]||'FALSE')==='TRUE';
+        return `<td${cls}><button class="reg-checkin-btn${on?' checked':''}" onclick="toggleReminderOptIn('${eventId}','${rid}','${on?'TRUE':'FALSE'}',this)">${on?'🔔':'🔕'}</button></td>`;
+      }
+      if(h==='residentNote'){
+        const note=r.residentNote||'';
+        const uid=esc(r.lineUserId||'');
+        const noLine=!r.lineUserId;
+        return `<td${cls}><div style="display:flex;align-items:center;gap:6px"><input type="text" class="reg-note-input" data-userid="${uid}" data-name="${esc(r.displayName||'')}" value="${esc(note)}" placeholder="${noLine?'（非 LINE 報名）':'真實姓名、職業等'}"${noLine?' disabled':''}>${noLine?'':` <button class="reg-note-save-btn" onclick="saveRegistrationNote(this)">儲存</button>`}</div></td>`;
+      }
+      let v=r[h]||'';
+      if(h==='consentGiven') v=v==='TRUE'?'✅':'—';
+      if(h==='submittedAt'&&v) v=formatTaipeiDateTime(v);
+      return `<td${cls}>${esc(String(v))}</td>`;
+    }).join('');
+    return `<tr>${cellsHtml}${actionHtml}</tr>`;
+  }).join('');
+  return `<table class="reg-table"><thead><tr>${thHtml}</tr></thead><tbody>${rowsHtml}</tbody></table>`;
+}
+
+function saveRegistrationNote(btn){
+  const td=btn.closest('td');
+  const ta=td.querySelector('.reg-note-input');
+  const lineUserId=ta.dataset.userid;
+  const displayName=ta.dataset.name;
+  const note=ta.value;
+  if(!lineUserId){showToast('非 LINE 報名，無法儲存備註');return;}
+  btn.disabled=true; btn.textContent='儲存中…';
+  postBackend('updateSurveyResidentNote',{sessionToken:SESSION.sessionToken,lineUserId,displayName,note})
+    .then(r=>r.json()).then(d=>{
+      btn.disabled=false; btn.textContent='儲存';
+      if(d.success) showToast('備註已儲存');
+      else showToast('儲存失敗：'+(d.error||''));
+    }).catch(()=>{btn.disabled=false;btn.textContent='儲存';showToast('網路錯誤');});
+}
+
+function addWalkInRegistration(){
+  if(!currentDrawerEventId){showToast('請先開啟報名名單');return;}
+  showQrModal(currentDrawerEventId, currentDrawerEventName);
+}
+
+var _qrInstance = null;
+function showQrModal(eventId, eventName){
+  if(!CONFIG.LINE_BOT_ID){
+    showToast('請先在 config.js 填入 LINE_BOT_ID');return;
+  }
+  var lineId = CONFIG.LINE_BOT_ID.replace(/^@/, '');
+  var lineUrl = 'https://line.me/R/ti/p/%40' + lineId;
+  _currentQrUrl = lineUrl;
+  var pin = eventId.split('_').pop() || eventId.slice(-4);
+  _currentQrPin = pin;
+  document.getElementById('qrModalTitle').textContent = eventName || '現場報名';
+  document.getElementById('qrModalSub').textContent = '① 掃碼開啟 LINE 官方帳號 → ② 輸入下方報名碼送出';
+  document.getElementById('qrPinWrap').style.display = '';
+  document.getElementById('qrPin').textContent = pin;
+  var canvas = document.getElementById('qrCanvas');
+  canvas.innerHTML = '';
+  _qrInstance = new QRCode(canvas, {
+    text: lineUrl, width: 200, height: 200,
+    colorDark: '#1E160E', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  document.getElementById('qrBackdrop').classList.add('open');
+}
+function showSurveyQrModal(){
+  if(!currentDrawerEventId||!currentDrawerSurveyId){showToast('此活動尚未設定問券');return;}
+  if(!CONFIG.LINE_BOT_ID){showToast('請先在 config.js 填入 LINE_BOT_ID');return;}
+  var lineId = CONFIG.LINE_BOT_ID.replace(/^@/, '');
+  var msg = '問券_' + currentDrawerEventId + '_' + currentDrawerSurveyId;
+  var lineUrl = 'https://line.me/R/oaMessage/%40' + lineId + '?text=' + encodeURIComponent(msg);
+  _currentQrUrl = lineUrl;
+  _currentQrPin = '';
+  document.getElementById('qrModalTitle').textContent = currentDrawerEventName + '｜活動問券';
+  document.getElementById('qrModalSub').textContent = '① 掃碼開啟 LINE 官方帳號 → ② 點「傳送」→ 自動收到問券連結';
+  document.getElementById('qrPinWrap').style.display = 'none';
+  var canvas = document.getElementById('qrCanvas');
+  canvas.innerHTML = '';
+  _qrInstance = new QRCode(canvas, {
+    text: lineUrl, width: 200, height: 200,
+    colorDark: '#1E160E', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  document.getElementById('qrBackdrop').classList.add('open');
+}
+function closeQrModal(){
+  document.getElementById('qrBackdrop').classList.remove('open');
+}
+function copyQrModalLink(){
+  if(!_currentQrUrl){showToast('請先開啟 QR Code');return;}
+  var text = _currentQrPin
+    ? ('點選連結開啟 LINE，報名碼會自動帶入，直接按「傳送」即可開始報名\n\n' + _currentQrUrl)
+    : ('點選連結開啟 LINE，會自動帶入問券訊息，直接按「傳送」即可收到問券連結\n\n' + _currentQrUrl);
+  navigator.clipboard.writeText(text).then(()=>showToast('連結已複製')).catch(()=>showToast('複製失敗，請手動複製'));
+}
+function printQrModal(){
+  if(!_currentQrUrl){showToast('請先開啟 QR Code');return;}
+  var printCanvas = document.getElementById('qrPrintCanvas');
+  printCanvas.innerHTML = '';
+  new QRCode(printCanvas, {
+    text: _currentQrUrl, width: 600, height: 600,
+    colorDark: '#1E160E', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){ printCanvas.innerHTML = ''; }, 1000);
+  }, 300);
+}
+
+function toggleReminderOptIn(eventId, regId, current, btn){
+  if(btn.dataset.syncing==='1') return;
+  const newVal=current==='TRUE'?'FALSE':'TRUE';
+  const applyState=(val)=>{
+    const isOn=val==='TRUE';
+    btn.className='reg-checkin-btn'+(isOn?' checked':'');
+    btn.textContent=isOn?'🔔':'🔕';
+    btn.setAttribute('onclick',`toggleReminderOptIn('${eventId}','${regId}','${val}',this)`);
+  };
+  btn.dataset.syncing='1';
+  applyState(newVal);
+  postBackend('updateRegistration',{sessionToken:SESSION.sessionToken,eventId,regId,updates:{lineReminderOptIn:newVal}})
+    .then(r=>r.json()).then(d=>{
+      btn.dataset.syncing='0';
+      if(!d.success){applyState(current);showToast('更新失敗：'+(d.error||''));return;}
+      const reg=currentRegs.find(r=>r.regId===regId);
+      if(reg) reg.lineReminderOptIn=newVal;
+      saveRegistrationsCache(eventId,{registrations:currentRegs,totalHeadcount:currentRegs.length});
+    }).catch(()=>{btn.dataset.syncing='0';applyState(current);showToast('網路錯誤');});
+}
+
+function openRegistrations(eventId, eventName, surveyId){
+  currentDrawerEventId=eventId;
+  currentDrawerEventName=eventName;
+  currentDrawerSurveyId=surveyId||null;
+  document.getElementById('drawerTitle').textContent='👥 '+eventName+' 報名名單';
+  var sqBtn=document.getElementById('surveyQrBtn');
+  if(sqBtn) sqBtn.style.display='flex';
+  document.getElementById('drawerBody').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">載入中…</p>';
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  sessionStorage.removeItem(registrationsCacheKey(eventId));
+  postBackend('getRegistrations',{sessionToken:SESSION.sessionToken,eventId})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){document.getElementById('drawerBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:40px">載入失敗：'+esc(d.error||'')+'</p>';return;}
+      const regs=applyRegistrationOverrides(eventId, d.registrations||[]);
+      const totalPeople=parseInt(d.totalHeadcount)||regs.length;
+      saveRegistrationsCache(eventId, {registrations: regs, totalHeadcount: totalPeople, registrationSheet: d.registrationSheet || ''});
+      currentRegs=regs;
+      if(!regs.length){document.getElementById('drawerBody').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">尚無報名資料</p>';return;}
+      document.getElementById('drawerBody').innerHTML=
+        `<p style="margin-bottom:12px;font-size:13px;color:var(--muted)">共 ${regs.length} 筆報名資料，合計 ${totalPeople} 人</p>`+
+        `<div class="reg-table-wrap">${buildRegTableHTML(eventId,regs)}</div>`;
+    }).catch(()=>{document.getElementById('drawerBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:40px">網路錯誤</p>';});
+}
+function renderRegistrationsDrawerFast(eventId, data, fromCache){
+  const regs = data.registrations || [];
+  const totalPeople = parseInt(data.totalHeadcount) || regs.length;
+  window.__currentRegistrationSheet = data.registrationSheet || window.__currentRegistrationSheet || '';
+  currentRegs = regs;
+  if(!regs.length){
+    document.getElementById('drawerBody').innerHTML='<p style="text-align:center;padding:40px;color:var(--muted)">目前沒有報名資料</p>';
+    return;
+  }
+  document.getElementById('drawerBody').innerHTML=
+    `<p style="margin-bottom:12px;font-size:13px;color:var(--muted)">共 ${regs.length} 筆報名資料，合計 ${totalPeople} 人${fromCache?'（背景同步中）':''}</p>`+
+    `<div class="reg-table-wrap">${buildRegTableHTML(eventId,regs)}</div>`;
+}
+
+function openRegistrationEdit(index){
+  editingRegIndex=index;
+  const reg=currentRegs[index];
+  if(!reg){showToast('找不到報名資料');return;}
+  const evt=(allEvents||[]).find(e=>e.eventId===currentDrawerEventId);
+  const qIdMap={};
+  for(const q of (evt?.questions||[])){if(q.id)qIdMap[q.id]=q.label;}
+  const colMap={...REG_COL_MAP,...qIdMap};
+  const fields=currentRegHeaders.filter(h=>h!=='submittedAt'&&h!=='residentNote'&&h!=='checkedIn');
+  document.getElementById('editRegForm').innerHTML=fields.map((h,i)=>{
+    const label=esc(colMap[h]||h);
+    const value=reg[h]||'';
+    const key=encodeURIComponent(h);
+    if(h==='consentGiven'){
+      return `<div class="edit-field"><label>${label}</label><select data-field="${key}"><option value="TRUE"${value==='TRUE'?' selected':''}>同意</option><option value="FALSE"${value!=='TRUE'?' selected':''}>不同意 / 未同意</option></select></div>`;
+    }
+    return `<div class="edit-field"><label>${label}</label><textarea data-field="${key}">${esc(String(value))}</textarea></div>`;
+  }).join('');
+  document.getElementById('editRegModal').classList.add('open');
+}
+function closeEditRegModal(){
+  document.getElementById('editRegModal').classList.remove('open');
+  editingRegIndex=null;
+}
+function saveRegistrationEdit(){
+  const reg=currentRegs[editingRegIndex];
+  if(!reg){showToast('找不到報名資料');return;}
+  const updates={};
+  document.querySelectorAll('#editRegForm [data-field]').forEach(el=>{
+    updates[decodeURIComponent(el.getAttribute('data-field'))]=el.value;
+  });
+  const btn=document.getElementById('saveRegBtn');
+  btn.disabled=true; btn.textContent='儲存中';
+  postBackend('updateRegistration',{sessionToken:SESSION.sessionToken,eventId:currentDrawerEventId,regId:reg.regId,updates})
+    .then(r=>r.json()).then(d=>{
+      btn.disabled=false; btn.textContent='儲存修改';
+      if(!d.success){showToast('儲存失敗：'+(d.error||''));return;}
+      closeEditRegModal();
+      const ev=allEvents.find(e=>e.eventId===currentDrawerEventId);
+      if(ev&&d.registeredCount!==undefined) ev.registeredCount=parseInt(d.registeredCount)||0;
+      updateCachedRegistration(currentDrawerEventId, reg.regId, updates);
+      saveEventsCache(allEvents);
+      renderStats(); renderCards();
+      showToast('報名資料已更新');
+      const cachedAfterEdit=getCachedRegistrations(currentDrawerEventId);
+      if(cachedAfterEdit) renderRegistrationsDrawerFast(currentDrawerEventId,cachedAfterEdit,false);
+    }).catch(()=>{btn.disabled=false;btn.textContent='儲存修改';showToast('網路錯誤');});
+}
+function deleteRegistration(eventId, regId, btn){
+  if(!eventId||!regId){showToast('缺少報名資料編號');return;}
+  if(!confirm('確定刪除此筆報名資料？刪除後會重新計算活動報名人數。')) return;
+  btn.disabled=true;
+  btn.textContent='…';
+  postBackend('deleteRegistration',{sessionToken:SESSION.sessionToken,eventId,regId})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){btn.disabled=false;btn.textContent='刪';showToast('刪除失敗：'+(d.error||''));return;}
+      const ev=allEvents.find(e=>e.eventId===eventId);
+      if(ev&&d.registeredCount!==undefined) ev.registeredCount=parseInt(d.registeredCount)||0;
+      removeCachedRegistration(eventId, regId);
+      saveEventsCache(allEvents);
+      renderStats(); renderCards();
+      showToast('報名資料已刪除');
+      const cachedAfterDelete=getCachedRegistrations(eventId);
+      if(cachedAfterDelete) renderRegistrationsDrawerFast(eventId,cachedAfterDelete,false);
+    }).catch(()=>{btn.disabled=false;btn.textContent='刪';showToast('網路錯誤');});
+}
+function closeDrawer(){
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  currentDrawerEventId=null;
+  currentDrawerEventName='';
+}
+
+// ── 導頁 ──
+function goCreate(){ location.href='./eventdetail.html'; }
+function goEdit(id){ location.href='./eventdetail.html?id='+id; }
+
+// ── 工具 ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+/* esc — moved to utils.js */
+function formatDateTimeText(value){
+  if(!value) return '';
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(value))){
+    const s=String(value);
+    return s.slice(0,10).replace(/-/g,'/')+' '+s.slice(11,16);
+  }
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return String(value).slice(0,16);
+  const pad=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function formatDateRangeText(start,end){
+  const s=formatDateTimeText(start), e=formatDateTimeText(end);
+  if(s&&e) return s+' - '+e;
+  return s||e||'';
+}
+
+// ── 簽到切換 ──
+function checkIn(eventId, regId, currentState, btn){
+  if(btn.dataset.syncing==='1') return;
+  const newState = currentState !== 'TRUE';
+  const previousState = currentState === 'TRUE';
+  const applyButtonState = (checked) => {
+    const ns = checked ? 'TRUE' : 'FALSE';
+    btn.setAttribute('onclick',`checkIn('${eventId}','${regId}','${ns}',this)`);
+    if(checked){
+      btn.classList.add('checked');
+      btn.textContent='✅';
+    } else {
+      btn.classList.remove('checked');
+      btn.textContent='⬜';
+    }
+  };
+
+  btn.dataset.syncing='1';
+  btn.classList.add('syncing');
+  applyButtonState(newState);
+  setRegistrationOverride(eventId, regId, {checkedIn: newState ? 'TRUE' : 'FALSE'});
+  updateCachedRegistration(eventId, regId, {checkedIn: newState ? 'TRUE' : 'FALSE'});
+
+  const cached = getCachedRegistrations(eventId);
+  const registrationSheet = (cached && cached.registrationSheet) || window.__currentRegistrationSheet || '';
+  postBackend('checkInRegistration',{sessionToken:SESSION.sessionToken,eventId,regId,checkedIn:newState,registrationSheet})
+    .then(r=>r.json()).then(d=>{
+      btn.dataset.syncing='0';
+      btn.classList.remove('syncing');
+      if(!d.success){
+        applyButtonState(previousState);
+        setRegistrationOverride(eventId, regId, {checkedIn: previousState ? 'TRUE' : 'FALSE'});
+        updateCachedRegistration(eventId, regId, {checkedIn: previousState ? 'TRUE' : 'FALSE'});
+        showToast('簽到同步失敗：'+(d.error||''));
+        return;
+      }
+      const committed = d.checkedIn !== undefined ? !!d.checkedIn : newState;
+      applyButtonState(committed);
+      setRegistrationOverride(eventId, regId, {checkedIn: committed ? 'TRUE' : 'FALSE'});
+      updateCachedRegistration(eventId, regId, {checkedIn: committed ? 'TRUE' : 'FALSE'});
+    }).catch(()=>{
+      btn.dataset.syncing='0';
+      btn.classList.remove('syncing');
+      applyButtonState(previousState);
+      setRegistrationOverride(eventId, regId, {checkedIn: previousState ? 'TRUE' : 'FALSE'});
+      updateCachedRegistration(eventId, regId, {checkedIn: previousState ? 'TRUE' : 'FALSE'});
+      showToast('簽到同步失敗，已還原');
+    });
+}
+
+// ── 問券管理 ──
+function openSurveyModal(){
+  document.getElementById('surveyModal').classList.add('open');
+  renderCachedSurveys();
+  loadSurveys();
+}
+function closeSurveyModal(){
+  document.getElementById('surveyModal').classList.remove('open');
+  document.getElementById('surveyModalTitle').textContent='📋 問券管理';
+}
+function loadSurveys(){
+  if(!allSurveys.length) document.getElementById('surveyModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">載入中…</p>';
+  postBackend('getSurveys',{sessionToken:SESSION.sessionToken})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){
+        if(surveyModalView==='list') document.getElementById('surveyModalBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:30px">載入失敗</p>';
+        return;
+      }
+      allSurveys = d.surveys||[];
+      saveSurveysCache();
+      if(surveyModalView==='list') renderSurveyList();
+    }).catch(()=>{
+      if(surveyModalView==='list') document.getElementById('surveyModalBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:30px">網路錯誤</p>';
+    });
+}
+function saveSurveysCache(){
+  try{ sessionStorage.setItem(SURVEYS_CACHE_KEY, JSON.stringify({savedAt:Date.now(), surveys:allSurveys||[]})); }catch(e){}
+}
+function renderCachedSurveys(){
+  try{
+    const raw=sessionStorage.getItem(SURVEYS_CACHE_KEY);
+    if(!raw) return false;
+    const cache=JSON.parse(raw);
+    if(!cache || !Array.isArray(cache.surveys)) return false;
+    allSurveys=cache.surveys;
+    renderSurveyList();
+    return true;
+  }catch(e){
+    sessionStorage.removeItem(SURVEYS_CACHE_KEY);
+    return false;
+  }
+}
+function renderSurveyList(){
+  surveyModalView='list';
+  document.getElementById('surveyModalTitle').textContent='📋 問券管理';
+  document.getElementById('surveyAddBtn').style.display='';
+  let html='';
+  if(!allSurveys.length){
+    html='<p style="text-align:center;color:var(--muted);padding:30px">尚無問券，請新增</p>';
+  } else {
+    html=allSurveys.map(sv=>{
+      const questions = sv.questions || [];
+      return `<div class="survey-list-item">
+      <div style="flex:1"><div class="survey-item-name">${esc(sv.surveyName)}</div><div class="survey-item-meta">${questions.length} 題</div></div>
+      <div class="survey-item-actions">
+        <button class="srv-edit-btn" onclick="previewSurvey('${esc(String(sv.surveyId))}')">預覽</button>
+        <button class="srv-edit-btn" onclick="openSurveyEdit('${esc(String(sv.surveyId))}')">編輯</button>
+        <button class="srv-edit-btn" onclick="openSurveyResponses('${esc(String(sv.surveyId))}')">回覆列表</button>
+        <button class="srv-edit-btn" onclick="copySurveyLink('${esc(String(sv.surveyId))}')">複製</button>
+        <button class="srv-del-btn" onclick="deleteSurveyItem('${esc(String(sv.surveyId))}',this)">刪除</button>
+      </div>
+    </div>`;
+    }).join('');
+  }
+  document.getElementById('surveyModalBody').innerHTML=html;
+}
+
+function openSurveyResponses(surveyId, keepFilters){
+  const sv = allSurveys.find(s=>s.surveyId===surveyId);
+  if(!sv){showToast('找不到問券');return;}
+  surveyModalView='responses';
+  currentSurveyResponseSurvey = sv;
+  if(!keepFilters){
+    window.__srvRespSearch = '';
+    window.__srvRespEvent = 'all';
+    window.__srvRespStatus = 'all';
+  }
+  document.getElementById('surveyModalTitle').textContent='📋 回覆列表';
+  document.getElementById('surveyAddBtn').style.display='none';
+  document.getElementById('surveyModalBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">讀取回覆中…</p>';
+  postBackend('getSurveyResponses',{sessionToken:SESSION.sessionToken,surveyId})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){document.getElementById('surveyModalBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:30px">讀取失敗：'+esc(d.error||'')+'</p>';return;}
+      currentSurveyResponses = d.responses || [];
+      currentSurveyResponseEvents = d.events || [];
+      renderSurveyResponses();
+    }).catch(()=>{document.getElementById('surveyModalBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:30px">網路錯誤</p>';});
+}
+
+function surveyStatusLabel(row){
+  if(row.registered && row.attended && row.filled) return '有報名／有參加／有填';
+  if(row.registered && row.attended && !row.filled) return '有報名／有參加／未填';
+  if(row.registered && !row.attended && row.filled) return '有報名／未參加／有填';
+  if(row.registered && !row.attended && !row.filled) return '有報名／未參加／未填';
+  if(!row.registered && row.attended && row.filled) return '沒報名／有參加／有填';
+  if(!row.registered && row.attended && !row.filled) return '沒報名／有參加／未填';
+  return '未填';
+}
+function surveyStatusClass(row){
+  if(row.filled && row.attended) return 'ok';
+  if(row.filled) return 'warn';
+  return 'miss';
+}
+function filterSurveyResponseRows(){
+  const keyword=(document.getElementById('srvRespSearch')?.value||'').trim().toLowerCase();
+  const eventId=document.getElementById('srvRespEvent')?.value||'all';
+  const status=document.getElementById('srvRespStatus')?.value||'all';
+  return currentSurveyResponses.filter(r=>{
+    if(eventId!=='all' && r.eventId!==eventId) return false;
+    if(status==='filled' && !r.filled) return false;
+    if(status==='missing' && r.filled) return false;
+    if(status==='attended_filled' && !(r.attended && r.filled)) return false;
+    if(status==='attended_missing' && !(r.attended && !r.filled)) return false;
+    if(status==='registered_absent_filled' && !(r.registered && !r.attended && r.filled)) return false;
+    if(status==='registered_absent_missing' && !(r.registered && !r.attended && !r.filled)) return false;
+    if(status==='walkin_filled' && !(!r.registered && r.attended && r.filled)) return false;
+    if(status==='walkin_missing' && !(!r.registered && r.attended && !r.filled)) return false;
+    if(keyword){
+      const hay=[r.displayName,r.residentNote,r.eventName,r.status,surveyStatusLabel(r),Object.values(r.answers||{}).join(' ')].join(' ').toLowerCase();
+      if(!hay.includes(keyword)) return false;
+    }
+    return true;
+  });
+}
+function formatTaipeiDateTime(value){
+  if(!value) return '—';
+  const raw = String(value);
+  let date = null;
+  if(/^\d{4}-\d{2}-\d{2}T/.test(raw)){
+    date = new Date(raw);
+  } else if(/^\d{4}\/\d{2}\/\d{2}/.test(raw)){
+    return raw.substring(0,16);
+  } else if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(raw)){
+    return raw.substring(0,16).replace(/-/g,'/');
+  }
+  if(!date || isNaN(date.getTime())) return raw.substring(0,16).replace('T',' ');
+  return new Intl.DateTimeFormat('zh-TW',{
+    timeZone:'Asia/Taipei',
+    year:'numeric',
+    month:'2-digit',
+    day:'2-digit',
+    hour:'2-digit',
+    minute:'2-digit',
+    hour12:false
+  }).format(date).replace(/\//g,'/');
+}
+function renderSurveyResponses(){
+  if(document.getElementById('srvRespSearch')) window.__srvRespSearch = document.getElementById('srvRespSearch').value || '';
+  if(document.getElementById('srvRespEvent')) window.__srvRespEvent = document.getElementById('srvRespEvent').value || 'all';
+  if(document.getElementById('srvRespStatus')) window.__srvRespStatus = document.getElementById('srvRespStatus').value || 'all';
+  const sv = currentSurveyResponseSurvey || {};
+  const eventOptions = ['<option value="all">全部活動</option>'].concat(currentSurveyResponseEvents.map(ev=>`<option value="${esc(ev.eventId)}">${esc(ev.eventName)}</option>`)).join('');
+  const total = currentSurveyResponses.length;
+  const filled = currentSurveyResponses.filter(r=>r.filled).length;
+  const missing = currentSurveyResponses.filter(r=>!r.filled).length;
+  const rows = filterSurveyResponseRows();
+  const answerColumns = [];
+  (sv.questions||[]).forEach(q=>{
+    const label=(q.label||'').trim();
+    if(label && !answerColumns.includes(label)) answerColumns.push(label);
+  });
+  rows.forEach(r=>{
+    Object.keys(r.answers||{}).forEach(label=>{
+      if(label && !answerColumns.includes(label)) answerColumns.push(label);
+    });
+  });
+  const answerHeads = answerColumns.map(label=>`<th class="answer-col">${esc(label)}</th>`).join('');
+  const body = rows.length ? rows.map(r=>{
+    const answerCells = answerColumns.map(label=>{
+      const value = r.filled ? String((r.answers||{})[label] || '').trim() : '';
+      return `<td class="answer-col">${value ? esc(value) : '<span style="color:var(--muted)">—</span>'}</td>`;
+    }).join('');
+    let deleteCell = '<td></td>';
+    if (r.filled && r.responseId) {
+      deleteCell = `<td style="text-align:center"><button class="srv-del-btn" title="刪除此筆回覆" onclick="deleteSurveyEntry('${esc(r.responseId)}','',this)">🗑</button></td>`;
+    } else if (!r.filled && r.lineUserId && r.lineUserId.startsWith('walkin:')) {
+      const aid = r.lineUserId.replace('walkin:','');
+      deleteCell = `<td style="text-align:center"><button class="srv-del-btn" title="刪除此筆回覆" onclick="deleteSurveyEntry('','${esc(aid)}',this)">🗑</button></td>`;
+    }
+    return `<tr>
+      <td>${esc(r.displayName || '未取得名稱')}</td>
+      <td><div style="display:flex;align-items:center;gap:6px"><input type="text" class="srv-note-input" data-uid="${esc(r.lineUserId||'')}" data-name="${esc(r.displayName||'')}" value="${esc(r.residentNote||'')}" placeholder="真實姓名、職業等"><button class="srv-edit-btn" onclick="saveSurveyResidentNote(this)">儲存</button></div></td>
+      <td>${esc(r.eventName||'')}</td>
+      <td><span class="srv-chip ${surveyStatusClass(r)}">${surveyStatusLabel(r)}</span></td>
+      <td>${r.filled ? esc(formatTaipeiDateTime(r.submittedAt)) : '—'}</td>
+      ${answerCells}
+      ${deleteCell}
+    </tr>`;
+  }).join('') : `<tr><td colspan="${5 + answerColumns.length + 1}" style="text-align:center;color:var(--muted);padding:26px">沒有符合篩選的資料</td></tr>`;
+  document.getElementById('surveyModalBody').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">
+      <div><div style="font-weight:800;color:var(--heading);font-size:16px">${esc(sv.surveyName||'問券')}</div><div class="survey-item-meta">${(sv.questions||[]).length} 題</div></div>
+      <button class="btn" onclick="renderSurveyList()">返回問券列表</button>
+    </div>
+    <div class="srv-response-summary">
+      <span class="srv-chip">全部 ${total}</span>
+      <span class="srv-chip ok">已填 ${filled}</span>
+      <span class="srv-chip miss">未填 ${missing}</span>
+    </div>
+    <div class="srv-response-tools">
+      <input id="srvRespSearch" type="text" placeholder="搜尋里民、備註、答案…" onkeydown="if(event.key==='Enter')renderSurveyResponses()">
+      <select id="srvRespEvent" onchange="renderSurveyResponses()">${eventOptions}</select>
+      <select id="srvRespStatus" onchange="renderSurveyResponses()">
+        <option value="all">全部狀態</option>
+        <option value="filled">已填問券</option>
+        <option value="missing">未填問券</option>
+        <option value="attended_filled">有參加有填</option>
+        <option value="attended_missing">有參加未填</option>
+        <option value="registered_absent_filled">有報名未參加有填</option>
+        <option value="registered_absent_missing">有報名未參加未填</option>
+        <option value="walkin_filled">沒報名有參加有填</option>
+        <option value="walkin_missing">沒報名有參加未填</option>
+      </select>
+      <button class="btn ghost" onclick="addSurveyWalkInAttendance()">新增現場參加者</button>
+      <button class="btn" onclick="renderSurveyResponses()">篩選</button>
+    </div>
+    <div class="srv-response-wrap">
+      <table class="srv-response-table">
+        <thead><tr><th>里民名稱</th><th>備註</th><th>參加的活動名稱</th><th>狀態</th><th>回填時間</th>${answerHeads}<th></th></tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>`;
+  const search=document.getElementById('srvRespSearch');
+  const eventSel=document.getElementById('srvRespEvent');
+  const statusSel=document.getElementById('srvRespStatus');
+  if(search) search.value = (window.__srvRespSearch || '');
+  if(eventSel) eventSel.value = (window.__srvRespEvent || 'all');
+  if(statusSel) statusSel.value = (window.__srvRespStatus || 'all');
+}
+
+function saveSurveyResidentNote(btn){
+  const input=btn.closest('td').querySelector('.srv-note-input');
+  const lineUserId=input.getAttribute('data-uid')||'';
+  if(!lineUserId){showToast('沒有 LINE 身分，無法儲存備註');return;}
+  btn.disabled=true;
+  postBackend('updateSurveyResidentNote',{sessionToken:SESSION.sessionToken,lineUserId,displayName:input.getAttribute('data-name')||'',note:input.value||''})
+    .then(r=>r.json()).then(d=>{
+      btn.disabled=false;
+      if(!d.success){showToast('備註儲存失敗：'+(d.error||''));return;}
+      currentSurveyResponses.forEach(row=>{if(row.lineUserId===lineUserId) row.residentNote=input.value||'';});
+      showToast('備註已儲存');
+    }).catch(()=>{btn.disabled=false;showToast('網路錯誤');});
+}
+
+function deleteSurveyEntry(responseId, attendanceId, btn){
+  if(!confirm('確定要刪除這筆回覆嗎？此操作無法復原。')) return;
+  btn.disabled=true;
+  const surveyId=(currentSurveyResponseSurvey||{}).surveyId||currentSurveyId||'';
+  if(!surveyId){showToast('找不到問券 ID');return;}
+  const payload={sessionToken:SESSION.sessionToken,surveyId};
+  if(responseId) payload.responseId=responseId;
+  if(attendanceId) payload.attendanceId=attendanceId;
+  postBackend('deleteSurveyEntry',payload)
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){btn.disabled=false;showToast('刪除失敗：'+(d.error||''));return;}
+      const tr=btn.closest('tr');
+      if(tr) tr.remove();
+      if(responseId) currentSurveyResponses=currentSurveyResponses.filter(r=>r.responseId!==responseId);
+      else if(attendanceId) currentSurveyResponses=currentSurveyResponses.filter(r=>!(r.lineUserId&&r.lineUserId.replace('walkin:','')===attendanceId));
+      showToast('已刪除');
+    }).catch(()=>{btn.disabled=false;showToast('網路錯誤');});
+}
+
+function addSurveyWalkInAttendance(){
+  const sv = currentSurveyResponseSurvey || {};
+  if(!sv.surveyId){showToast('請先開啟問券回覆列表');return;}
+  const selectedEvent = document.getElementById('srvRespEvent')?.value || 'all';
+  if(selectedEvent === 'all'){
+    showToast('請先在活動下拉選單選定一個活動');
+    return;
+  }
+  const displayName = (prompt('請輸入現場參加者名稱') || '').trim();
+  if(!displayName) return;
+  const note = (prompt('備註可填真實姓名、職業等，也可以留空') || '').trim();
+  postBackend('addSurveyWalkInAttendance',{
+    sessionToken:SESSION.sessionToken,
+    surveyId:sv.surveyId,
+    eventId:selectedEvent,
+    displayName,
+    note
+  }).then(r=>r.json()).then(d=>{
+    if(!d.success){showToast('新增失敗：'+(d.error||''));return;}
+    showToast('已新增現場參加者');
+    window.__srvRespEvent = selectedEvent;
+    openSurveyResponses(sv.surveyId, true);
+  }).catch(()=>showToast('網路錯誤'));
+}
+
+function buildQCard(q, idx){
+  const types=[{v:'text',l:'文字輸入'},{v:'single',l:'單選'},{v:'multi',l:'多選'},{v:'scale',l:'量表(1-5)'}];
+  const typeOpts=types.map(t=>`<option value="${t.v}"${(q.type||'text')===t.v?' selected':''}>${t.l}</option>`).join('');
+  const hasOpts=['single','multi'].includes(q.type||'text');
+  const optsHtml=hasOpts?(q.options||[]).map(o=>`<div class="srv-opt-row"><input type="text" value="${esc(o)}" placeholder="選項文字" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:4px;font-size:13px"><button onclick="removeQuestionOption(this)" style="border:none;background:none;color:var(--accent);cursor:pointer;font-size:16px">✕</button></div>`).join(''):'';
+  const addOptBtn=hasOpts?`<button onclick="addQuestionOption(this)" class="srv-add-opt-btn" style="font-size:12px;background:none;border:1px dashed #aaa;padding:4px 10px;border-radius:4px;cursor:pointer;color:var(--muted);margin-top:4px">＋ 新增選項</button>`:'';
+  const otherRow=hasOpts?`<label class="srv-other-row"><input type="checkbox" class="srv-q-other"${q.allowOther?' checked':''}> 加入「其他」填答</label>`:'';
+  return `<div class="srv-q-card">
+    <div class="srv-q-header">
+      <span class="srv-q-num">第 ${idx+1} 題</span>
+      <button class="srv-q-remove" onclick="this.closest('.srv-q-card').remove()">✕ 刪除</button>
+    </div>
+    <input type="text" class="srv-q-text" value="${esc(q.label||'')}" placeholder="題目文字">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <label style="font-size:12px;color:var(--muted)">類型：</label>
+      <select class="srv-q-type" onchange="updateQCardOpts(this)" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:13px">${typeOpts}</select>
+      <label style="font-size:12px;color:var(--muted)"><input type="checkbox" class="srv-q-req"${q.required?' checked':''} style="margin-right:4px">必填</label>
+    </div>
+    <div class="srv-opts-wrap">${optsHtml}${addOptBtn}${otherRow}</div>
+  </div>`;
+}
+function openSurveyEdit(surveyId){
+  surveyModalView='edit';
+  document.getElementById('surveyAddBtn').style.display='none';
+  currentSurveyId = surveyId || null;
+  const sv = surveyId ? allSurveys.find(s=>s.surveyId===surveyId) : null;
+  const name = sv ? sv.surveyName : '';
+  const introTitle = sv ? (sv.introTitle || sv.surveyName || '') : '';
+  const introDescription = sv ? (sv.introDescription || '') : '';
+  const outroTitle = sv ? (sv.outroTitle || '問券已送出，感謝！') : '問券已送出，感謝！';
+  const outroDescription = sv ? (sv.outroDescription || '您的意見已收到，感謝您的參與！') : '您的意見已收到，感謝您的參與！';
+  const qs = sv ? (sv.questions||[]) : [];
+  document.getElementById('surveyModalTitle').textContent = surveyId ? '✏️ 編輯問券' : '＋ 新增問券';
+  const qHtml = qs.map((q,i)=>buildQCard(q,i)).join('');
+  document.getElementById('surveyModalBody').innerHTML=`
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">問券名稱</label>
+      <input type="text" id="surveyNameInput" value="${esc(name)}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box" placeholder="例：活動意見調查">
+    </div>
+    <div style="margin-bottom:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#faf7f2">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">封面標題</label>
+      <input type="text" id="surveyIntroTitleInput" value="${esc(introTitle)}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;margin-bottom:10px" placeholder="例：一起來規劃舊社里的活動吧">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">封面說明</label>
+      <textarea id="surveyIntroDescInput" style="width:100%;min-height:88px;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;resize:vertical" placeholder="例：您好，感謝您參加這次活動。請花一點時間填寫，方便之後有更好的規劃。">${esc(introDescription)}</textarea>
+    </div>
+    <div id="qCards">${qHtml}</div>
+    <button class="srv-add-q-btn" onclick="addSurveyQuestion()">＋ 新增題目</button>
+    <div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#faf7f2">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">送出後標題</label>
+      <input type="text" id="surveyOutroTitleInput" value="${esc(outroTitle)}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;margin-bottom:10px" placeholder="例：問券已送出，感謝！">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">送出後說明</label>
+      <textarea id="surveyOutroDescInput" style="width:100%;min-height:72px;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;resize:vertical" placeholder="例：您的意見已收到，感謝您的參與！">${esc(outroDescription)}</textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn ghost" id="previewSurveyBtn" onclick="previewSurvey()" disabled>預覽問券</button>
+      <button class="btn ghost" id="copySurveyLinkBtn" onclick="copySurveyLink()" disabled>複製連結</button>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+      <button class="btn" onclick="renderSurveyList()">取消</button>
+      <button class="btn primary" id="saveSurveyBtn" onclick="saveSurvey()">儲存問券</button>
+    </div>`;
+  updateSurveyPreviewButtons();
+}
+
+function addSurveyQuestion(){
+  const cards=document.getElementById('qCards');
+  const idx=cards.querySelectorAll('.srv-q-card').length;
+  cards.insertAdjacentHTML('beforeend',buildQCard({type:'text',label:'',required:false},idx));
+}
+function updateQCardOpts(sel){
+  const wrap=sel.closest('.srv-q-card').querySelector('.srv-opts-wrap');
+  const hasOpts=['single','multi'].includes(sel.value);
+  if(hasOpts){
+    if(!wrap.querySelector('.srv-opt-row')){
+      wrap.innerHTML=`<div class="srv-opt-row"><input type="text" value="" placeholder="選項文字" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:4px;font-size:13px"><button onclick="removeQuestionOption(this)" style="border:none;background:none;color:var(--accent);cursor:pointer;font-size:16px">✕</button></div><button onclick="addQuestionOption(this)" class="srv-add-opt-btn" style="font-size:12px;background:none;border:1px dashed #aaa;padding:4px 10px;border-radius:4px;cursor:pointer;color:var(--muted);margin-top:4px">＋ 新增選項</button><label class="srv-other-row"><input type="checkbox" class="srv-q-other"> 加入「其他」填答</label>`;
+    }
+  } else {
+    wrap.innerHTML='';
+  }
+}
+function addQuestionOption(btn){
+  const wrap=btn.closest('.srv-opts-wrap');
+  const newRow=document.createElement('div');
+  newRow.className='srv-opt-row';
+  newRow.innerHTML=`<input type="text" value="" placeholder="選項文字" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:4px;font-size:13px"><button onclick="removeQuestionOption(this)" style="border:none;background:none;color:var(--accent);cursor:pointer;font-size:16px">✕</button>`;
+  wrap.insertBefore(newRow, btn);
+}
+function removeQuestionOption(btn){
+  btn.closest('.srv-opt-row').remove();
+}
+function saveSurvey(){
+  const name=(document.getElementById('surveyNameInput').value||'').trim();
+  if(!name){showToast('請輸入問券名稱');return;}
+  const introTitle=(document.getElementById('surveyIntroTitleInput').value||'').trim() || name;
+  const introDescription=(document.getElementById('surveyIntroDescInput').value||'').trim();
+  const outroTitle=(document.getElementById('surveyOutroTitleInput').value||'').trim() || '問券已送出，感謝！';
+  const outroDescription=(document.getElementById('surveyOutroDescInput').value||'').trim() || '您的意見已收到，感謝您的參與！';
+  const cards=document.querySelectorAll('#qCards .srv-q-card');
+  if(!cards.length){showToast('請至少新增一道題目');return;}
+  const questions=[];
+  let valid=true;
+  cards.forEach((card,i)=>{
+    const label=(card.querySelector('.srv-q-text').value||'').trim();
+    if(!label){showToast(`第 ${i+1} 題題目不能空白`);valid=false;return;}
+    const type=card.querySelector('.srv-q-type').value;
+    const required=card.querySelector('.srv-q-req').checked;
+    const opts=[];
+    card.querySelectorAll('.srv-opt-row input').forEach(inp=>{const v=(inp.value||'').trim();if(v)opts.push(v);});
+    if(['single','multi'].includes(type)&&opts.length<2){showToast(`第 ${i+1} 題選項至少需要 2 個`);valid=false;return;}
+    const allowOther=!!card.querySelector('.srv-q-other')?.checked;
+    questions.push({label,type,required,options:opts,allowOther});
+  });
+  if(!valid) return;
+  const btn=document.getElementById('saveSurveyBtn');
+  btn.disabled=true; btn.textContent='儲存中…';
+  const action=currentSurveyId?'updateSurvey':'createSurvey';
+  const payload={action,sessionToken:SESSION.sessionToken,surveyName:name,introTitle,introDescription,outroTitle,outroDescription,questions};
+  if(currentSurveyId) payload.surveyId=currentSurveyId;
+  postBackend(action,payload)
+    .then(r=>r.json()).then(d=>{
+      btn.disabled=false; btn.textContent='儲存問券';
+      if(!d.success){showToast('儲存失敗：'+(d.error||''));return;}
+      showToast(currentSurveyId?'問券已更新':'問券已建立');
+      loadSurveys();
+    }).catch(()=>{btn.disabled=false;btn.textContent='儲存問券';showToast('網路錯誤');});
+}
+function getSurveyPreviewUrl(surveyId){
+  const id = surveyId || currentSurveyId;
+  if(!id) return null;
+  const sv = allSurveys.find(s=>s.surveyId===id);
+  if(!sv) return null;
+  if (sv.surveyFileName) {
+    return CONFIG.BASE_URL.replace(/\/$/, '') + '/survey?preview=1&surveyFileName=' + encodeURIComponent(sv.surveyFileName);
+  }
+  return CONFIG.BASE_URL.replace(/\/$/, '') + '/survey?preview=1&surveyId=' + encodeURIComponent(sv.surveyId);
+}
+function previewSurvey(surveyId){
+  const url = getSurveyPreviewUrl(surveyId);
+  if(!url){showToast('請先儲存問券後再預覽');return;}
+  window.open(url, '_blank');
+}
+function copySurveyLink(surveyId){
+  const url = getSurveyPreviewUrl(surveyId);
+  if(!url){showToast('請先儲存問券後再複製連結');return;}
+  navigator.clipboard.writeText(url).then(()=>showToast('問券預覽連結已複製')).catch(()=>showToast('複製失敗，請手動複製')); 
+}
+function updateSurveyPreviewButtons(){
+  const btn = document.getElementById('previewSurveyBtn');
+  const copyBtn = document.getElementById('copySurveyLinkBtn');
+  if(!btn||!copyBtn) return;
+  const enabled = !!currentSurveyId;
+  btn.disabled = !enabled;
+  copyBtn.disabled = !enabled;
+}
+function deleteSurveyItem(surveyId, btn){
+  if(!confirm('確定要刪除此問券？')) return;
+  btn.disabled=true;
+  postBackend('deleteSurvey',{sessionToken:SESSION.sessionToken,surveyId})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){btn.disabled=false;showToast('刪除失敗：'+(d.error||''));return;}
+      showToast('問券已刪除');
+      loadSurveys();
+    }).catch(()=>{btn.disabled=false;showToast('網路錯誤');});
+}
+
+// ── 報名記錄查詢 ──
+function openHistoryModal(){
+  document.getElementById('historyModal').classList.add('open');
+  document.getElementById('historySearchInput').value='';
+  document.getElementById('historyBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">請輸入姓名或 LINE ID 查詢報名記錄</p>';
+}
+function closeHistoryModal(){
+  document.getElementById('historyModal').classList.remove('open');
+}
+function searchHistory(){
+  const q=(document.getElementById('historySearchInput').value||'').trim();
+  if(!q){showToast('請輸入查詢內容');return;}
+  document.getElementById('historyBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">查詢中…</p>';
+  postBackend('getLineUserRegistrationHistory',{sessionToken:SESSION.sessionToken,query:q})
+    .then(r=>r.json()).then(d=>{
+      if(!d.success){document.getElementById('historyBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:30px">查詢失敗：'+esc(d.error||'')+'</p>';return;}
+      const records=d.records||[];
+      if(!records.length){document.getElementById('historyBody').innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">查無資料</p>';return;}
+      const rowsHtml=records.map(r=>`<tr>
+        <td>${esc(r.displayName||'')}</td>
+        <td style="font-size:11px;color:var(--muted)">${esc(r.lineUserId||'')}</td>
+        <td>${esc(r.eventName||r.eventId||'')}</td>
+        <td>${esc(formatTaipeiDateTime(r.submittedAt))}</td>
+        <td>${r.checkedIn==='TRUE'?'✅':'—'}</td>
+      </tr>`).join('');
+      document.getElementById('historyBody').innerHTML=`<table class="history-table"><thead><tr><th>姓名</th><th>LINE ID</th><th>活動</th><th>報名時間</th><th>簽到</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+    }).catch(()=>{document.getElementById('historyBody').innerHTML='<p style="color:var(--accent);text-align:center;padding:30px">網路錯誤</p>';});
+}
+</script>
+</body>
+</html>

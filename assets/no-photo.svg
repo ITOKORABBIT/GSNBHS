@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="未上傳照片">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d9f3ea" />
+      <stop offset="100%" stop-color="#c7dbff" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)" />
+  <g transform="translate(600 315)">
+    <rect x="-170" y="-90" width="340" height="220" rx="34" fill="#ffffff" opacity="0.96" />
+    <rect x="-105" y="-135" width="120" height="52" rx="22" fill="#ffffff" opacity="0.96" />
+    <circle cx="0" cy="20" r="64" fill="none" stroke="#2b5fd9" stroke-width="18" />
+    <circle cx="0" cy="20" r="18" fill="#2b5fd9" />
+    <circle cx="118" cy="-12" r="16" fill="#7eb7ff" />
+  </g>
+  <text x="600" y="575" text-anchor="middle" font-size="62" font-family="'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="700" fill="#2b5fd9">未上傳照片</text>
+  <text x="600" y="640" text-anchor="middle" font-size="28" font-family="'Noto Sans TC', 'Microsoft JhengHei', sans-serif" fill="#40616f">純文字通報也沒問題，我們已收到案件</text>
+</svg>

@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理後台 - 舊社里 里民小幫手</title>
+<link rel="icon" type="image/png" href="./HP_logo.png?v=5">
+<link rel="shortcut icon" href="./HP_logo.png?v=5">
+<link rel="apple-touch-icon" href="./HP_logo.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Noto Sans TC',sans-serif;
+  background:#f3f0ea;
+  color:#2b231b;
+  min-height:100vh;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+:root{
+  --bg:#f3f0ea;
+  --card:#ffffff;
+  --border:#e1d7cb;
+  --muted:#8f7c69;
+  --text:#2b231b;
+  --heading:#17110c;
+  --green:#4d7a56;
+  --green-soft:#ebf3ec;
+  --gold:#be9445;
+  --gold-soft:#fbf4e4;
+  --blue:#2f63ce;
+  --blue-soft:#eef4ff;
+  --rose:#b95353;
+  --rose-soft:#fff1ef;
+  --shadow:0 14px 40px rgba(43,35,27,.08);
+  --radius:18px;
+  --topbar-h:72px;
+}
+
+.login-shell{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:32px 16px;
+  background:
+    radial-gradient(circle at top left, rgba(190,148,69,.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(77,122,86,.14), transparent 30%),
+    var(--bg);
+}
+.login-card{
+  width:min(100%,440px);
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(225,215,203,.9);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  padding:32px 28px;
+}
+.login-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:var(--green-soft);
+  color:var(--green);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:18px;
+}
+.login-title{
+  font-size:28px;
+  font-weight:800;
+  color:var(--heading);
+  margin-bottom:10px;
+}
+.login-sub{
+  color:var(--muted);
+  line-height:1.75;
+  margin-bottom:22px;
+}
+.login-error{
+  display:none;
+  margin-top:16px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:var(--rose-soft);
+  color:var(--rose);
+  font-size:14px;
+}
+.webview-warn{
+  display:none;
+  margin-bottom:18px;
+  padding:14px 16px;
+  border-radius:14px;
+  background:#fff8e1;
+  border:1px solid #ffe082;
+  color:#7a5800;
+  font-size:14px;
+  line-height:1.7;
+}
+.webview-warn strong{display:block;margin-bottom:4px;font-size:15px}
+.webview-copy-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding:10px 16px;
+  border:none;
+  border-radius:12px;
+  background:#f59e0b;
+  color:#fff;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  width:100%;
+  justify-content:center;
+}
+
+.app-shell{display:none}
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:90;
+  height:var(--topbar-h);
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:0 20px;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(225,215,203,.9);
+}
+.brand-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#4d7a56,#6b9d75);
+  color:#fff;
+  box-shadow:0 10px 24px rgba(77,122,86,.25);
+}
+.brand-copy{display:flex;flex-direction:column;gap:2px}
+.brand-title{font-size:18px;font-weight:800;color:var(--heading)}
+.brand-sub{font-size:12px;color:var(--muted)}
+.manual-link{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--gold-soft);
+  color:var(--gold);
+  font-size:14px;
+  font-weight:800;
+}
+.topbar-spacer{flex:1}
+.topbar-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+}
+.avatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--green-soft);
+  color:var(--green);
+  font-weight:800;
+}
+.user-meta{display:flex;flex-direction:column;line-height:1.25}
+.user-name{font-size:13px;font-weight:700}
+.user-role{font-size:11px;color:var(--muted)}
+.logout-btn{
+  padding:10px 14px;
+  border:none;
+  border-radius:12px;
+  background:#1e1915;
+  color:#fff;
+  font-weight:700;
+}
+.login-manual{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--gold-soft);
+  color:var(--gold);
+  font-weight:800;
+}
+
+.page{
+  max-width:1400px;
+  margin:0 auto;
+  padding:24px 20px 40px;
+}
+.summary-card,.tab-shell,.modal-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+.summary-card{
+  padding:16px;
+  min-height:116px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  border-radius:16px;
+}
+.summary-label{font-size:13px;color:var(--muted);font-weight:700}
+.summary-value{font-size:32px;font-weight:800;color:var(--heading)}
+.summary-note{font-size:12px;color:var(--muted);line-height:1.6}
+
+.tab-shell{overflow:hidden}
+.tabbar{
+  display:flex;
+  gap:0;
+  border-bottom:1px solid var(--border);
+  overflow:auto;
+  background:#fcfbfa;
+}
+.tab-btn{
+  flex:1;
+  min-width:180px;
+  padding:16px 18px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  font-weight:800;
+  border-bottom:3px solid transparent;
+}
+.tab-btn.active{
+  color:var(--heading);
+  border-bottom-color:var(--tab-accent,#4d7a56);
+  background:var(--tab-soft,#ebf3ec);
+}
+.tab-panel{display:none;padding:20px}
+.tab-panel.active{display:block}
+.panel-head{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+.panel-title{font-size:22px;font-weight:800;color:var(--heading)}
+.panel-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.panel-actions{display:flex;flex-wrap:wrap;gap:10px}
+.action-btn{
+  padding:11px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-weight:700;
+}
+.action-btn.primary{background:var(--tab-accent,#4d7a56);border-color:var(--tab-accent,#4d7a56);color:#fff}
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:14px;
+}
+.search{
+  flex:1;
+  min-width:240px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+}
+.pill-group{display:flex;flex-wrap:wrap;gap:8px}
+.pill{
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+.pill.active{
+  background:var(--tab-soft,#ebf3ec);
+  color:var(--tab-accent,#4d7a56);
+  border-color:transparent;
+}
+
+.table-wrap{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:#fff;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  padding:14px 16px;
+  border-bottom:1px solid #efe8df;
+  text-align:left;
+  vertical-align:middle;
+}
+th{
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  background:#faf8f5;
+}
+td{font-size:14px}
+tbody tr:hover{background:#fcfaf7}
+tbody tr:last-child td{border-bottom:none}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.badge-green{background:#eaf3eb;color:#2f6836}
+.badge-gold{background:#fff4df;color:#9b6112}
+.badge-blue{background:#eef4ff;color:#1a56a8}
+.badge-gray{background:#f2efea;color:#6f645a}
+.inline-actions{display:flex;flex-wrap:wrap;gap:8px}
+.inline-link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 10px;
+  border:none;
+  border-radius:10px;
+  background:#f7f3ee;
+  font-size:13px;
+  font-weight:700;
+  color:inherit;
+  cursor:pointer;
+}
+.muted{color:var(--muted)}
+.empty-state{
+  padding:48px 20px;
+  text-align:center;
+  color:var(--muted);
+}
+.empty-state h3{
+  color:var(--heading);
+  font-size:18px;
+  margin-bottom:8px;
+}
+
+.account-grid{
+  display:grid;
+  gap:12px;
+}
+.account-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:#fff;
+}
+.account-main{display:flex;align-items:center;gap:12px}
+.account-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--blue-soft);
+  color:var(--blue);
+  font-weight:800;
+}
+.account-name{font-weight:800}
+.account-email{font-size:13px;color:var(--muted)}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(24,18,14,.45);
+  z-index:120;
+}
+.modal.open{display:flex}
+.modal-card{
+  width:min(100%,520px);
+  padding:22px;
+}
+.modal-card.wide{
+  width:min(100%,980px);
+  max-height:86vh;
+  overflow:auto;
+}
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+.modal-title{font-size:22px;font-weight:800}
+.close-btn{
+  width:36px;
+  height:36px;
+  border:none;
+  border-radius:50%;
+  background:#f4f0ea;
+  font-size:20px;
+}
+.field{margin-bottom:14px}
+.label{
+  display:block;
+  margin-bottom:6px;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:700;
+}
+.input,.select{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+}
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:8px;
+}
+.error-box{
+  display:none;
+  margin-bottom:12px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:var(--rose-soft);
+  color:var(--rose);
+  font-size:14px;
+}
+.registration-summary{
+  margin-bottom:12px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+.registration-table-wrap{
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:auto;
+  background:#fff;
+}
+.registration-table-wrap table{min-width:760px}
+.view-tool-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-bottom:14px;
+}
+.view-tool-card{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#fff;
+  padding:14px;
+}
+.view-tool-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:flex-end;
+}
+.view-tool-row .field{
+  flex:1;
+  min-width:130px;
+  margin-bottom:0;
+}
+.view-total{
+  font-size:28px;
+  font-weight:800;
+  color:var(--tab-accent,#4d7a56);
+  margin-top:4px;
+}
+.view-message{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:var(--tab-soft,#ebf3ec);
+  color:var(--tab-accent,#4d7a56);
+  font-size:13px;
+  font-weight:700;
+  display:none;
+}
+.view-message.error{
+  display:block;
+  background:var(--rose-soft);
+  color:var(--rose);
+}
+
+@media (max-width: 980px){
+  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 760px){
+  .topbar{height:auto;flex-wrap:wrap;padding:14px 16px}
+  .page{padding:18px 14px 32px}
+  .tab-panel{padding:16px}
+  .panel-head,.toolbar{flex-direction:column;align-items:stretch}
+  .summary-grid{grid-template-columns:1fr 1fr;padding:16px 16px 0}
+  th:nth-child(4),td:nth-child(4),
+  th:nth-child(5),td:nth-child(5){display:none}
+  #viewWrap th:nth-child(4),#viewWrap td:nth-child(4),
+  #viewWrap th:nth-child(5),#viewWrap td:nth-child(5){display:table-cell}
+}
+</style>
+</head>
+<body>
+
+<div class="login-shell" id="loginScreen">
+  <div class="login-card">
+    <div class="login-badge">舊社里小幫手 管理入口</div>
+    <div class="login-title">管理後台</div>
+    <div class="webview-warn" id="webviewWarn">
+      <strong>⚠️ 無法在此瀏覽器登入</strong>
+      您目前使用 LINE 或 App 內建瀏覽器，Google 帳號登入會被封鎖。<br>
+      請複製連結，貼到 <strong>Chrome</strong> 或手機預設瀏覽器開啟。
+      <button class="webview-copy-btn" onclick="copyLoginUrl()">複製登入網址</button>
+    </div>
+    <div class="login-sub">
+      這裡整合里民案件通報、美食地圖、活動公告欄與管理者帳號。
+      請使用已授權的 Google 帳號登入。
+    </div>
+    <div id="loginBtnWrap"></div>
+    <a class="login-manual" href="使用者手冊_舊社里.html" target="_blank" rel="noopener">查看使用手冊</a>
+    <div class="login-error" id="loginError">登入失敗，或此帳號尚未被加入管理名單。</div>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell">
+  <div class="topbar">
+    <div class="brand-icon">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <path d="M9 22V12h6v10"/>
+      </svg>
+    </div>
+    <div class="brand-copy">
+      <div class="brand-title">舊社里小幫手</div>
+      <div class="brand-sub">整合式管理後台</div>
+    </div>
+    <a class="manual-link" href="使用者手冊_舊社里.html" target="_blank" rel="noopener">使用手冊</a>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-user">
+      <div class="avatar" id="userAvatar">管</div>
+      <div class="user-meta">
+        <div class="user-name" id="userName">管理者</div>
+        <div class="user-role" id="userRole">登入中</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">登出</button>
+  </div>
+
+  <div class="page">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">案件總數</div>
+        <div class="summary-value" id="sumCases">-</div>
+        <div class="summary-note" id="sumCasesNote">載入中</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">商店總數</div>
+        <div class="summary-value" id="sumStores">-</div>
+        <div class="summary-note" id="sumStoresNote">載入中</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">公告總數</div>
+        <div class="summary-value" id="sumBulletins">-</div>
+        <div class="summary-note" id="sumBulletinsNote">載入中</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">管理者數量</div>
+        <div class="summary-value" id="sumAdmins">-</div>
+        <div class="summary-note" id="sumAdminsNote">僅超級管理員可管理帳號</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">活動報名</div>
+        <div class="summary-value" id="sumEvents">-</div>
+        <div class="summary-note" id="sumEventsNote">載入中</div>
+      </div>
+    </div>
+
+    <section class="tab-shell">
+      <div class="tabbar">
+        <button class="tab-btn active" data-tab="cases" onclick="switchTab('cases')">📋 里民案件清單</button>
+        <button class="tab-btn" data-tab="stores" onclick="switchTab('stores')">🍽️ 美食地圖清單</button>
+        <button class="tab-btn" data-tab="bulletins" onclick="switchTab('bulletins')">📣 活動公告欄</button>
+        <button class="tab-btn" data-tab="events" onclick="switchTab('events')">🎪 活動報名</button>
+        <button class="tab-btn" data-tab="views" onclick="switchTab('views')">👁️ 瀏覽人次</button>
+        <button class="tab-btn" data-tab="admins" onclick="switchTab('admins')">👤 管理者</button>
+        <button class="tab-btn" data-tab="emergency" onclick="switchTab('emergency')">📞 緊急電話</button>
+        <button class="tab-btn" data-tab="chat" onclick="switchTab('chat')">💬 留言記錄</button>
+      </div>
+
+      <div class="tab-panel active" id="panel-cases">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">里民案件清單</div>
+            <div class="panel-sub">快速查看案件狀態，進入案件完整頁面後可直接回覆與設定公開資訊。</div>
+          </div>
+          <div class="panel-actions">
+            <a class="action-btn" href="openlist.html" target="_blank" rel="noopener">里民公開清單</a>
+<a class="action-btn primary" href="list.html">進入案件管理頁</a>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="caseSearch" type="text" placeholder="搜尋案件編號、主旨、地點、分類…" oninput="renderCases()">
+          <div class="pill-group" id="casePills"></div>
+        </div>
+        <div class="table-wrap" id="caseWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-stores">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">美食地圖清單</div>
+            <div class="panel-sub">快速看申請狀態與公開狀況，進入完整頁可進一步審核與調整公開內容。</div>
+          </div>
+          <div class="panel-actions">
+            <a class="action-btn" href="storeopenlist.html" target="_blank" rel="noopener">里民公開清單</a>
+            <a class="action-btn primary" href="storelist.html">進入商店管理頁</a>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="storeSearch" type="text" placeholder="搜尋商店編號、店名、地址、申請人…" oninput="renderStores()">
+          <div class="pill-group" id="storePills"></div>
+        </div>
+        <div class="table-wrap" id="storeWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-bulletins">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">活動公告欄</div>
+            <div class="panel-sub">這裡顯示公告摘要；新增、編輯、發布與刪除請進入「公告管理頁」。</div>
+          </div>
+          <div class="panel-actions">
+            <a class="action-btn" href="bulletin.html" target="_blank" rel="noopener">里民公告清單</a>
+            <a class="action-btn primary" href="bulletinlist.html">進入公告管理頁</a>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="bulletinSearch" type="text" placeholder="搜尋公告標題、內容、建立者…" oninput="renderBulletins()">
+          <div class="pill-group" id="bulletinPills"></div>
+        </div>
+        <div class="table-wrap" id="bulletinWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-events">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">活動報名管理</div>
+            <div class="panel-sub">建立活動問券、管理報名狀態，點「進入管理頁」可新增與編輯活動。</div>
+          </div>
+          <div class="panel-actions">
+            <a class="action-btn primary" href="eventdetail.html">＋ 新增活動</a>
+            <a class="action-btn" href="eventlist.html">進入管理頁</a>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="eventSearch" type="text" placeholder="搜尋活動名稱、地點…" oninput="renderEvents()">
+          <div class="pill-group" id="eventPills"></div>
+        </div>
+        <div class="table-wrap" id="eventWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-views">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">瀏覽人次</div>
+            <div class="panel-sub">調整公開頁卡片瀏覽數。只限管理員登入後操作。</div>
+          </div>
+          <div class="panel-actions">
+            <button class="action-btn" onclick="loadViewStats(true)">重新整理</button>
+          </div>
+        </div>
+        <div class="view-message" id="viewMessage"></div>
+        <div class="view-tool-grid">
+          <div class="view-tool-card">
+            <div class="field">
+              <label class="label" for="viewPageSelect">頁面</label>
+              <select class="select" id="viewPageSelect" onchange="loadViewStats(true)">
+                <option value="cases">公開案件</option>
+                <option value="stores">美食地圖</option>
+                <option value="bulletins">活動公告</option>
+              </select>
+            </div>
+            <div class="summary-note">目前總瀏覽數</div>
+            <div class="view-total" id="viewTotal">-</div>
+          </div>
+          <div class="view-tool-card">
+            <div class="view-tool-row">
+              <div class="field">
+                <label class="label" for="viewTopN">前幾筆</label>
+                <input class="input" id="viewTopN" type="number" min="1" max="200" value="10">
+              </div>
+              <div class="field">
+                <label class="label" for="viewAddMin">增加數</label>
+                <input class="input" id="viewAddMin" type="number" min="0" value="20">
+              </div>
+              <div class="field">
+                <label class="label" for="viewAddMax">隨機上限</label>
+                <input class="input" id="viewAddMax" type="number" min="0" value="30">
+              </div>
+              <button class="action-btn primary" onclick="bulkBoostViews()">批次增加</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap" id="viewWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-admins">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">管理者</div>
+            <div class="panel-sub">超級管理員可新增、編輯、停用或刪除帳號。</div>
+          </div>
+          <div class="panel-actions">
+            <button class="action-btn primary" onclick="openAdminModal()">新增管理者</button>
+          </div>
+        </div>
+        <div id="adminWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-emergency">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">緊急電話</div>
+            <div class="panel-sub">管理「緊急通話」選單顯示的電話清單，新增/編輯/刪除後立即生效。</div>
+          </div>
+          <div class="panel-actions">
+            <button class="action-btn primary" onclick="openEmergencyModal()">新增電話</button>
+          </div>
+        </div>
+        <div id="emergencyWrap"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-chat">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">留言記錄</div>
+            <div class="panel-sub">里民透過「只想聊聊」留下的訊息，AI 只負責記錄，不會回答問題，請點「查看」回覆里民。</div>
+          </div>
+        </div>
+        <div id="chatWrap"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal" id="chatModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title" id="chatModalTitle">留言內容</div>
+      <button class="close-btn" onclick="closeChatModal()">×</button>
+    </div>
+    <div id="chatMessagesWrap" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<div class="modal" id="emergencyModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title" id="emergencyModalTitle">新增電話</div>
+      <button class="close-btn" onclick="closeEmergencyModal()">×</button>
+    </div>
+    <div class="error-box" id="emergencyModalError"></div>
+    <div class="field">
+      <label class="label" for="emergencyKindInput">類型</label>
+      <select class="select" id="emergencyKindInput" onchange="toggleEmergencyPhoneField()">
+        <option value="tel">電話（點擊直接撥號）</option>
+        <option value="url">通話連結（例如 LINE 官方帳號的免費通話連結）</option>
+        <option value="hint">免費通話提示（提示使用聊天室右上角的通話圖示）</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label" for="emergencyNameInput">名稱（例如：里長 陳煜威）</label>
+      <input class="input" id="emergencyNameInput" type="text">
+    </div>
+    <div class="field">
+      <label class="label" for="emergencyOrgInput">單位（選填，例如：東山派出所）</label>
+      <input class="input" id="emergencyOrgInput" type="text">
+    </div>
+    <div class="field" id="emergencyPhoneField">
+      <label class="label" id="emergencyPhoneLabel" for="emergencyPhoneInput">電話（純數字，例如：0919662257）</label>
+      <input class="input" id="emergencyPhoneInput" type="text">
+    </div>
+    <div class="field">
+      <label class="label" for="emergencySortInput">排序（數字越小越前面）</label>
+      <input class="input" id="emergencySortInput" type="number" value="0">
+    </div>
+    <div class="modal-actions">
+      <button class="action-btn" onclick="closeEmergencyModal()">取消</button>
+      <button class="action-btn primary" id="emergencySaveBtn" onclick="saveEmergencyContact()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="adminModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title" id="adminModalTitle">新增管理者</div>
+      <button class="close-btn" onclick="closeAdminModal()">×</button>
+    </div>
+    <div class="error-box" id="adminModalError"></div>
+    <div class="field">
+      <label class="label" for="adminNameInput">名稱</label>
+      <input class="input" id="adminNameInput" type="text">
+    </div>
+    <div class="field">
+      <label class="label" for="adminEmailInput">Email</label>
+      <input class="input" id="adminEmailInput" type="email">
+    </div>
+    <div class="field">
+      <label class="label" for="adminRoleInput">角色</label>
+      <select class="select" id="adminRoleInput">
+        <option value="管理員">管理員</option>
+        <option value="超級管理員">超級管理員</option>
+        <option value="協辦">協辦</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="action-btn" onclick="closeAdminModal()">取消</button>
+      <button class="action-btn primary" id="adminSaveBtn" onclick="saveAdmin()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="registrationModal">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div class="modal-title" id="registrationModalTitle">報名名單</div>
+      <button class="close-btn" onclick="closeRegistrationModal()">×</button>
+    </div>
+    <div id="registrationModalBody">
+      <div class="empty-state"><h3>載入中</h3><p>正在讀取報名名單…</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script>
+const TAB_STYLES = {
+  cases:    { accent: '#4d7a56', soft: '#ebf3ec' },
+  stores:   { accent: '#be9445', soft: '#fbf4e4' },
+  bulletins:{ accent: '#b95353', soft: '#fff1ef' },
+  events:   { accent: '#1a73e8', soft: '#e8f0fe' },
+  views:    { accent: '#5f5aa2', soft: '#f0efff' },
+  admins:   { accent: '#2f63ce', soft: '#eef4ff' },
+  emergency:{ accent: '#c0392b', soft: '#fdeceb' },
+  chat:     { accent: '#0f9d8d', soft: '#e6f7f5' }
+};
+const VIEW_PAGE_CONFIG = {
+  cases: {
+    label: '公開案件',
+    url: () => CONFIG.CASE_API_URL,
+    sourceAction: 'getCases',
+    idKey: 'caseId',
+    title: item => item.publicTitle || item.title || '（無標題）',
+    publicOnly: item => isTruthy(item.publicFlag)
+  },
+  stores: {
+    label: '美食地圖',
+    url: () => CONFIG.STORE_API_URL,
+    sourceAction: 'getStores',
+    idKey: 'storeId',
+    title: item => item.pubName || item.storeName || '（無名稱）',
+    publicOnly: item => item.status === '已公開'
+  },
+  bulletins: {
+    label: '活動公告',
+    url: () => CONFIG.BULLETIN_API_URL,
+    sourceAction: 'getBulletins',
+    idKey: 'bulletinId',
+    title: item => item.title || '（無標題）',
+    publicOnly: item => bulletinStatusLabel(item.status) === '已發布'
+  }
+};
+
+let currentTab = 'cases';
+let adminName = '';
+let adminRole = '';
+let adminEmail = '';
+let allCases = [];
+let allStores = [];
+let allBulletins = [];
+let allAdmins = [];
+let allEvents = [];
+let loadedTabs = {};
+let caseFilter = 'all';
+let storeFilter = 'all';
+let bulletinFilter = 'all';
+let eventFilter = 'all';
+let editingAdminEmail = null;
+let adminsAccessible = false;
+let viewStatsData = {};
+let viewItems = [];
+let allEmergencyContacts = [];
+let editingEmergencyId = null;
+let allChatThreads = [];
+
+const WORKER_ACTION_URLS = {
+  getCases:     () => CONFIG.CASE_API_URL,
+  getStores:    () => CONFIG.STORE_API_URL,
+  getBulletins: () => CONFIG.BULLETIN_API_URL,
+  getEvents:    () => CONFIG.EVENT_API_URL,
+  getRegistrations: () => CONFIG.EVENT_API_URL,
+  getEmergencyContacts:    () => CONFIG.EVENT_API_URL,
+  addEmergencyContact:     () => CONFIG.EVENT_API_URL,
+  updateEmergencyContact:  () => CONFIG.EVENT_API_URL,
+  deleteEmergencyContact:  () => CONFIG.EVENT_API_URL,
+  getChatThreads:  () => CONFIG.EVENT_API_URL,
+  getChatMessages: () => CONFIG.EVENT_API_URL,
+};
+function apiCall(action, extra) {
+  const sess = getSession();
+  const payload = Object.assign({ action: action }, extra || {});
+  const workerUrl = WORKER_ACTION_URLS[action] ? WORKER_ACTION_URLS[action]() : null;
+  const isWorker = !!workerUrl;
+  const url = workerUrl || CONFIG.SCRIPT_URL;
+  if (sess) {
+    payload.sessionToken = sess.sessionToken;
+    if (isWorker && sess.id_token) payload.id_token = sess.id_token;
+  }
+  return fetch(url, {
+    method: 'POST',
+    redirect: isWorker ? undefined : 'follow',
+    headers: { 'Content-Type': isWorker ? 'application/json' : 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json());
+}
+
+function apiCallTo(url, action, extra) {
+  const sess = getSession();
+  const payload = Object.assign({ action: action }, extra || {});
+  if (sess) {
+    payload.sessionToken = sess.sessionToken;
+    if (sess.id_token) payload.id_token = sess.id_token;
+  }
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+}
+
+function handleExpiredSession() {
+  clearSession();
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'grid';
+  document.getElementById('loginError').style.display = 'block';
+  document.getElementById('loginError').textContent = '登入已失效，請重新登入。';
+  if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+}
+
+function isLineWebView() {
+  return /Line\//i.test(navigator.userAgent);
+}
+
+function isOtherWebView() {
+  const ua = navigator.userAgent;
+  return /FBAN|FBAV|Instagram|MicroMessenger/i.test(ua) ||
+    (ua.includes('Android') && /wv\b/.test(ua));
+}
+
+function copyLoginUrl() {
+  const url = location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.webview-copy-btn');
+    btn.textContent = '✓ 已複製！貼到 Chrome 開啟';
+    btn.style.background = '#16a34a';
+  }).catch(() => {
+    prompt('請手動複製此網址：', url);
+  });
+}
+
+function initGoogle() {
+  if (isLineWebView()) {
+    const url = new URL(location.href);
+    if (!url.searchParams.has('openExternalBrowser')) {
+      url.searchParams.set('openExternalBrowser', '1');
+      location.replace(url.toString());
+      return;
+    }
+  }
+  if (isOtherWebView()) {
+    document.getElementById('webviewWarn').style.display = 'block';
+    return;
+  }
+  const sess = getSession();
+  if (sess) {
+    adminName = sess.name || '';
+    adminRole = sess.role || '';
+    adminEmail = sess.email || '';
+    enterApp();
+    return;
+  }
+  if (!CONFIG.GOOGLE_CLIENT_ID) return;
+  if (typeof google === 'undefined') {
+    setTimeout(initGoogle, 300);
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: onGoogleSignIn,
+    auto_select: true
+  });
+  google.accounts.id.renderButton(document.getElementById('loginBtnWrap'), {
+    type: 'standard',
+    theme: 'filled_blue',
+    size: 'large',
+    text: 'signin_with',
+    locale: 'zh-TW',
+    width: 280
+  });
+  google.accounts.id.prompt();
+}
+
+function onGoogleSignIn(resp) {
+  document.getElementById('loginError').style.display = 'none';
+  fetch(CONFIG.SCRIPT_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'login', id_token: resp.credential })
+  })
+  .then(r => r.text())
+  .then(t => JSON.parse(t))
+  .then(json => {
+    if (!json.success) {
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    adminName = json.name || '';
+    adminRole = json.role || '';
+    adminEmail = json.email || '';
+    setSession(json.sessionToken, json.email, json.name, json.role || '', resp.credential);
+    enterApp();
+  })
+  .catch(() => {
+    document.getElementById('loginError').style.display = 'block';
+  });
+}
+
+function enterApp() {
+  const redirect = new URLSearchParams(location.search).get('redirect') || '';
+  if (redirect) {
+    try {
+      const target = new URL(redirect, location.origin);
+      if (target.origin === location.origin) {
+        location.replace(redirect);
+        return;
+      }
+    } catch (error) {}
+  }
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  document.getElementById('userAvatar').textContent = (adminName || '管').charAt(0);
+  document.getElementById('userName').textContent = adminName || '管理者';
+  document.getElementById('userRole').textContent = adminRole || '管理員';
+  applyInitialTab();
+}
+
+function doLogout() {
+  clearSession();
+  if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+  location.href = 'admin.html';
+}
+
+function applyInitialTab() {
+  const tab = new URLSearchParams(location.search).get('tab');
+  if (tab && TAB_STYLES[tab]) currentTab = tab;
+  switchTab(currentTab);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  const style = TAB_STYLES[tab];
+  document.documentElement.style.setProperty('--tab-accent', style.accent);
+  document.documentElement.style.setProperty('--tab-soft', style.soft);
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === 'panel-' + tab);
+  });
+  loadTab(tab);
+}
+
+function badgeClassByText(text) {
+  const value = String(text || '');
+  if (value.includes('新') || value.includes('待')) return 'badge-blue';
+  if (value.includes('處理中') || value.includes('審核中') || value.includes('草稿') || value.includes('未發布')) return 'badge-gold';
+  if (value.includes('已公開') || value.includes('已發布') || value.includes('已處理') || value.includes('已結案')) return 'badge-green';
+  return 'badge-gray';
+}
+
+function isTruthy(value) {
+  return value === true || value === 1 || value === '1' || value === 'TRUE' || value === '是';
+}
+
+function setSummary(id, value, note) {
+  document.getElementById(id).textContent = value;
+  document.getElementById(id + 'Note').textContent = note;
+}
+
+function bulletinStatusLabel(status) {
+  return String(status || '').trim() === '已發布' ? '已發布' : '未發布';
+}
+
+function buildPills(containerId, items, selected, callbackName) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = items.map(item => (
+    '<button class="pill' + (item.value === selected ? ' active' : '') + '" onclick="' + callbackName + '(\'' + escapeHtml(item.value) + '\')">' +
+    escapeHtml(item.label) + '</button>'
+  )).join('');
+}
+
+function setCaseFilter(value) { caseFilter = value; renderCases(); }
+function setStoreFilter(value) { storeFilter = value; renderStores(); }
+function setBulletinFilter(value) { bulletinFilter = value; renderBulletins(); }
+function setEventFilter(value) { eventFilter = value; renderEvents(); }
+
+function refreshAll() {
+  loadTab(currentTab, true);
+}
+
+function loadTab(tab, force) {
+  if (!force && loadedTabs[tab]) return;
+  loadedTabs[tab] = true;
+
+  if (tab === 'cases') loadCases();
+  if (tab === 'stores') loadStores();
+  if (tab === 'bulletins') loadBulletins();
+  if (tab === 'events') loadEvents();
+  if (tab === 'views') loadViewStats();
+  if (tab === 'admins') loadAdmins();
+  if (tab === 'emergency') loadEmergencyContacts();
+  if (tab === 'chat') loadChatThreads();
+}
+
+function loadCases() {
+  apiCall('getCases').then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入案件失敗');
+    allCases = json.cases || [];
+    const pending = allCases.filter(item => String(item.status || '').includes('新') || String(item.status || '').includes('待')).length;
+    setSummary('sumCases', String(allCases.length), '待關注 ' + pending + ' 件');
+    renderCases();
+  }).catch(error => {
+    document.getElementById('caseWrap').innerHTML = '<div class="empty-state"><h3>無法載入案件</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderCases() {
+  const q = (document.getElementById('caseSearch').value || '').trim().toLowerCase();
+  const statusCounts = {};
+  allCases.forEach(item => {
+    const key = item.status || '未設定';
+    statusCounts[key] = (statusCounts[key] || 0) + 1;
+  });
+
+  const pills = [{ value: 'all', label: '全部 ' + allCases.length }];
+  Object.keys(statusCounts).sort().forEach(key => pills.push({ value: key, label: key + ' ' + statusCounts[key] }));
+  buildPills('casePills', pills, caseFilter, 'setCaseFilter');
+
+  const list = allCases.filter(item => {
+    if (caseFilter !== 'all' && (item.status || '未設定') !== caseFilter) return false;
+    if (!q) return true;
+    const hay = [item.caseId, item.title, item.addr, item.category, item.publicTitle].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!list.length) {
+    document.getElementById('caseWrap').innerHTML = '<div class="empty-state"><h3>沒有符合的案件</h3><p>請調整搜尋條件或切換狀態。</p></div>';
+    return;
+  }
+
+  const rows = list.map(item => (
+    '<tr>' +
+    '<td>' + escapeHtml(item.caseId) + '</td>' +
+    '<td>' + escapeHtml(item.title || '（無標題）') + '</td>' +
+    '<td><span class="badge ' + badgeClassByText(item.status) + '">' + escapeHtml(item.status || '未設定') + '</span></td>' +
+    '<td>' + escapeHtml(item.category || '—') + '</td>' +
+    '<td>' + escapeHtml(fmtDate(item.reportTime)) + '</td>' +
+    '<td><div class="inline-actions">' +
+    '<a class="inline-link" href="detail.html?id=' + encodeURIComponent(item.caseId) + '">編輯</a>' +
+    '<a class="inline-link" href="opendetail.html?id=' + encodeURIComponent(item.caseId) + '&back=' + encodeURIComponent('openlist.html') + '" target="_blank" rel="noopener">公開頁</a>' +
+    '</div></td>' +
+    '</tr>'
+  )).join('');
+
+  document.getElementById('caseWrap').innerHTML =
+    '<table><thead><tr><th>案件編號</th><th>主旨</th><th>狀態</th><th>分類</th><th>通報時間</th><th>操作</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function loadStores() {
+  apiCall('getStores').then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入商店失敗');
+    allStores = json.stores || [];
+    const publicCount = allStores.filter(item => item.status === '已公開').length;
+    setSummary('sumStores', String(allStores.length), '已公開 ' + publicCount + ' 間');
+    renderStores();
+  }).catch(error => {
+    document.getElementById('storeWrap').innerHTML = '<div class="empty-state"><h3>無法載入商店</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderStores() {
+  const q = (document.getElementById('storeSearch').value || '').trim().toLowerCase();
+  const statusCounts = {};
+  allStores.forEach(item => {
+    const key = item.status || '未設定';
+    statusCounts[key] = (statusCounts[key] || 0) + 1;
+  });
+
+  const pills = [{ value: 'all', label: '全部 ' + allStores.length }];
+  Object.keys(statusCounts).sort().forEach(key => pills.push({ value: key, label: key + ' ' + statusCounts[key] }));
+  buildPills('storePills', pills, storeFilter, 'setStoreFilter');
+
+  const list = allStores.filter(item => {
+    if (storeFilter !== 'all' && (item.status || '未設定') !== storeFilter) return false;
+    if (!q) return true;
+    const hay = [item.storeId, item.storeName, item.addr, item.category, item.name].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!list.length) {
+    document.getElementById('storeWrap').innerHTML = '<div class="empty-state"><h3>沒有符合的商店</h3><p>請調整搜尋條件或切換狀態。</p></div>';
+    return;
+  }
+
+  const rows = list.map(item => (
+    '<tr>' +
+    '<td>' + escapeHtml(item.storeId) + '</td>' +
+    '<td>' + escapeHtml(item.storeName || '（無名稱）') + '</td>' +
+    '<td><span class="badge ' + badgeClassByText(item.status) + '">' + escapeHtml(item.status || '未設定') + '</span></td>' +
+    '<td>' + escapeHtml(item.category || '—') + '</td>' +
+    '<td>' + escapeHtml(fmtDate(item.applyTime)) + '</td>' +
+    '<td><div class="inline-actions">' +
+    '<a class="inline-link" href="storedetail.html?id=' + encodeURIComponent(item.storeId) + '">審核</a>' +
+    '<a class="inline-link" href="storeopendetail.html?id=' + encodeURIComponent(item.storeId) + '&back=' + encodeURIComponent('storeopenlist.html') + '" target="_blank" rel="noopener">公開頁</a>' +
+    '</div></td>' +
+    '</tr>'
+  )).join('');
+
+  document.getElementById('storeWrap').innerHTML =
+    '<table><thead><tr><th>商店編號</th><th>店名</th><th>狀態</th><th>分類</th><th>申請時間</th><th>操作</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function loadBulletins() {
+  apiCall('getBulletins').then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入公告失敗');
+    allBulletins = json.bulletins || [];
+    const publishedCount = allBulletins.filter(item => bulletinStatusLabel(item.status) === '已發布').length;
+    setSummary('sumBulletins', String(allBulletins.length), '已發布 ' + publishedCount + ' 則');
+    renderBulletins();
+  }).catch(error => {
+    document.getElementById('bulletinWrap').innerHTML = '<div class="empty-state"><h3>無法載入公告</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderBulletins() {
+  const q = (document.getElementById('bulletinSearch').value || '').trim().toLowerCase();
+  const statusCounts = {};
+  allBulletins.forEach(item => {
+    const key = bulletinStatusLabel(item.status);
+    statusCounts[key] = (statusCounts[key] || 0) + 1;
+  });
+
+  const pills = [{ value: 'all', label: '全部 ' + allBulletins.length }];
+  ['已發布', '未發布'].forEach(key => pills.push({ value: key, label: key + ' ' + (statusCounts[key] || 0) }));
+  buildPills('bulletinPills', pills, bulletinFilter, 'setBulletinFilter');
+
+  const list = allBulletins.filter(item => {
+    if (bulletinFilter !== 'all' && bulletinStatusLabel(item.status) !== bulletinFilter) return false;
+    if (!q) return true;
+    const hay = [item.bulletinId, item.title, item.content, item.author].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!list.length) {
+    document.getElementById('bulletinWrap').innerHTML = '<div class="empty-state"><h3>沒有符合的公告</h3><p>請調整搜尋條件或切換狀態。</p></div>';
+    return;
+  }
+
+  const rows = list.map(item => (
+    '<tr>' +
+    '<td>' + escapeHtml(item.bulletinId) + '</td>' +
+    '<td>' + escapeHtml(item.title || '（無標題）') + (item.pinned ? ' <span class="muted">置頂</span>' : '') + '</td>' +
+    '<td><span class="badge ' + badgeClassByText(bulletinStatusLabel(item.status)) + '">' + escapeHtml(bulletinStatusLabel(item.status)) + '</span></td>' +
+    '<td>' + escapeHtml(fmtDate(item.createdAt)) + '</td>' +
+    '<td>' + escapeHtml(item.author || '—') + '</td>' +
+    '<td><div class="inline-actions">' +
+    '<a class="inline-link" href="bulletinlist.html">管理</a>' +
+    '<a class="inline-link" href="bulletin.html" target="_blank" rel="noopener">前台</a>' +
+    '</div></td>' +
+    '</tr>'
+  )).join('');
+
+  document.getElementById('bulletinWrap').innerHTML =
+    '<table><thead><tr><th>公告編號</th><th>標題</th><th>狀態</th><th>建立時間</th><th>建立者</th><th>操作</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function loadEvents() {
+  apiCall('getEvents').then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入活動失敗');
+    allEvents = json.events || [];
+    const activeCount = allEvents.filter(e => e.status === '報名中').length;
+    const totalReg = allEvents.reduce((s, e) => s + (parseInt(e.registeredCount) || 0), 0);
+    setSummary('sumEvents', String(allEvents.length), '報名中 ' + activeCount + ' 個・共 ' + totalReg + ' 人報名');
+    renderEvents();
+  }).catch(error => {
+    document.getElementById('eventWrap').innerHTML = '<div class="empty-state"><h3>無法載入活動</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderEvents() {
+  const q = (document.getElementById('eventSearch').value || '').trim().toLowerCase();
+  const statusCounts = {};
+  allEvents.forEach(e => {
+    const key = e.status || '草稿';
+    statusCounts[key] = (statusCounts[key] || 0) + 1;
+  });
+
+  const pills = [{ value: 'all', label: '全部 ' + allEvents.length }];
+  ['報名中', '草稿', '已截止'].forEach(key => {
+    if (statusCounts[key]) pills.push({ value: key, label: key + ' ' + statusCounts[key] });
+  });
+  buildPills('eventPills', pills, eventFilter, 'setEventFilter');
+
+  const list = allEvents.filter(e => {
+    if (eventFilter !== 'all' && (e.status || '草稿') !== eventFilter) return false;
+    if (!q) return true;
+    return [e.eventName, e.eventLocation, e.eventDate].join(' ').toLowerCase().includes(q);
+  });
+
+  if (!list.length) {
+    document.getElementById('eventWrap').innerHTML = '<div class="empty-state"><h3>沒有符合的活動</h3><p>請調整搜尋條件，或到「進入管理頁」新增活動。</p></div>';
+    return;
+  }
+
+  const statusBadge = {
+    '報名中': 'badge-green',
+    '草稿':   'badge-gold',
+    '已截止': 'badge-gray'
+  };
+
+  const rows = list.map(e => {
+    const quota = e.quota > 0
+      ? e.registeredCount + ' / ' + e.quota + ' 人'
+      : e.registeredCount + ' 人（不限）';
+    const isFull = e.quota > 0 && e.registeredCount >= e.quota;
+    const quotaHtml = isFull
+      ? '<span class="badge badge-gray">' + quota + ' 額滿</span>'
+      : quota;
+    const s = e.status || '草稿';
+    return '<tr>' +
+      '<td>' + escapeHtml(e.eventName || '（未命名）') + '</td>' +
+      '<td><span class="badge ' + (statusBadge[s] || 'badge-gray') + '">' + escapeHtml(s) + '</span></td>' +
+      '<td>' + escapeHtml(e.eventDate || '—') + '</td>' +
+      '<td>' + escapeHtml(e.eventLocation || '—') + '</td>' +
+      '<td>' + quotaHtml + '</td>' +
+      '<td><div class="inline-actions">' +
+      '<a class="inline-link" href="eventdetail.html?id=' + encodeURIComponent(e.eventId) + '">編輯</a>' +
+      '<button class="inline-link" type="button" onclick="openEventRegistrations(\'' + escapeHtml(e.eventId) + '\')">名單</button>' +
+      '</div></td>' +
+      '</tr>';
+  }).join('');
+
+  document.getElementById('eventWrap').innerHTML =
+    '<table><thead><tr><th>活動名稱</th><th>狀態</th><th>日期</th><th>地點</th><th>報名人數</th><th>操作</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function openEventRegistrations(eventId) {
+  const event = allEvents.find(item => String(item.eventId || '') === String(eventId || '')) || {};
+  const eventName = event.eventName || '（未命名）';
+  document.getElementById('registrationModalTitle').textContent = eventName + ' 報名名單';
+  document.getElementById('registrationModalBody').innerHTML =
+    '<div class="empty-state"><h3>載入中</h3><p>正在讀取報名名單…</p></div>';
+  document.getElementById('registrationModal').classList.add('open');
+  apiCall('getRegistrations', { eventId: eventId }).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入報名名單失敗');
+    renderEventRegistrations(json);
+  }).catch(error => {
+    document.getElementById('registrationModalBody').innerHTML =
+      '<div class="empty-state"><h3>無法載入名單</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function closeRegistrationModal() {
+  document.getElementById('registrationModal').classList.remove('open');
+}
+
+function renderEventRegistrations(data) {
+  const regs = data.registrations || [];
+  const totalHeadcount = parseInt(data.totalHeadcount, 10) || regs.length;
+  if (!regs.length) {
+    document.getElementById('registrationModalBody').innerHTML =
+      '<div class="empty-state"><h3>尚無報名資料</h3><p>目前沒有里民報名此活動。</p></div>';
+    return;
+  }
+  const rows = regs.map(reg => (
+    '<tr>' +
+    '<td>' + escapeHtml(reg.displayName || '（未取得姓名）') + '</td>' +
+    '<td>' + escapeHtml(reg.headcount || '1') + '</td>' +
+    '<td>' + (String(reg.checkedIn || '').toUpperCase() === 'TRUE' ? '<span class="badge badge-green">已簽到</span>' : '<span class="badge badge-gray">未簽到</span>') + '</td>' +
+    '<td>' + (String(reg.lineReminderOptIn || '').toUpperCase() === 'TRUE' ? '🔔 接收' : '—') + '</td>' +
+    '<td>' + escapeHtml(formatDateTime(reg.submittedAt)) + '</td>' +
+    '<td>' + escapeHtml(reg.residentNote || '') + '</td>' +
+    '</tr>'
+  )).join('');
+  document.getElementById('registrationModalBody').innerHTML =
+    '<div class="registration-summary">共 ' + regs.length + ' 筆報名・' + totalHeadcount + ' 人</div>' +
+    '<div class="registration-table-wrap"><table><thead><tr><th>LINE 姓名</th><th>人數</th><th>簽到</th><th>LINE 提醒</th><th>報名時間</th><th>備註</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function formatDateTime(value) {
+  if (!value) return '—';
+  const raw = String(value);
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) {
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) {
+      return new Intl.DateTimeFormat('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      }).format(d).replace(/\//g, '-').replace(',', '');
+    }
+  }
+  return raw.substring(0, 16).replace('T', ' ');
+}
+
+function selectedViewConfig() {
+  const key = document.getElementById('viewPageSelect') ? document.getElementById('viewPageSelect').value : 'cases';
+  return { key, config: VIEW_PAGE_CONFIG[key] || VIEW_PAGE_CONFIG.cases };
+}
+
+function showViewMessage(message, isError) {
+  const el = document.getElementById('viewMessage');
+  if (!el) return;
+  el.textContent = message || '';
+  el.classList.toggle('error', !!isError);
+  el.style.display = message ? 'block' : 'none';
+}
+
+function loadViewStats(force) {
+  const sel = selectedViewConfig();
+  const config = sel.config;
+  showViewMessage('', false);
+  document.getElementById('viewWrap').innerHTML = '<div class="empty-state"><h3>載入中</h3><p>正在讀取瀏覽人次…</p></div>';
+
+  return Promise.all([
+    apiCall(config.sourceAction),
+    apiCallTo(config.url(), 'getViewStats', { page: sel.key })
+  ]).then(([sourceJson, statsJson]) => {
+    if (sourceJson.code === 401 || statsJson.code === 401) return handleExpiredSession();
+    if (!sourceJson.success) throw new Error(sourceJson.error || '無法讀取資料');
+    if (!statsJson.success) throw new Error(statsJson.error || '無法讀取瀏覽人次');
+
+    const source = sourceJson.cases || sourceJson.stores || sourceJson.bulletins || [];
+    const idKey = config.idKey;
+    viewStatsData = statsJson.cardCounts || {};
+    viewItems = source
+      .filter(config.publicOnly)
+      .map(item => ({
+        id: String(item[idKey] || ''),
+        title: config.title(item),
+        count: Number(viewStatsData[item[idKey]] || 0)
+      }))
+      .filter(item => item.id);
+    document.getElementById('viewTotal').textContent = String(statsJson.pageCount || 0);
+    renderViewRows();
+  }).catch(error => {
+    showViewMessage(error.message || '讀取失敗', true);
+    document.getElementById('viewWrap').innerHTML = '<div class="empty-state"><h3>無法讀取瀏覽人次</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderViewRows() {
+  if (!viewItems.length) {
+    document.getElementById('viewWrap').innerHTML = '<div class="empty-state"><h3>沒有公開項目</h3><p>這個頁面目前沒有可調整的公開卡片。</p></div>';
+    return;
+  }
+  const rows = sortedViewItems()
+    .map(item => (
+      '<tr>' +
+      '<td>' + escapeHtml(item.id) + '</td>' +
+      '<td>' + escapeHtml(item.title) + '</td>' +
+      '<td>' + escapeHtml(String(item.count)) + '</td>' +
+      '<td><input class="input view-count-input" data-id="' + escapeHtml(item.id) + '" type="number" min="0" value="' + escapeHtml(String(item.count)) + '"></td>' +
+      '<td><button class="inline-link" type="button" onclick="setSingleViewCount(\'' + escapeHtml(item.id) + '\')">套用</button></td>' +
+      '</tr>'
+    )).join('');
+  document.getElementById('viewWrap').innerHTML =
+    '<table><thead><tr><th>編號</th><th>標題</th><th>目前</th><th>指定數字</th><th>操作</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function sortedViewItems() {
+  return viewItems.slice().sort((a, b) => b.count - a.count || a.id.localeCompare(b.id));
+}
+
+function bulkBoostViews() {
+  const sel = selectedViewConfig();
+  const count = Math.max(1, Math.floor(Number(document.getElementById('viewTopN').value || 0)));
+  const min = Math.max(0, Math.floor(Number(document.getElementById('viewAddMin').value || 0)));
+  const maxRaw = Math.max(0, Math.floor(Number(document.getElementById('viewAddMax').value || 0)));
+  const max = Math.max(min, maxRaw);
+  const items = sortedViewItems().slice(0, count).map(item => ({
+    itemId: item.id,
+    count: min === max ? min : Math.floor(Math.random() * (max - min + 1)) + min
+  })).filter(item => item.count > 0);
+  if (!items.length) {
+    showViewMessage('沒有可增加的項目，或增加數為 0。', true);
+    return;
+  }
+  apiCallTo(sel.config.url(), 'bulkAddCardViews', { page: sel.key, items })
+    .then(json => {
+      if (json.code === 401) return handleExpiredSession();
+      if (!json.success) throw new Error(json.error || '批次增加失敗');
+      return loadViewStats(true).then(() => {
+        showViewMessage('已增加 ' + (json.updated || items.length) + ' 筆瀏覽數。', false);
+      });
+    })
+    .catch(error => showViewMessage(error.message || '批次增加失敗', true));
+}
+
+function setSingleViewCount(itemId) {
+  const sel = selectedViewConfig();
+  const input = document.querySelector('.view-count-input[data-id="' + CSS.escape(itemId) + '"]');
+  const count = Math.max(0, Math.floor(Number(input ? input.value : 0)));
+  apiCallTo(sel.config.url(), 'resetViewStats', { page: sel.key, cards: [{ itemId, count }] })
+    .then(json => {
+      if (json.code === 401) return handleExpiredSession();
+      if (!json.success) throw new Error(json.error || '設定失敗');
+      return loadViewStats(true).then(() => {
+        showViewMessage('已設定 ' + itemId + ' 為 ' + count + '。', false);
+      });
+    })
+    .catch(error => showViewMessage(error.message || '設定失敗', true));
+}
+
+function loadAdmins() {
+  apiCall('getAdmins').then(json => {
+    if (json.code === 401 || json.success === false) {
+      adminsAccessible = false;
+      allAdmins = [];
+      setSummary('sumAdmins', '—', '目前帳號無管理者權限');
+      renderAdmins(json.error || '僅超級管理員可查看與管理帳號。');
+      return;
+    }
+    adminsAccessible = true;
+    allAdmins = json.admins || [];
+    setSummary('sumAdmins', String(allAdmins.length), '目前可管理帳號 ' + allAdmins.length + ' 位');
+    renderAdmins();
+  }).catch(() => {
+    adminsAccessible = false;
+    renderAdmins('無法載入管理者名單。');
+  });
+}
+
+function renderAdmins(message) {
+  if (!adminsAccessible) {
+    document.getElementById('adminWrap').innerHTML = '<div class="empty-state"><h3>管理者頁面受限</h3><p>' + escapeHtml(message || '僅超級管理員可操作。') + '</p></div>';
+    return;
+  }
+  if (!allAdmins.length) {
+    document.getElementById('adminWrap').innerHTML = '<div class="empty-state"><h3>目前沒有管理者資料</h3><p>請先新增一位帳號。</p></div>';
+    return;
+  }
+
+  const cards = allAdmins.map(item => {
+    const activeLabel = item.active ? '啟用中' : '停用中';
+    const badgeClass = item.active ? 'badge-green' : 'badge-gray';
+    return '<div class="account-card">' +
+      '<div class="account-main">' +
+      '<div class="account-avatar">' + escapeHtml((item.display_name || '管').charAt(0)) + '</div>' +
+      '<div>' +
+      '<div class="account-name">' + escapeHtml(item.display_name || '未命名') + '</div>' +
+      '<div class="account-email">' + escapeHtml(item.email || '') + '</div>' +
+      '</div></div>' +
+      '<div class="account-actions">' +
+      '<span class="badge ' + badgeClass + '">' + activeLabel + '</span>' +
+      '<span class="badge badge-blue">' + escapeHtml(item.role || '管理員') + '</span>' +
+      '<button class="action-btn" onclick="openAdminModalByEmail(\'' + escapeHtml(item.email) + '\')">編輯</button>' +
+      '<button class="action-btn" onclick="toggleAdminActive(\'' + escapeHtml(item.email) + '\',' + (item.active ? 'true' : 'false') + ')">' + (item.active ? '停用' : '啟用') + '</button>' +
+      '<button class="action-btn" onclick="deleteAdmin(\'' + escapeHtml(item.email) + '\')">刪除</button>' +
+      '</div></div>';
+  }).join('');
+
+  document.getElementById('adminWrap').innerHTML = '<div class="account-grid">' + cards + '</div>';
+}
+
+function openAdminModal(admin) {
+  if (!adminsAccessible) return;
+  editingAdminEmail = admin ? admin.email : null;
+  document.getElementById('adminModalTitle').textContent = admin ? '編輯管理者' : '新增管理者';
+  document.getElementById('adminNameInput').value = admin ? (admin.display_name || '') : '';
+  document.getElementById('adminEmailInput').value = admin ? (admin.email || '') : '';
+  document.getElementById('adminEmailInput').readOnly = !!admin;
+  document.getElementById('adminRoleInput').value = admin ? (admin.role || '管理員') : '管理員';
+  document.getElementById('adminModalError').style.display = 'none';
+  document.getElementById('adminSaveBtn').textContent = '儲存';
+  document.getElementById('adminModal').classList.add('open');
+}
+
+function openAdminModalByEmail(email) {
+  const admin = allAdmins.find(item => item.email === email);
+  if (!admin) return;
+  openAdminModal(admin);
+}
+
+function closeAdminModal() {
+  document.getElementById('adminModal').classList.remove('open');
+}
+
+function showAdminError(message) {
+  const el = document.getElementById('adminModalError');
+  el.textContent = message;
+  el.style.display = 'block';
+}
+
+function saveAdmin() {
+  const name = document.getElementById('adminNameInput').value.trim();
+  const email = document.getElementById('adminEmailInput').value.trim().toLowerCase();
+  const role = document.getElementById('adminRoleInput').value;
+  const btn = document.getElementById('adminSaveBtn');
+
+  if (!name) return showAdminError('請輸入名稱。');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAdminError('請輸入正確的 Email。');
+
+  btn.textContent = '儲存中…';
+  const action = editingAdminEmail ? 'updateAdmin' : 'addAdmin';
+  const payload = { display_name: name, email: email, role: role };
+  if (editingAdminEmail) payload.target_email = editingAdminEmail;
+
+  apiCall(action, payload).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) {
+      btn.textContent = '儲存';
+      return showAdminError(json.error || '儲存失敗');
+    }
+    closeAdminModal();
+    loadAdmins();
+  }).catch(() => {
+    btn.textContent = '儲存';
+    showAdminError('儲存失敗，請稍後再試。');
+  });
+}
+
+function toggleAdminActive(email, currentActive) {
+  if (!confirm((currentActive ? '停用' : '啟用') + '這個管理者帳號？')) return;
+  apiCall('updateAdmin', {
+    target_email: email,
+    active: !currentActive
+  }).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) {
+      alert(json.error || '更新失敗');
+      return;
+    }
+    loadAdmins();
+  }).catch(() => {
+    alert('更新失敗，請稍後再試。');
+  });
+}
+
+function deleteAdmin(email) {
+  if (!confirm('確定要刪除這位管理者？')) return;
+  apiCall('deleteAdmin', { target_email: email }).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) {
+      alert(json.error || '刪除失敗');
+      return;
+    }
+    loadAdmins();
+  }).catch(() => {
+    alert('刪除失敗，請稍後再試。');
+  });
+}
+
+function loadEmergencyContacts() {
+  apiCall('getEmergencyContacts').then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入失敗');
+    allEmergencyContacts = json.contacts || [];
+    renderEmergencyContacts();
+  }).catch(error => {
+    document.getElementById('emergencyWrap').innerHTML = '<div class="empty-state"><h3>無法載入緊急電話</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderEmergencyContacts() {
+  if (!allEmergencyContacts.length) {
+    document.getElementById('emergencyWrap').innerHTML = '<div class="empty-state"><h3>目前沒有緊急電話</h3><p>請先新增一筆。</p></div>';
+    return;
+  }
+  const cards = allEmergencyContacts.map(item => {
+    return '<div class="account-card">' +
+      '<div class="account-main">' +
+      '<div class="account-avatar">' + escapeHtml((item.name || '電').charAt(0)) + '</div>' +
+      '<div>' +
+      '<div class="account-name">' + escapeHtml(item.name || '未命名') + (item.org ? '（' + escapeHtml(item.org) + '）' : '') + '</div>' +
+      '<div class="account-email">' + (item.kind === 'hint' ? '免費通話提示' : item.kind === 'url' ? ('通話連結：' + escapeHtml(item.phone || '')) : escapeHtml(item.phone || '')) + '</div>' +
+      '</div></div>' +
+      '<div class="account-actions">' +
+      '<button class="action-btn" onclick="openEmergencyModalById(\'' + escapeHtml(item.id) + '\')">編輯</button>' +
+      '<button class="action-btn" onclick="deleteEmergencyContactUi(\'' + escapeHtml(item.id) + '\')">刪除</button>' +
+      '</div></div>';
+  }).join('');
+  document.getElementById('emergencyWrap').innerHTML = '<div class="account-grid">' + cards + '</div>';
+}
+
+function openEmergencyModal(contact) {
+  editingEmergencyId = contact ? contact.id : null;
+  document.getElementById('emergencyModalTitle').textContent = contact ? '編輯電話' : '新增電話';
+  document.getElementById('emergencyKindInput').value = contact ? (contact.kind || 'tel') : 'tel';
+  document.getElementById('emergencyNameInput').value = contact ? (contact.name || '') : '';
+  document.getElementById('emergencyOrgInput').value = contact ? (contact.org || '') : '';
+  document.getElementById('emergencyPhoneInput').value = contact ? (contact.phone || '') : '';
+  document.getElementById('emergencySortInput').value = contact ? (contact.sort_order || 0) : 0;
+  document.getElementById('emergencyModalError').style.display = 'none';
+  document.getElementById('emergencySaveBtn').textContent = '儲存';
+  toggleEmergencyPhoneField();
+  document.getElementById('emergencyModal').classList.add('open');
+}
+
+function toggleEmergencyPhoneField() {
+  const kind = document.getElementById('emergencyKindInput').value;
+  document.getElementById('emergencyPhoneField').style.display = kind === 'hint' ? 'none' : '';
+  document.getElementById('emergencyPhoneLabel').textContent =
+    kind === 'url' ? '通話連結（例如 https://lin.ee/xxxxx）' : '電話（純數字，例如：0919662257）';
+}
+
+function openEmergencyModalById(id) {
+  const contact = allEmergencyContacts.find(item => item.id === id);
+  if (!contact) return;
+  openEmergencyModal(contact);
+}
+
+function closeEmergencyModal() {
+  document.getElementById('emergencyModal').classList.remove('open');
+}
+
+function showEmergencyError(message) {
+  const el = document.getElementById('emergencyModalError');
+  el.textContent = message;
+  el.style.display = 'block';
+}
+
+function saveEmergencyContact() {
+  const kind = document.getElementById('emergencyKindInput').value;
+  const name = document.getElementById('emergencyNameInput').value.trim();
+  const org = document.getElementById('emergencyOrgInput').value.trim();
+  const phone = document.getElementById('emergencyPhoneInput').value.trim();
+  const sortOrder = Number(document.getElementById('emergencySortInput').value) || 0;
+  const btn = document.getElementById('emergencySaveBtn');
+
+  if (!name) return showEmergencyError('請輸入名稱。');
+  if (kind !== 'hint' && !phone) return showEmergencyError(kind === 'url' ? '請輸入通話連結。' : '請輸入電話。');
+
+  btn.textContent = '儲存中…';
+  const action = editingEmergencyId ? 'updateEmergencyContact' : 'addEmergencyContact';
+  const payload = { kind: kind, name: name, org: org, phone: phone, sortOrder: sortOrder };
+  if (editingEmergencyId) payload.id = editingEmergencyId;
+
+  apiCall(action, payload).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) {
+      btn.textContent = '儲存';
+      return showEmergencyError(json.error || '儲存失敗');
+    }
+    closeEmergencyModal();
+    loadEmergencyContacts();
+  }).catch(() => {
+    btn.textContent = '儲存';
+    showEmergencyError('儲存失敗，請稍後再試。');
+  });
+}
+
+function deleteEmergencyContactUi(id) {
+  if (!confirm('確定要刪除這筆電話？')) return;
+  apiCall('deleteEmergencyContact', { id: id }).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) {
+      alert(json.error || '刪除失敗');
+      return;
+    }
+    loadEmergencyContacts();
+  }).catch(() => {
+    alert('刪除失敗，請稍後再試。');
+  });
+}
+
+function loadChatThreads() {
+  apiCall('getChatThreads').then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入失敗');
+    allChatThreads = json.threads || [];
+    renderChatThreads();
+  }).catch(error => {
+    document.getElementById('chatWrap').innerHTML = '<div class="empty-state"><h3>無法載入留言記錄</h3><p>' + escapeHtml(error.message || '請稍後再試') + '</p></div>';
+  });
+}
+
+function renderChatThreads() {
+  if (!allChatThreads.length) {
+    document.getElementById('chatWrap').innerHTML = '<div class="empty-state"><h3>目前還沒有留言</h3><p>里民使用「只想聊聊」後會出現在這裡。</p></div>';
+    return;
+  }
+  const cards = allChatThreads.map(item => {
+    const name = item.display_name || '（未知里民）';
+    const lastAt = (item.last_at || '').replace('T', ' ').substring(0, 16);
+    return '<div class="account-card">' +
+      '<div class="account-main">' +
+      '<div class="account-avatar">' + escapeHtml(name.charAt(0)) + '</div>' +
+      '<div>' +
+      '<div class="account-name">' + escapeHtml(name) + '</div>' +
+      '<div class="account-email">共 ' + (item.message_count || 0) + ' 則・最後留言 ' + escapeHtml(lastAt) + '</div>' +
+      '</div></div>' +
+      '<div class="account-actions">' +
+      '<button class="action-btn primary" onclick="openChatThread(\'' + escapeHtml(item.line_user_id) + '\', \'' + escapeHtml(name) + '\')">查看</button>' +
+      '</div></div>';
+  }).join('');
+  document.getElementById('chatWrap').innerHTML = '<div class="account-grid">' + cards + '</div>';
+}
+
+function openChatThread(lineUserId, displayName) {
+  document.getElementById('chatModalTitle').textContent = displayName + ' 的留言';
+  document.getElementById('chatMessagesWrap').innerHTML = '<p>載入中…</p>';
+  document.getElementById('chatModal').classList.add('open');
+  apiCall('getChatMessages', { lineUserId: lineUserId }).then(json => {
+    if (json.code === 401) return handleExpiredSession();
+    if (!json.success) throw new Error(json.error || '載入失敗');
+    renderChatMessages(json.messages || []);
+  }).catch(error => {
+    document.getElementById('chatMessagesWrap').innerHTML = '<p>' + escapeHtml(error.message || '載入失敗') + '</p>';
+  });
+}
+
+function renderChatMessages(messages) {
+  if (!messages.length) {
+    document.getElementById('chatMessagesWrap').innerHTML = '<p>沒有留言內容。</p>';
+    return;
+  }
+  const rows = messages.map(m => {
+    const who = m.role === 'user' ? '里民' : 'AI 小幫手';
+    const at = (m.created_at || '').replace('T', ' ').substring(0, 16);
+    const align = m.role === 'user' ? 'left' : 'right';
+    const bg = m.role === 'user' ? '#eef4ff' : '#f0f0f0';
+    return '<div style="text-align:' + align + ';margin:8px 0;">' +
+      '<div style="display:inline-block;max-width:80%;background:' + bg + ';border-radius:10px;padding:8px 12px;">' +
+      '<div style="font-size:12px;color:#888;margin-bottom:2px;">' + escapeHtml(who) + ' · ' + escapeHtml(at) + '</div>' +
+      '<div>' + escapeHtml(m.content || '') + '</div>' +
+      '</div></div>';
+  }).join('');
+  document.getElementById('chatMessagesWrap').innerHTML = rows;
+}
+
+function closeChatModal() {
+  document.getElementById('chatModal').classList.remove('open');
+}
+
+window.addEventListener('click', event => {
+  if (event.target === document.getElementById('adminModal')) closeAdminModal();
+  if (event.target === document.getElementById('emergencyModal')) closeEmergencyModal();
+  if (event.target === document.getElementById('registrationModal')) closeRegistrationModal();
+});
+
+
+['click', 'keydown', 'mousedown', 'touchstart', 'scroll'].forEach(function(eventName) {
+  window.addEventListener(eventName, function() {
+    touchSession();
+  }, { passive: true });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  let tries = 0;
+  const timer = setInterval(function() {
+    if (typeof google !== 'undefined' || ++tries > 30) {
+      clearInterval(timer);
+      initGoogle();
+    }
+  }, 200);
+});
+</script>
+<script src="./branding-footer.js"></script>
+</body>
+</html>
