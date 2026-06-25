@@ -22,12 +22,6 @@ const STORE_ACTIONS = new Set([
   "uploadAdminPhoto",
 ]);
 
-const FOOD_ORDER = {
-  "里內日常小吃": 1,
-  "家庭好友聚餐": 2,
-  "大坑名產貴賓招待": 3,
-};
-
 export const DEFAULT_STORE_CATEGORIES = [
   "美食地圖",
   "飲料冰品",
@@ -152,10 +146,13 @@ async function getPublicStores(env) {
       WHERE status = '已公開'
       ORDER BY
         CASE pub_cate
-          WHEN '里內日常小吃' THEN 1
-          WHEN '家庭好友聚餐' THEN 2
-          WHEN '大坑名產貴賓招待' THEN 3
-          ELSE 4
+          WHEN '美食地圖' THEN 1
+          WHEN '飲料冰品' THEN 2
+          WHEN '健康醫療' THEN 3
+          WHEN '生活便利' THEN 4
+          WHEN '住宅相關' THEN 5
+          WHEN '寵物專區' THEN 6
+          ELSE 7
         END,
         CASE WHEN sort_order > 0 THEN 1 ELSE 0 END,
         CASE WHEN sort_order > 0 THEN sort_order ELSE 0 END ASC,
@@ -784,8 +781,7 @@ function corsResponse(env, body, status = 200, headers = {}) {
 }
 
 function normalizeStoreCategory(value) {
-  const cate = text(value);
-  return cate === "食" ? "里內日常小吃" : cate;
+  return text(value);
 }
 
 function normalizePublicUrl(value) {
