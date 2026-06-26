@@ -1,0 +1,23 @@
+name: Deploy Cloudflare Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "workers/**"
+      - ".github/workflows/deploy-worker.yml"
+
+jobs:
+  deploy-pages:
+    runs-on: ubuntu-latest
+    name: Deploy gsnbhs Pages site
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: pages deploy . --project-name=gsnbhs --branch=main
