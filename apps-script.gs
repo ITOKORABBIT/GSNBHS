@@ -389,7 +389,7 @@ function handleSubmitReport(data) {
 
   var now = new Date();
   var nowText = Utilities.formatDate(now, "Asia/Taipei", "yyyy-MM-dd HH:mm");
-  var caseId = nextCaseId_(sheet, "HP");
+  var caseId = nextCaseId_(sheet, "GS");
   var replyUrl = buildDetailUrl_(caseId);
   var photos = [
     String(data.photo1 || ""),
