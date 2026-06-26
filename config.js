@@ -7,7 +7,7 @@ const CONFIG = {
   REPLY_WEBHOOK_URL: '',
   STORE_WEBHOOK_URL: '',
 
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz-tyVnT1v5h3TeMzmaAoSPa7GtBO_jay1PrkmRL-LL0N3bTeOojg4EMep9hnDG0DVO/exec',
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxIRdGFYKIz0NWpG1PC1OnB53vRz4yREH9eNvE_c7TXuFEiAfL2fCgt984T4IX9KqELCA/exec',
   EVENT_API_URL:    'https://gsnbhs-events-api.ulch0709.workers.dev',
   CASE_API_URL:     'https://gsnbhs-cases-api.ulch0709.workers.dev',
   STORE_API_URL:    'https://gsnbhs-stores-api.ulch0709.workers.dev',

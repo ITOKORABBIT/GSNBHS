@@ -16,7 +16,7 @@ const CONFIG = {
   UPLOAD_URL: '',
 
   // Google Apps Script（統一 API 端點，所有資料讀寫都經過此處驗證）
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz-tyVnT1v5h3TeMzmaAoSPa7GtBO_jay1PrkmRL-LL0N3bTeOojg4EMep9hnDG0DVO/exec',
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxIRdGFYKIz0NWpG1PC1OnB53vRz4yREH9eNvE_c7TXuFEiAfL2fCgt984T4IX9KqELCA/exec',
 
   // Cloudflare Worker 商店 API
   STORE_API_URL: 'https://gsnbhs-stores-api.ulch0709.workers.dev',
