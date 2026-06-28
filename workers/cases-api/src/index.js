@@ -4,6 +4,7 @@ const ACTIONS = new Set([
   "getCases",
   "getCase",
   "submitReport",
+  "submitAdminReport",
   "updateReply",
   "pinCase",
   "reorderCases",
@@ -97,6 +98,7 @@ export default {
         (async () => {
           if (action === "getCases")           return getCases(env);
           if (action === "getCase")            return getCase(env, data);
+          if (action === "submitAdminReport")  return submitAdminReport(env, ctx, data);
           if (action === "updateReply")        return updateReply(env, ctx, data);
           if (action === "pinCase")            return pinCase(env, ctx, data);
           if (action === "reorderCases")       return reorderCases(env, ctx, data);
@@ -252,6 +254,14 @@ async function submitReport(env, ctx, data) {
   return { success: true, caseId, ...gasResult };
 }
 
+// ─── Submit (admin) ───────────────────────────────────────
+// 里長/辦公處登入後送出的通報，沿用 submitReport 的 GAS+D1 寫入流程，
+// 差別只在於這個 action 走 admin 驗證，且前端可一併帶上
+// status / publicFlag / publicTitle / publicCate / publicLoc / publicSummary。
+async function submitAdminReport(env, ctx, data) {
+  return submitReport(env, ctx, data);
+}
+
 // ─── Admin writes ─────────────────────────────────────────
 
 async function updateReply(env, ctx, data) {
@@ -395,7 +405,9 @@ function buildCaseFromSubmit(data, caseId, now) {
     repPhoto1: "", repPhoto2: "", repPhoto3: "", repPhoto4: "", repPhoto5: "",
     repPhoto6: "", repPhoto7: "", repPhoto8: "", repPhoto9: "", repPhoto10: "",
     handler: "", note: "",
-    publicFlag: false, publicTitle: "", publicCate: "", publicLoc: "", publicSummary: "",
+    publicFlag: parseBoolean(data.publicFlag),
+    publicTitle: text(data.publicTitle), publicCate: text(data.publicCate),
+    publicLoc: text(data.publicLoc), publicSummary: text(data.publicSummary),
     replyUrl: "https://gsnbhs.pages.dev/detail.html?id=" + encodeURIComponent(caseId),
     pinOrder: 0, sortOrder: 0,
   };

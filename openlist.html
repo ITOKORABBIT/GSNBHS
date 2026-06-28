@@ -717,8 +717,10 @@ function formatReplyDate(replyTime) {
 }
 
 function renderCard(item) {
-  var thumb = item.repPhoto1
-    ? '<div class="card-thumb"><img src="' + esc(item.repPhoto1) + '" alt="" loading="lazy" onerror="imgFallback(this)"></div>'
+  // 尚未填寫處理照片時，改用通報時上傳的照片
+  var thumbSrc = item.repPhoto1 || item.photo1;
+  var thumb = thumbSrc
+    ? '<div class="card-thumb"><img src="' + esc(thumbSrc) + '" alt="" loading="lazy" onerror="imgFallback(this)"></div>'
     : '<div class="card-thumb"><div class="card-thumb-placeholder">' +
       '<svg width="28" height="28" fill="none" stroke="#b8a898" stroke-width="1.5" viewBox="0 0 24 24">' +
       '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +

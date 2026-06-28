@@ -384,6 +384,10 @@ function loadCase() {
 function renderCase(d) {
   var repPhotos = [d.repPhoto1, d.repPhoto2, d.repPhoto3, d.repPhoto4, d.repPhoto5,
                    d.repPhoto6, d.repPhoto7, d.repPhoto8, d.repPhoto9, d.repPhoto10].filter(Boolean);
+  // 尚未填寫處理照片時，改顯示通報時上傳的照片（案件已公開即代表照片可對外顯示）
+  if (!repPhotos.length) {
+    repPhotos = [d.photo1, d.photo2, d.photo3, d.photo4, d.photo5].filter(Boolean);
+  }
   var title = d.publicTitle || '公開案件詳情';
 
   document.getElementById('pageTitle').textContent = title;
