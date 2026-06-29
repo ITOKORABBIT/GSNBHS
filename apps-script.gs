@@ -380,16 +380,25 @@ function isSuperAdminRole(role) {
 // ══════════════════════════════════════════════
 
 function handleSubmitReport(data) {
-  var validationError = validatePublicReport_(data);
-  if (validationError)
-    return jsonOut({ success: false, error: validationError });
+  // Worker (cases-api) now validates + generates caseId itself and calls this
+  // in the background after the citizen already sees "submitted". This GAS
+  // call only needs to append the Sheets row + fire the Discord notification.
+  // data.caseId presence means the Worker already did validation; without it
+  // (legacy/direct call), fall back to the original synchronous behavior.
+  var caseId = String(data.caseId || "").trim();
+
+  if (!caseId) {
+    var validationError = validatePublicReport_(data);
+    if (validationError)
+      return jsonOut({ success: false, error: validationError });
+  }
 
   var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_CASES);
   if (!sheet) return jsonOut({ success: false, error: "Sheet not found" });
 
   var now = new Date();
   var nowText = Utilities.formatDate(now, "Asia/Taipei", "yyyy-MM-dd HH:mm");
-  var caseId = nextCaseId_(sheet, "GS");
+  if (!caseId) caseId = nextCaseId_(sheet, "GS");
   var replyUrl = buildDetailUrl_(caseId);
   var photos = [
     String(data.photo1 || ""),

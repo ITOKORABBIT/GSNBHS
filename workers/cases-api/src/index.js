@@ -29,6 +29,10 @@ const PUBLIC_ACTIONS = new Set([
   "uploadPublicPhoto",
 ]);
 
+const PUBLIC_FORM_MIN_MS = 3000;
+const PUBLIC_FORM_MAX_MS = 2 * 60 * 60 * 1000;
+const PUBLIC_SUBMIT_COOLDOWN_SEC = 300;
+
 // In-memory session cache: avoids repeated GAS auth calls within the same Worker isolate.
 const sessionCache = new Map();
 const SESSION_CACHE_TTL = 5 * 60 * 1000;
@@ -238,28 +242,122 @@ async function resetViewStats(env, data) {
 // ─── Submit (public) ──────────────────────────────────────
 
 async function submitReport(env, ctx, data) {
-  // Always call GAS synchronously: gets caseId and triggers LINE notification.
-  const gasResult = await forwardToGas(env, data);
-  const caseId = text(gasResult.caseId);
-  if (!caseId) return { success: true, ...gasResult };
+  const validationError = await validatePublicReport(env, data);
+  if (validationError) return { success: false, error: validationError };
 
+  const caseId = await generateCaseId(env);
   const now = nowTW();
   const c = buildCaseFromSubmit(data, caseId, now);
+  await upsertCaseStatement(env, c).run();
+
   ctx.waitUntil(
-    upsertCaseStatement(env, c).run().catch((err) => {
-      console.error(JSON.stringify({ action: "submitReport", caseId, error: err.message }));
-    }),
+    forwardToGas(env, { ...data, action: "submitReport", caseId })
+      .catch((err) => {
+        console.error(JSON.stringify({ action: "submitReport", caseId, syncTarget: "gas", error: err.message }));
+      }),
   );
 
-  return { success: true, caseId, ...gasResult };
+  return { success: true, caseId };
+}
+
+async function validatePublicReport(env, data) {
+  if (text(data.website)) return "bot_rejected";
+
+  const formTs = parseInt(data.formTs || "0", 10);
+  const elapsed = Date.now() - formTs;
+  if (!formTs || elapsed < PUBLIC_FORM_MIN_MS || elapsed > PUBLIC_FORM_MAX_MS) return "form_expired";
+
+  const required = ["name", "phone", "cate", "title", "desc", "addr"];
+  for (const field of required) {
+    if (!text(data[field])) return "missing_required_fields";
+  }
+
+  const phone = normalizePhone(data.phone);
+  if (!phone || phone.length < 8) return "invalid_phone";
+
+  const dedupeKey = await computeDedupeKey(phone, text(data.title), text(data.addr));
+  const isDuplicate = await checkAndSetDedupe(env, dedupeKey);
+  if (isDuplicate) return "too_many_requests";
+
+  return "";
 }
 
 // ─── Submit (admin) ───────────────────────────────────────
-// 里長/辦公處登入後送出的通報，沿用 submitReport 的 GAS+D1 寫入流程，
-// 差別只在於這個 action 走 admin 驗證，且前端可一併帶上
-// status / publicFlag / publicTitle / publicCate / publicLoc / publicSummary。
+
 async function submitAdminReport(env, ctx, data) {
-  return submitReport(env, ctx, data);
+  const required = ["cate", "title", "desc", "addr"];
+  for (const field of required) {
+    if (!text(data[field])) throw httpError(400, "missing_required_fields");
+  }
+
+  const caseId = await generateCaseId(env);
+  const now = nowTW();
+  const c = buildCaseFromSubmit(data, caseId, now);
+  await upsertCaseStatement(env, c).run();
+
+  ctx.waitUntil(
+    forwardToGas(env, { ...data, action: "submitReport", caseId })
+      .catch(logSyncError("submitAdminReport", caseId)),
+  );
+
+  return { success: true, caseId };
+}
+
+function normalizePhone(phone) {
+  return String(phone || "").replace(/[^\d]/g, "");
+}
+
+async function computeDedupeKey(phone, title, addr) {
+  const raw = `${phone}|${title}|${addr}`;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  const bytes = new Uint8Array(digest);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return "r_" + btoa(binary).replace(/[+/=]/g, "");
+}
+
+async function checkAndSetDedupe(env, dedupeKey) {
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const expiresAt = new Date(now.getTime() + PUBLIC_SUBMIT_COOLDOWN_SEC * 1000).toISOString();
+
+  const existing = await env.DB.prepare(
+    "SELECT 1 FROM report_dedupe WHERE dedupe_key = ? AND expires_at > ?",
+  ).bind(dedupeKey, nowIso).first();
+  if (existing) return true;
+
+  await env.DB.prepare(
+    `INSERT INTO report_dedupe (dedupe_key, expires_at) VALUES (?, ?)
+     ON CONFLICT(dedupe_key) DO UPDATE SET expires_at = excluded.expires_at`,
+  ).bind(dedupeKey, expiresAt).run();
+  return false;
+}
+
+async function generateCaseId(env) {
+  const datePart = nowTaiwanYYMMDD();
+  const monthPart = datePart.slice(0, 4);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const row = await env.DB.prepare(
+      `SELECT MAX(CAST(SUBSTR(case_id, -3) AS INTEGER)) AS maxSeq
+         FROM cases WHERE case_id LIKE 'GS' || ? || '%'`,
+    ).bind(monthPart).first();
+    const nextSeq = (Number(row?.maxSeq) || 0) + 1;
+    const caseId = "GS" + datePart + String(nextSeq).padStart(3, "0");
+    try {
+      await env.DB.prepare("INSERT INTO cases (case_id) VALUES (?)").bind(caseId).run();
+      return caseId;
+    } catch (err) {
+      if (!String(err.message).includes("UNIQUE")) throw err;
+      // case_id collision (concurrent submit) — retry with a freshly read max
+    }
+  }
+  throw httpError(503, "caseId 產生失敗，請稍後再試");
+}
+
+function nowTaiwanYYMMDD() {
+  const tw = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(tw.getUTCFullYear() % 100)}${pad(tw.getUTCMonth() + 1)}${pad(tw.getUTCDate())}`;
 }
 
 // ─── Admin writes ─────────────────────────────────────────
