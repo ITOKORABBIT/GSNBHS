@@ -649,6 +649,10 @@ function qCardHTML(q,i){
     <input type="checkbox" id="req-${i}" ${q.required?'checked':''} onchange="setRequired(${i},this.checked)">
     <label for="req-${i}">必填（不允許略過）</label>
   </div>
+  <div class="q-required-row">
+    <input type="checkbox" id="namefield-${i}" ${q.isNameField?'checked':''} onchange="setNameField(${i},this.checked)">
+    <label for="namefield-${i}">設為報名清單顯示名稱（例如：小朋友姓名，僅可勾選一題）</label>
+  </div>
 </div>`;
 }
 
@@ -679,6 +683,11 @@ function setQType(i,type){
 
 function setQLabel(i,v){ questions[i].label=v; }
 function setRequired(i,v){ questions[i].required=v; }
+function setNameField(i,v){
+  if(v) questions.forEach((q,qi)=>{ q.isNameField = qi===i; });
+  else questions[i].isNameField=false;
+  renderQuestions();
+}
 function setMaxLen(i,v){ questions[i].maxLength=Math.min(500,Math.max(1,parseInt(v)||100)); }
 
 function addOption(i){

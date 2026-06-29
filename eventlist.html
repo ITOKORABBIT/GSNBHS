@@ -828,7 +828,8 @@ function buildRegTableHTML(eventId, regs){
   for(const q of (evt?.questions||[])){
     if(q.id){qIdMap[q.id]=q.label;if(q.label)labelToQId[q.label]=q.id;}
   }
-  const getColLabel=h=>REG_COL_MAP[h]||qIdMap[h]||h;
+  const nameFieldQId=(evt?.questions||[]).find(q=>q.isNameField)?.id||null;
+  const getColLabel=h=>(h==='displayName'&&nameFieldQId)?'姓名':(REG_COL_MAP[h]||qIdMap[h]||h);
   // Normalize all regs to q_id keys for consistent column mapping
   const normRegs=Object.keys(labelToQId).length?regs.map(r=>normalizeRegKeys(r,labelToQId)):regs;
   // Update currentRegs to normalized so edit modal reads correct keys
@@ -836,7 +837,7 @@ function buildRegTableHTML(eventId, regs){
   const dataKeys=new Set(normRegs.flatMap(r=>Object.keys(r)));
   // Sort custom cols by question order so columns follow Q1→Q2→Q3 regardless of JSON key position
   const qOrder=(evt?.questions||[]).map(q=>q.id);
-  const customCols=[...dataKeys].filter(h=>!REG_HIDDEN.has(h)&&!REG_FIXED.has(h))
+  const customCols=[...dataKeys].filter(h=>!REG_HIDDEN.has(h)&&!REG_FIXED.has(h)&&h!==nameFieldQId)
     .sort((a,b)=>{const ia=qOrder.indexOf(a),ib=qOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
   const headers=[...REG_FIRST,...customCols,...REG_LAST.filter(h=>dataKeys.has(h))];
   currentRegHeaders=headers;
@@ -861,6 +862,7 @@ function buildRegTableHTML(eventId, regs){
         return `<td${cls}><div style="display:flex;align-items:center;gap:6px"><input type="text" class="reg-note-input" data-userid="${uid}" data-name="${esc(r.displayName||'')}" value="${esc(note)}" placeholder="${noLine?'（非 LINE 報名）':'真實姓名、職業等'}"${noLine?' disabled':''}>${noLine?'':` <button class="reg-note-save-btn" onclick="saveRegistrationNote(this)">儲存</button>`}</div></td>`;
       }
       let v=r[h]||'';
+      if(h==='displayName'&&nameFieldQId&&r[nameFieldQId]) v=r[nameFieldQId];
       if(h==='consentGiven') v=v==='TRUE'?'✅':'—';
       if(h==='submittedAt'&&v) v=formatTaipeiDateTime(v);
       return `<td${cls}>${esc(String(v))}</td>`;

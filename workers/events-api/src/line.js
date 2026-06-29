@@ -254,7 +254,7 @@ async function handleWalkInPin(env, userId, replyToken, pin) {
   const eventName = text(event.eventName);
 
   const regRows = await env.DB.prepare(
-    `SELECT reg_id, display_name, checked_in FROM event_registrations
+    `SELECT reg_id, display_name, checked_in, payload_json FROM event_registrations
      WHERE event_id = ? AND line_user_id = ?`
   ).bind(eventId, userId).all();
 
@@ -263,10 +263,13 @@ async function handleWalkInPin(env, userId, replyToken, pin) {
   }
 
   const regs = regRows.results;
+  const nameFieldQId = (event.questions || []).find((q) => q.isNameField)?.id || null;
   const allChecked = regs.every(r => r.checked_in === "TRUE");
-  const nameList = regs.map(r =>
-    `・${r.display_name || "（未取得名稱）"}${r.checked_in === "TRUE" ? " ✅" : ""}`
-  ).join("\n");
+  const nameList = regs.map(r => {
+    const payload = nameFieldQId ? parseJson(r.payload_json) : null;
+    const name = (nameFieldQId && text(payload?.[nameFieldQId])) || r.display_name || "（未取得名稱）";
+    return `・${name}${r.checked_in === "TRUE" ? " ✅" : ""}`;
+  }).join("\n");
 
   const footerBtns = [];
   if (!allChecked) {
