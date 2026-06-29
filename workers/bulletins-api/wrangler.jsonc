@@ -9,7 +9,7 @@
   },
   "vars": {
     "ALLOWED_ORIGIN": "https://gsnbhs.pages.dev",
-    "GAS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbxIRdGFYKIz0NWpG1PC1OnB53vRz4yREH9eNvE_c7TXuFEiAfL2fCgt984T4IX9KqELCA/exec",
+    "GAS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzzp0iFCBkJmlxHuR2j8Ae8xpVPc9gzmvbqBBGNUt0Whm9QpJIrUC0dIs7ZnUjacuuS/exec",
     "GOOGLE_CLIENT_ID": "998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com",
     "ADMIN_EMAILS": "ulch0709@gmail.com,peaceli236@gmail.com,chinchinya0828@gmail.com"
   },
