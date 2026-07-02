@@ -334,6 +334,7 @@ a{text-decoration:none;color:inherit}
     <div class="drawer-head">
       <h2 id="drawerTitle">報名名單</h2>
       <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn ghost" style="padding:7px 10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700" title="匯出報名名單 Excel" onclick="exportRegistrationsExcel()">⬇️ 匯出</button>
         <button id="surveyQrBtn" class="btn ghost" style="padding:7px 10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700" title="問券 QR Code" onclick="showSurveyQrModal()">📋 QR</button>
         <button class="btn ghost" style="padding:7px 10px;display:flex;align-items:center;justify-content:center" title="現場報名 QR Code" onclick="addWalkInRegistration()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></svg></button>
         <button class="drawer-close" onclick="closeDrawer()">✕</button>
@@ -402,6 +403,7 @@ a{text-decoration:none;color:inherit}
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="./config.js"></script>
 <script src="utils.js"></script>
 <script>
@@ -821,6 +823,50 @@ function normalizeRegKeys(reg, labelToQId){
   }
   return norm;
 }
+function exportRegistrationsExcel(){
+  if(!currentRegs||!currentRegs.length){showToast('目前沒有報名資料可匯出');return;}
+  if(typeof XLSX==='undefined'){showToast('匯出功能載入中，請稍後再試');return;}
+  const headers=(currentRegHeaders&&currentRegHeaders.length)?currentRegHeaders:Object.keys(currentRegs[0]);
+  const evt=(allEvents||[]).find(e=>e.eventId===currentDrawerEventId);
+  const qIdMap={};
+  for(const q of (evt?.questions||[])){if(q.id)qIdMap[q.id]=q.label;}
+  const nameFieldQId=(evt?.questions||[]).find(q=>q.isNameField)?.id||null;
+  const getColLabel=h=>(h===nameFieldQId)?'姓名':(REG_COL_MAP[h]||qIdMap[h]||h);
+  const cellVal=(r,h)=>{
+    let v=r[h]||'';
+    if(h==='checkedIn') return v==='TRUE'?'已簽到':'未簽到';
+    if(h==='lineReminderOptIn') return v==='TRUE'?'開啟':'關閉';
+    if(h==='consentGiven') return v==='TRUE'?'同意':'未同意';
+    if(h==='submittedAt'&&v) return formatTaipeiDateTime(v);
+    return String(v);
+  };
+  const aoa=[headers.map(getColLabel)];
+  for(const r of currentRegs){
+    aoa.push(headers.map(h=>cellVal(r,h)));
+  }
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  const CJK_RE=new RegExp('['+
+    '\u3000-\u30FF'+   // CJK punctuation, Hiragana, Katakana
+    '\u3400-\u4DBF'+   // CJK ext A
+    '\u4E00-\u9FFF'+   // CJK unified ideographs
+    '\uF900-\uFAFF'+   // CJK compat ideographs
+    '\uFF00-\uFFEF'+   // fullwidth forms
+    ']');
+  const dispWidth=s=>String(s).split('').reduce((w,ch)=>w+(CJK_RE.test(ch)?2:1),0);
+  ws['!cols']=headers.map((h,i)=>{
+    const maxLen=aoa.reduce((m,row)=>Math.max(m,dispWidth(row[i]||'')),0);
+    return {wch:Math.min(Math.max(maxLen+2,8),40)};
+  });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'報名名單');
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const stamp=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+  const safeName=(currentDrawerEventName||'活動').replace(/[\/:*?"<>|]/g,'_');
+  XLSX.writeFile(wb,`${safeName}_報名名單_${stamp}.xlsx`);
+  showToast('已匯出報名名單');
+}
+
 function buildRegTableHTML(eventId, regs){
   const evt=(allEvents||[]).find(e=>e.eventId===eventId);
   const qIdMap={};
