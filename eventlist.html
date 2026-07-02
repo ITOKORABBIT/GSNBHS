@@ -875,7 +875,8 @@ function buildRegTableHTML(eventId, regs){
     if(q.id){qIdMap[q.id]=q.label;if(q.label)labelToQId[q.label]=q.id;}
   }
   const nameFieldQId=(evt?.questions||[]).find(q=>q.isNameField)?.id||null;
-  const getColLabel=h=>(h==='displayName'&&nameFieldQId)?'姓名':(REG_COL_MAP[h]||qIdMap[h]||h);
+  // nameField question becomes its own "姓名" column; displayName always stays as "LINE姓名"
+  const getColLabel=h=>(h===nameFieldQId)?'姓名':(REG_COL_MAP[h]||qIdMap[h]||h);
   // Normalize all regs to q_id keys for consistent column mapping
   const normRegs=Object.keys(labelToQId).length?regs.map(r=>normalizeRegKeys(r,labelToQId)):regs;
   // Update currentRegs to normalized so edit modal reads correct keys
@@ -885,7 +886,12 @@ function buildRegTableHTML(eventId, regs){
   const qOrder=(evt?.questions||[]).map(q=>q.id);
   const customCols=[...dataKeys].filter(h=>!REG_HIDDEN.has(h)&&!REG_FIXED.has(h)&&h!==nameFieldQId)
     .sort((a,b)=>{const ia=qOrder.indexOf(a),ib=qOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
-  const headers=[...REG_FIRST,...customCols,...REG_LAST.filter(h=>dataKeys.has(h))];
+  // When isNameField is set, insert that question as "姓名" column right after checkedIn,
+  // keeping displayName visible as "LINE姓名"
+  const firstCols=nameFieldQId&&dataKeys.has(nameFieldQId)
+    ?['checkedIn','displayName',nameFieldQId]
+    :REG_FIRST;
+  const headers=[...firstCols,...customCols,...REG_LAST.filter(h=>dataKeys.has(h))];
   currentRegHeaders=headers;
   const thHtml=headers.map(h=>`<th class="${REG_COL_CLASS[h]||''}">${esc(getColLabel(h))}</th>`).join('')+`<th class="reg-action-col">操作</th>`;
   const rowsHtml=normRegs.map((r,idx)=>{
@@ -908,7 +914,6 @@ function buildRegTableHTML(eventId, regs){
         return `<td${cls}><div style="display:flex;align-items:center;gap:6px"><input type="text" class="reg-note-input" data-userid="${uid}" data-name="${esc(r.displayName||'')}" value="${esc(note)}" placeholder="${noLine?'（非 LINE 報名）':'真實姓名、職業等'}"${noLine?' disabled':''}>${noLine?'':` <button class="reg-note-save-btn" onclick="saveRegistrationNote(this)">儲存</button>`}</div></td>`;
       }
       let v=r[h]||'';
-      if(h==='displayName'&&nameFieldQId&&r[nameFieldQId]) v=r[nameFieldQId];
       if(h==='consentGiven') v=v==='TRUE'?'✅':'—';
       if(h==='submittedAt'&&v) v=formatTaipeiDateTime(v);
       return `<td${cls}>${esc(String(v))}</td>`;
