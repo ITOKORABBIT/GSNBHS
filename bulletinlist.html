@@ -590,6 +590,10 @@ a{text-decoration:none;color:inherit}
           <button class="btn" type="button" id="removeImageBtn" onclick="clearBulletinImage()" style="display:none">移除圖片</button>
         </div>
         <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。</div>
+        <div class="upload-row" style="margin-top:10px">
+          <input class="input" id="imageUrlInput" type="url" placeholder="或貼上圖片網址（例如臉書貼文圖片網址）" style="flex:1">
+          <button class="btn" type="button" onclick="addImageUrlFromInput()">加入圖片網址</button>
+        </div>
       </div>
 
       <div class="form-section">
@@ -774,6 +778,7 @@ function applyDraftSnapshot(snapshot) {
   document.getElementById('categoryInput').value = snapshot.category || '里民活動';
   setImageUrls(splitImageUrls(snapshot.imageUrl || ''));
   document.getElementById('imageFileInput').value = '';
+  document.getElementById('imageUrlInput').value = '';
   document.getElementById('contentInput').value = snapshot.content || '';
   document.getElementById('contentEditor').innerHTML = snapshot.content || '';
   document.getElementById('linkUrlInput').value = snapshot.linkUrl || '';
@@ -921,6 +926,7 @@ function createBulletin() {
   document.getElementById('categoryInput').value = '里民活動';
   document.getElementById('imageInput').value = '';
   document.getElementById('imageFileInput').value = '';
+  document.getElementById('imageUrlInput').value = '';
   document.getElementById('contentInput').value = '';
   document.getElementById('contentEditor').innerHTML = '';
   document.getElementById('linkUrlInput').value = '';
@@ -947,6 +953,7 @@ function fillEditor(item) {
   document.getElementById('categoryInput').value = item.category || '里民活動';
   document.getElementById('imageInput').value = item.imageUrl || '';
   document.getElementById('imageFileInput').value = '';
+  document.getElementById('imageUrlInput').value = '';
   document.getElementById('contentInput').value = item.content || '';
   document.getElementById('contentEditor').innerHTML = item.content || '';
   document.getElementById('linkUrlInput').value = item.linkUrl || '';
@@ -975,6 +982,23 @@ function updateImageMeta(urls) {
   }
   meta.textContent = '尚未上傳圖片';
   removeBtn.style.display = 'none';
+}
+
+function addImageUrlFromInput() {
+  const input = document.getElementById('imageUrlInput');
+  const url = input.value.trim();
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) {
+    showMessage('圖片網址需以 http:// 或 https:// 開頭。', false);
+    return;
+  }
+  const urls = getImageUrls();
+  urls.push(url);
+  setImageUrls(urls);
+  updateImageMeta(urls);
+  input.value = '';
+  refreshPreview();
+  persistCurrentDraftCache();
 }
 
 function removeBulletinImage(index) {
