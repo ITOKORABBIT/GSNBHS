@@ -1120,13 +1120,14 @@ async function handleLineMenuEvent(env, userId, replyToken, event) {
     return true;
   }
   if (pb.menu === "news" || pb.menu === "course") {
-    const cate = pb.menu === "news" ? "最新消息" : "教育課程";
-    const bulletins = await fetchBulletinsByCategory(env, cate);
+    const label = pb.menu === "news" ? "最新消息" : "教育課程";
+    const cates = pb.menu === "news" ? ["最新消息", "里民活動"] : ["教育課程"];
+    const bulletins = await fetchBulletinsByCategories(env, cates);
     if (!bulletins.length) {
-      await lineReply(env, replyToken, [{ type: "text", text: `目前尚無「${cate}」內容，敬請期待！` }]);
+      await lineReply(env, replyToken, [{ type: "text", text: `目前尚無「${label}」內容，敬請期待！` }]);
       return true;
     }
-    await lineReply(env, replyToken, [buildBulletinCarousel(cate, bulletins)]);
+    await lineReply(env, replyToken, [buildBulletinCarousel(label, bulletins)]);
     return true;
   }
   if (MENU_LABELS[pb.menu]) {
@@ -1219,50 +1220,82 @@ function matchLineCategory(msg) {
   return null;
 }
 
-async function fetchBulletinsByCategory(env, cate) {
+async function fetchBulletinsByCategories(env, cates) {
   try {
+    const placeholders = cates.map(() => "?").join(",");
     const rows = await env.DB.prepare(
-      "SELECT payload_json FROM bulletins WHERE status = '已發布' AND category = ? ORDER BY sort_order ASC, created_at DESC LIMIT 12"
-    ).bind(cate).all();
+      `SELECT payload_json FROM bulletins WHERE status = '已發布' AND category IN (${placeholders}) ORDER BY sort_order ASC, created_at DESC LIMIT 12`
+    ).bind(...cates).all();
     return rows.results.map((r) => parseJson(r.payload_json));
   } catch (err) {
-    console.error(JSON.stringify({ fn: "fetchBulletinsByCategory", cate, error: err.message }));
+    console.error(JSON.stringify({ fn: "fetchBulletinsByCategories", cates, error: err.message }));
     return [];
   }
 }
 
-function buildBulletinCarousel(cate, bulletins) {
-  const bubbles = bulletins.map((b) => buildBulletinBubble(cate, b));
+function buildBulletinCarousel(label, bulletins) {
+  const bubbles = bulletins.map((b) => buildBulletinBubble(b));
   return {
     type: "flex",
-    altText: `${cate}（${bulletins.length} 則）`,
+    altText: `${label}（${bulletins.length} 則）`,
     contents: { type: "carousel", contents: bubbles },
   };
 }
 
-function buildBulletinBubble(cate, b) {
+const BULLETIN_TAG_COLOR = {
+  最新消息: "#F59E0B",
+  教育課程: "#7C3AED",
+  里民活動: "#2F6836",
+  緊急通告: "#B91C1C",
+  政策宣導: "#1D4ED8",
+};
+
+function buildBulletinBubble(b) {
   const firstImage = String(b.imageUrl || "").split(/\r?\n|,/).map((s) => s.trim()).filter(Boolean)[0];
   const linkUrl = String(b.linkUrl || "").trim();
+  const cate = b.category || "里民活動";
   const detailUrl = /^https?:\/\//i.test(linkUrl) ? linkUrl : BULLETIN_URL + "?category=" + encodeURIComponent(cate);
   return {
     type: "bubble", size: "mega",
-    hero: { type: "image", url: firstImage || EVENT_IMG_FALLBACK, size: "full", aspectRatio: "20:13", aspectMode: "cover" },
     body: {
-      type: "box", layout: "vertical", spacing: "sm",
+      type: "box", layout: "vertical", paddingAll: "0px", spacing: "none",
+      action: { type: "uri", uri: detailUrl },
       contents: [
-        { type: "text", text: b.title || "(未命名)", weight: "bold", size: "md", wrap: true, maxLines: 2 },
-        { type: "text", text: stripHtmlTags(b.content), size: "sm", color: "#5A7090", wrap: true, maxLines: 4 },
+        {
+          type: "box", layout: "vertical",
+          contents: [
+            { type: "image", url: firstImage || EVENT_IMG_FALLBACK, size: "full", aspectRatio: "20:13", aspectMode: "cover" },
+            {
+              type: "box", layout: "vertical", position: "absolute", offsetTop: "10px", offsetStart: "10px",
+              backgroundColor: BULLETIN_TAG_COLOR[cate] || "#3B82F6", cornerRadius: "6px", paddingAll: "4px",
+              contents: [{ type: "text", text: cate, size: "xs", color: "#FFFFFF", weight: "bold" }],
+            },
+          ],
+        },
+        {
+          type: "box", layout: "vertical", paddingAll: "16px", spacing: "sm",
+          contents: [
+            { type: "text", text: b.title || "(未命名)", weight: "bold", size: "md", wrap: true, maxLines: 2 },
+            { type: "text", text: truncateText(stripHtmlTags(b.content), 80), size: "sm", color: "#5A7090", wrap: true, maxLines: 4 },
+          ],
+        },
       ],
     },
     footer: {
-      type: "box", layout: "vertical",
+      type: "box", layout: "vertical", paddingAll: "16px",
       contents: [{ type: "button", style: "primary", color: "#3B82F6", height: "sm", action: { type: "uri", label: "查看詳情", uri: detailUrl } }],
     },
   };
 }
 
 function stripHtmlTags(html) {
-  return String(html || "").replace(/<[^>]*>/g, "").trim() || "（請點擊查看詳情）";
+  return String(html || "").replace(/<[^>]*>/g, "").trim();
+}
+
+function truncateText(str, max) {
+  const s = String(str || "").trim();
+  if (!s) return "（請點擊查看詳情）";
+  return s.length > max ? s.slice(0, max).trim() + "..." : s;
 }
 
 async function fetchStoresByCategory(env, cate) {
