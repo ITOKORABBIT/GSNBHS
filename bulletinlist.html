@@ -592,6 +592,11 @@ a{text-decoration:none;color:inherit}
         <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。</div>
       </div>
 
+      <div class="form-section">
+        <label class="label" for="linkUrlInput">原始連結（選填）</label>
+        <input class="input" id="linkUrlInput" type="url" placeholder="例如臉書貼文網址，LINE 選單「查看詳情」按鈕會連到這裡">
+      </div>
+
       <label class="toggle-row">
         <input type="checkbox" id="pinnedInput">
         <span>設為置頂公告</span>
@@ -732,6 +737,7 @@ function buildEditorSnapshot() {
     category: document.getElementById('categoryInput').value,
     imageUrl: getImageUrls().join('\n'),
     content: document.getElementById('contentInput').value.trim(),
+    linkUrl: document.getElementById('linkUrlInput').value.trim(),
     pinned: document.getElementById('pinnedInput').checked,
     ts: Date.now()
   };
@@ -770,6 +776,7 @@ function applyDraftSnapshot(snapshot) {
   document.getElementById('imageFileInput').value = '';
   document.getElementById('contentInput').value = snapshot.content || '';
   document.getElementById('contentEditor').innerHTML = snapshot.content || '';
+  document.getElementById('linkUrlInput').value = snapshot.linkUrl || '';
   document.getElementById('pinnedInput').checked = !!snapshot.pinned;
   updateImageMeta(getImageUrls());
   refreshPreview();
@@ -916,6 +923,7 @@ function createBulletin() {
   document.getElementById('imageFileInput').value = '';
   document.getElementById('contentInput').value = '';
   document.getElementById('contentEditor').innerHTML = '';
+  document.getElementById('linkUrlInput').value = '';
   document.getElementById('pinnedInput').checked = false;
   document.getElementById('deleteBtn').style.display = 'none';
   hideMessage();
@@ -941,6 +949,7 @@ function fillEditor(item) {
   document.getElementById('imageFileInput').value = '';
   document.getElementById('contentInput').value = item.content || '';
   document.getElementById('contentEditor').innerHTML = item.content || '';
+  document.getElementById('linkUrlInput').value = item.linkUrl || '';
   document.getElementById('pinnedInput').checked = !!item.pinned;
   document.getElementById('deleteBtn').style.display = 'inline-flex';
   hideMessage();
@@ -1233,6 +1242,7 @@ function saveBulletin() {
   const imageUrl = getImageUrls().join('\n');
   const status = normalizeBulletinStatus(document.getElementById('statusInput').value);
   const category = document.getElementById('categoryInput').value;
+  const linkUrl = document.getElementById('linkUrlInput').value.trim();
   const pinned = document.getElementById('pinnedInput').checked;
 
   if (!title) {
@@ -1247,6 +1257,7 @@ function saveBulletin() {
     imageUrl: imageUrl,
     status: status,
     category: category,
+    linkUrl: linkUrl,
     pinned: pinned
   };
   if (editingBulletinId) payload.bulletinId = editingBulletinId;
@@ -1338,7 +1349,7 @@ function refreshPreview(freshLocalUrl, freshDriveUrl) {
   }
 }
 
-['titleInput', 'contentInput', 'imageInput', 'statusInput', 'categoryInput', 'pinnedInput'].forEach(id => {
+['titleInput', 'contentInput', 'imageInput', 'statusInput', 'categoryInput', 'linkUrlInput', 'pinnedInput'].forEach(id => {
   document.addEventListener('input', event => {
     if (event.target && event.target.id === id) refreshPreview();
   });
@@ -1352,7 +1363,7 @@ document.getElementById('contentEditor').addEventListener('input', function() {
   persistCurrentDraftCache();
 });
 
-['titleInput', 'contentInput', 'imageInput', 'statusInput', 'categoryInput', 'pinnedInput'].forEach(id => {
+['titleInput', 'contentInput', 'imageInput', 'statusInput', 'categoryInput', 'linkUrlInput', 'pinnedInput'].forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', persistCurrentDraftCache);

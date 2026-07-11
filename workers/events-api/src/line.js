@@ -1242,7 +1242,8 @@ function buildBulletinCarousel(cate, bulletins) {
 
 function buildBulletinBubble(cate, b) {
   const firstImage = String(b.imageUrl || "").split(/\r?\n|,/).map((s) => s.trim()).filter(Boolean)[0];
-  const detailUrl = BULLETIN_URL + "?category=" + encodeURIComponent(cate);
+  const linkUrl = String(b.linkUrl || "").trim();
+  const detailUrl = /^https?:\/\//i.test(linkUrl) ? linkUrl : BULLETIN_URL + "?category=" + encodeURIComponent(cate);
   return {
     type: "bubble", size: "mega",
     hero: { type: "image", url: firstImage || EVENT_IMG_FALLBACK, size: "full", aspectRatio: "20:13", aspectMode: "cover" },
