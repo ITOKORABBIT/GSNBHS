@@ -11,6 +11,7 @@ const LINE_REPLY_API = "https://api.line.me/v2/bot/message/reply";
 const LINE_MULTICAST_API = "https://api.line.me/v2/bot/message/multicast";
 export const SURVEY_BASE_URL = "https://gsnbhs.pages.dev/survey";
 const VOUCHER_URL = "https://gsnbhs.pages.dev/voucher.html";
+const BULLETIN_URL = "https://gsnbhs.pages.dev/bulletin.html";
 const STORE_DETAIL_URL = "https://gsnbhs.pages.dev/storeopendetail.html?id=";
 const STORE_LIST_URL = "https://gsnbhs.pages.dev/storeopenlist.html";
 const STORE_IMG_FALLBACK = "https://lh3.googleusercontent.com/d/1GAb13SxqDBjTnnwZZjNubyJEWxqibs-Z";
@@ -1116,6 +1117,12 @@ async function handleLineMenuEvent(env, userId, replyToken, event) {
   // findchief / apply / backmain 是 richmenuswitch 按鈕，畫面已經由 LINE
   // 平台自動切到對應子選單，這裡只需吞掉 postback，不用再回訊息。
   if (pb.menu === "findchief" || pb.menu === "apply" || pb.menu === "backmain") {
+    return true;
+  }
+  if (pb.menu === "news" || pb.menu === "course") {
+    const cate = pb.menu === "news" ? "最新消息" : "教育課程";
+    const url = BULLETIN_URL + "?category=" + encodeURIComponent(cate);
+    await lineReply(env, replyToken, [{ type: "text", text: "點此查看「" + cate + "」：\n" + url }]);
     return true;
   }
   if (MENU_LABELS[pb.menu]) {

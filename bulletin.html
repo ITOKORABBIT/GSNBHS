@@ -140,6 +140,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--val);font-size:15p
 .cate-emergency{background:#fee2e2;color:#b91c1c}
 .cate-policy{background:#dbeafe;color:#1d4ed8}
 .cate-activity{background:var(--primary-light);color:var(--primary-dark)}
+.cate-news{background:#fef3c7;color:#b45309}
+.cate-course{background:#ede9fe;color:#6d28d9}
 
 /* ── 瀏覽統計 ── */
 .stats-row{
@@ -399,6 +401,12 @@ async function load() {
       return;
     }
     _bulletins = d.bulletins;
+    const wantCate = new URLSearchParams(location.search).get('category');
+    if (wantCate) _bulletins = _bulletins.filter(b => (b.category || '里民活動') === wantCate);
+    if (wantCate && !_bulletins.length) {
+      document.getElementById('emptyEl').style.display = 'block';
+      return;
+    }
     _bulletins.forEach(b => { vcNamesMap[b.bulletinId] = b.title || b.bulletinId; });
     render(_bulletins);
     loadViewStats();
@@ -411,19 +419,23 @@ async function load() {
 function catBadgeClass(cate) {
   if (cate === '緊急通告') return 'cate-emergency';
   if (cate === '政策宣導') return 'cate-policy';
+  if (cate === '最新消息') return 'cate-news';
+  if (cate === '教育課程') return 'cate-course';
   return 'cate-activity';
 }
 function catHeaderLabel(cate) {
   if (cate === '緊急通告') return '🚨 緊急通告';
   if (cate === '政策宣導') return '📋 政策宣導';
+  if (cate === '最新消息') return '📰 最新消息';
+  if (cate === '教育課程') return '📚 教育課程';
   return '🎪 里民活動';
 }
 
 function render(list) {
   // Client-side sort to ensure correct category order
-  var catW = { '緊急通告': 1, '政策宣導': 2, '里民活動': 3 };
+  var catW = { '緊急通告': 1, '政策宣導': 2, '最新消息': 3, '教育課程': 4, '里民活動': 5 };
   list = list.slice().sort(function(a, b) {
-    var wa = catW[a.category] || 3, wb = catW[b.category] || 3;
+    var wa = catW[a.category] || 5, wb = catW[b.category] || 5;
     if (wa !== wb) return wa - wb;
     var ha = (a.sortOrder || 0) > 0, hb = (b.sortOrder || 0) > 0;
     if (ha !== hb) return ha ? 1 : -1;
