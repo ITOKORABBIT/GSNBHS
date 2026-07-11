@@ -1130,6 +1130,10 @@ async function handleLineMenuEvent(env, userId, replyToken, event) {
     await lineReply(env, replyToken, [buildBulletinCarousel(label, bulletins)]);
     return true;
   }
+  if (pb.menu === "apply_event" || pb.menu === "apply_course") {
+    await handleEvtStart(env, userId, replyToken);
+    return true;
+  }
   if (MENU_LABELS[pb.menu]) {
     await lineReply(env, replyToken, [{ type: "text", text: "「" + MENU_LABELS[pb.menu] + "」功能準備中，敬請期待！" }]);
     return true;
