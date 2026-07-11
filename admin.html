@@ -1160,10 +1160,6 @@ function setStoreFilter(value) { storeFilter = value; renderStores(); }
 function setBulletinFilter(value) { bulletinFilter = value; renderBulletins(); }
 function setEventFilter(value) { eventFilter = value; renderEvents(); }
 
-function refreshAll() {
-  loadTab(currentTab, true);
-}
-
 function loadTab(tab, force) {
   if (!force && loadedTabs[tab]) return;
   loadedTabs[tab] = true;

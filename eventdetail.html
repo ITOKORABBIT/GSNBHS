@@ -43,11 +43,7 @@ a{text-decoration:none;color:inherit}
 .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,35,27,.1)}
 .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn.primary:hover{background:#1557b0}
-.btn.green-btn{background:var(--green);border-color:var(--green);color:#fff}
-.btn.green-btn:hover{background:#245429}
 .btn.ghost{background:#fbf7f2}
-.btn.danger{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.sm{padding:7px 12px;font-size:12px;border-radius:10px}
 .btn:disabled{opacity:.5;pointer-events:none}
 
 /* ── 區塊卡片 ── */
@@ -69,7 +65,6 @@ a{text-decoration:none;color:inherit}
 .toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .toggle.on::after{left:23px}
 .hint{font-size:12px;color:var(--muted);margin-top:4px}
-.warn-hint{font-size:12px;color:var(--gold);margin-top:4px;display:none}
 
 /* ── 圖片上傳 ── */
 .img-upload-box{border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
@@ -586,12 +581,6 @@ function loadEvent(){
     }).catch(()=>showToast('網路錯誤'));
 }
 
-function loadStats(){
-  postBackend('getEventStats',{sessionToken:SESSION.sessionToken,eventId:editId})
-    .then(r=>r.json()).then(d=>renderStats(d))
-    .catch(()=>{document.getElementById('statsContent').innerHTML='<p style="color:var(--muted);font-size:13px">無法載入統計</p>';});
-}
-
 function renderStats(d){
       if(!d.success){document.getElementById('statsContent').innerHTML='<p style="color:var(--muted);font-size:13px">無法載入統計</p>';return;}
       const s=d.stats;
@@ -780,8 +769,6 @@ function fillCheckinCenterFromCurrentLocation(){
 }
 
 // ── 圖片上傳 ──
-function triggerUpload(){ document.getElementById('imgInput').click(); }
-
 function handleImgChange(e){
   const file=e.target.files[0];
   if(!file) return;

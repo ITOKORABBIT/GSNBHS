@@ -215,7 +215,6 @@ body{
 }
 .info-val a{ color: var(--primary); text-decoration: none; }
 .info-val a:hover{ text-decoration: underline; }
-.pre{ white-space: pre-wrap; }
 .paragraph-list{ display:flex; flex-direction:column; gap:7px; }
 .paragraph-list p{ margin:0; line-height:1.7; }
 
@@ -229,20 +228,6 @@ body{
   font-size: 13px; color: var(--primary-dark);
   line-height: 1.6; white-space: pre-wrap;
 }
-
-/* ── Photo grid ── */
-.photo-grid-wrap{ padding: 12px 18px 14px; }
-.photo-grid{
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 10px;
-}
-.photo-grid img{
-  width: 100%; aspect-ratio: 4/3; object-fit: cover;
-  border-radius: 8px; border: 1px solid var(--border);
-  cursor: pointer; transition: transform .2s;
-}
-.photo-grid img:hover{ transform: scale(1.03); }
 
 /* ── Lightbox ── */
 .lightbox{
@@ -289,7 +274,6 @@ body{
 .state-wrap p{ font-size: 14px; }
 
 @media(max-width:520px){
-  .photo-grid{ grid-template-columns: repeat(2, 1fr); }
   .info-lbl{ width: 66px; }
 }
 </style>
@@ -564,13 +548,6 @@ function linkUrl(url) {
   if (!text) return '';
   if (!/^https?:\/\//i.test(text)) return esc(text);
   return '<a href="' + esc(text) + '" target="_blank" rel="noopener">前往連結 ↗</a>';
-}
-
-function makePlaceholder() {
-  var d = document.createElement('div');
-  d.className = 'hero-placeholder';
-  d.innerHTML = '<svg width="48" height="48" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-  return d;
 }
 
 function showError(msg) {

@@ -9,12 +9,6 @@ const CONFIG = {
   VILLAGE_NAME: '舊社里',
   SYSTEM_NAME: '里民小幫手',
 
-  // Make Webhook URL 已改由 Apps Script 後端的 Script Properties 管理
-  STORE_WEBHOOK_URL: '',
-
-  // Google Apps Script（照片上傳，公開，無需登入）
-  UPLOAD_URL: '',
-
   // Google Apps Script（統一 API 端點，所有資料讀寫都經過此處驗證）
   SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxIRdGFYKIz0NWpG1PC1OnB53vRz4yREH9eNvE_c7TXuFEiAfL2fCgt984T4IX9KqELCA/exec',
 
@@ -27,7 +21,4 @@ const CONFIG = {
   // Google OAuth Client ID（用於管理員 Google 登入）
   // 注意：填入與 HPNBHS 相同的 Client ID 或另建新的
   GOOGLE_CLIENT_ID: '998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com',
-
-  // 公開前端不保存後端 API Key；上傳由 Apps Script 做來源網域與流量限制
-  API_KEY: '',
 };

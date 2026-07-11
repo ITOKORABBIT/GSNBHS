@@ -612,35 +612,3 @@ export async function loadResidentNotes(env) {
   }
   return notes;
 }
-
-export async function importSurveyResponsesFromGas(env, data) {
-  const json = await forwardToGas(env, data);
-  if (!Array.isArray(json.responses)) return;
-  const statements = [];
-  for (const response of json.responses) {
-    if (response.filled) {
-      statements.push(upsertSurveyResponseStatement(env, normalizeSurveyResponse({
-        ...response,
-        responseId: response.responseId || `LEGACY_${text(response.eventId)}_${text(response.lineUserId)}_${text(response.submittedAt)}`,
-      })));
-    }
-    if (!response.registered && response.attended && !response.filled) {
-      statements.push(upsertWalkInStatement(env, normalizeWalkInAttendance({
-        attendanceId: response.attendanceId || `LEGACY_${text(response.eventId)}_${text(response.lineUserId)}`,
-        ...response,
-        createdAt: response.createdAt || response.submittedAt || new Date().toISOString(),
-      })));
-    }
-    if (text(response.lineUserId) && text(response.residentNote)) {
-      statements.push(upsertResidentNoteStatement(env, normalizeResidentNote({
-        lineUserId: response.lineUserId,
-        displayName: response.displayName,
-        note: response.residentNote,
-        updatedAt: new Date().toISOString(),
-      })));
-    }
-  }
-  for (let i = 0; i < statements.length; i += 50) {
-    await env.DB.batch(statements.slice(i, i + 50));
-  }
-}

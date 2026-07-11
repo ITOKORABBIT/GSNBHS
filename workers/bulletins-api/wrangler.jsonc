@@ -13,12 +13,6 @@
     "GOOGLE_CLIENT_ID": "998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com",
     "ADMIN_EMAILS": "ulch0709@gmail.com,peaceli236@gmail.com,chinchinya0828@gmail.com"
   },
-  "kv_namespaces": [
-    {
-      "binding": "SESSIONS",
-      "id": "9a11524bfdbb4bb789fd44f58d2e8bf1"
-    }
-  ],
   "d1_databases": [
     {
       "binding": "DB",
