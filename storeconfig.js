@@ -10,7 +10,7 @@ const CONFIG = {
   SYSTEM_NAME: '里民小幫手',
 
   // Google Apps Script（統一 API 端點，所有資料讀寫都經過此處驗證）
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxIRdGFYKIz0NWpG1PC1OnB53vRz4yREH9eNvE_c7TXuFEiAfL2fCgt984T4IX9KqELCA/exec',
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzzp0iFCBkJmlxHuR2j8Ae8xpVPc9gzmvbqBBGNUt0Whm9QpJIrUC0dIs7ZnUjacuuS/exec',
 
   // Cloudflare Worker 商店 API
   STORE_API_URL: 'https://gsnbhs-stores-api.ulch0709.workers.dev',
