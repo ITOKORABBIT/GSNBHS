@@ -992,7 +992,7 @@ async function getLineProfile(env, userId) {
 async function startChatFlow(env, userId, replyToken) {
   if (!CHAT_FEATURE_ENABLED) {
     await lineReply(env, replyToken, [
-      { type: "text", text: "請直接在這裡留言，里長會親自看到並回覆您 😊" },
+      { type: "text", text: "請直接在這裡留言，我等等就會回覆您 😊" },
     ]);
     return;
   }
