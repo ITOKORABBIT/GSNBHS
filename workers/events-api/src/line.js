@@ -1711,7 +1711,7 @@ export function buildStoreItem(s) {
   };
 }
 
-function buildEvtListCarousel(events) {
+export function buildEvtListCarousel(events) {
   const bubbles = events.slice(0, 12).map((ev) => {
     const statusText = ev.isFull ? "🔴 名額已滿" : ev.isAlmostFull ? `⚠️ 剩餘 ${ev.remaining} 個名額` : "🟢 報名中";
     const statusColor = ev.isFull ? "#cc0000" : ev.isAlmostFull ? "#e37400" : "#00aa44";
@@ -1719,6 +1719,7 @@ function buildEvtListCarousel(events) {
       { type: "text", text: ev.eventName, weight: "bold", size: "md", wrap: true },
       ev.eventDate ? { type: "text", text: "📅 " + ev.eventDate, size: "sm", color: "#555555", wrap: true } : null,
       ev.eventLocation ? buildEvtLocationText(ev) : null,
+      ev.description ? { type: "text", text: ev.description, size: "sm", color: "#555555", wrap: true, margin: "sm" } : null,
       { type: "text", text: statusText, size: "sm", color: statusColor },
     ].filter(Boolean);
     const btnAction = ev.isFull

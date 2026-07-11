@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildEvtReminderBubble, buildStoreBubble, buildStoreItem } from "./line.js";
+import { buildEvtListCarousel, buildEvtReminderBubble, buildStoreBubble, buildStoreItem } from "./line.js";
 
 test("LINE store item keeps square media and a separate offer action row", () => {
   const item = buildStoreItem({
@@ -15,7 +15,7 @@ test("LINE store item keeps square media and a separate offer action row", () =>
   assert.equal(item.height, "128px");
   assert.equal(item.contents[0].layout, "horizontal");
   assert.equal(item.contents[0].height, "84px");
-  assert.equal(item.contents[0].action.uri, "https://omnbhs.pages.dev/storeopendetail.html?id=STORE-1");
+  assert.equal(item.contents[0].action.uri, "https://gsnbhs.pages.dev/storeopendetail.html?id=STORE-1");
   assert.equal(item.contents[0].contents[0].aspectRatio, "1:1");
   assert.equal(item.contents[0].contents[1].contents[1].text, "消費滿百送小菜");
   assert.equal(item.contents[0].contents[1].contents[1].maxLines, 4);
@@ -44,4 +44,19 @@ test("LINE event reminder uses the friendly next-day message", () => {
   const note = bubble.contents.body.contents.at(-1);
 
   assert.equal(note.text, "明天見唷！如有問題請聯繫我們。");
+});
+
+test("LINE event list card shows the full activity description", () => {
+  const carousel = buildEvtListCarousel([{
+    eventId: "EVT_1",
+    eventName: "社區歌唱班",
+    eventDate: "2026/07/21 14:00 - 2026/09/22 16:00",
+    eventLocation: "活動中心",
+    description: "開頭介紹\n學習亮點\n課程資訊\n聯絡方式",
+  }]);
+  const description = carousel.contents.contents[0].body.contents.find((item) => item.text?.startsWith("開頭介紹"));
+
+  assert.equal(description.wrap, true);
+  assert.equal(description.maxLines, undefined);
+  assert.match(description.text, /聯絡方式/);
 });
