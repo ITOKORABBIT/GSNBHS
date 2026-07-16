@@ -13,6 +13,7 @@ const ACTIONS = new Set([
   "bulkAddCardViews",
   "resetViewStats",
   "uploadBulletinImage",
+  "importBulletinImageUrl",
 ]);
 
 const PUBLIC_ACTIONS = new Set([
@@ -24,6 +25,7 @@ const PUBLIC_ACTIONS = new Set([
 // In-memory session cache: avoids repeated GAS auth calls within the same Worker isolate.
 const sessionCache = new Map();
 const SESSION_CACHE_TTL = 5 * 60 * 1000;
+const MAX_BULLETIN_IMAGE_BYTES = 5 * 1024 * 1024;
 
 let driveTokenCache = null;
 let driveTokenExpiry = 0;
@@ -82,6 +84,7 @@ export default {
       if (action === "bulkAddCardViews")    return corsJson(env, await bulkAddCardViews(env, data));
       if (action === "resetViewStats")      return corsJson(env, await resetViewStats(env, data));
       if (action === "uploadBulletinImage") return corsJson(env, await uploadBulletinImage(env, data));
+      if (action === "importBulletinImageUrl") return corsJson(env, await importBulletinImageUrl(env, data));
 
       throw httpError(400, "Unsupported action");
     } catch (error) {
@@ -494,9 +497,8 @@ async function getGoogleAccessToken(env) {
   return driveTokenCache;
 }
 
-async function uploadToDrive(env, b64, mimeType, fileName) {
+async function uploadBytesToDrive(env, bytes, mimeType, fileName) {
   const accessToken = await getGoogleAccessToken(env);
-  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   const boundary = `----Boundary${Math.random().toString(36).slice(2)}`;
   const metadata = JSON.stringify({ name: fileName, parents: [env.GOOGLE_DRIVE_FOLDER_ID] });
   const enc = new TextEncoder();
@@ -530,15 +532,78 @@ async function uploadToDrive(env, b64, mimeType, fileName) {
   return `https://lh3.googleusercontent.com/d/${file.id}`;
 }
 
+async function uploadToDrive(env, b64, mimeType, fileName) {
+  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  return uploadBytesToDrive(env, bytes, mimeType, fileName);
+}
+
 async function uploadBulletinImage(env, data) {
   let b64 = text(data.imageBase64 || data.base64);
   if (!b64) return { success: false, error: "Missing imageBase64" };
   const comma = b64.indexOf(",");
   if (comma !== -1) b64 = b64.slice(comma + 1);
-  if (b64.length * 0.75 > 2 * 1024 * 1024) return { success: false, error: "圖片過大，請壓縮至 2MB 以下" };
+  if (b64.length * 0.75 > MAX_BULLETIN_IMAGE_BYTES) return { success: false, error: "圖片過大，請壓縮至 5MB 以下" };
   if (!env.GOOGLE_OAUTH_CLIENT_ID || !env.GOOGLE_DRIVE_FOLDER_ID) return { success: false, error: "Drive 未設定" };
   const mimeType = text(data.mimeType) || "image/jpeg";
   const ext = mimeType.split("/")[1] || "jpg";
   const url = await uploadToDrive(env, b64, mimeType, `bulletin_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`);
+  return { success: true, url };
+}
+
+async function importBulletinImageUrl(env, data) {
+  const imageUrl = text(data.imageUrl);
+  if (!imageUrl) return { success: false, error: "請貼上 Facebook 圖片網址" };
+
+  let parsed;
+  try {
+    parsed = new URL(imageUrl);
+  } catch {
+    return { success: false, error: "圖片網址格式不正確" };
+  }
+  if (parsed.protocol !== "https:") return { success: false, error: "圖片網址必須使用 https://" };
+
+  const host = parsed.hostname.toLowerCase();
+  if (host === "facebook.com" || host.endsWith(".facebook.com")) {
+    return { success: false, error: "這是 Facebook 貼文／相片頁網址。請在照片上按右鍵，選擇「複製圖片網址」後再貼上。" };
+  }
+  if (!host.endsWith(".fbcdn.net")) {
+    return { success: false, error: "目前自動匯入僅支援 Facebook 的 fbcdn 圖片網址" };
+  }
+
+  const imageRes = await fetch(parsed.toString(), {
+    redirect: "follow",
+    headers: {
+      Accept: "image/webp,image/png,image/jpeg,image/gif,*/*;q=0.8",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36",
+    },
+  });
+  if (!imageRes.ok) {
+    return { success: false, error: `Facebook 圖片網址已失效（HTTP ${imageRes.status}），請重新複製圖片網址` };
+  }
+
+  const mimeType = text(imageRes.headers.get("content-type")).split(";")[0].toLowerCase();
+  if (!/^image\/(jpeg|png|gif|webp)$/.test(mimeType)) {
+    return { success: false, error: "這個網址不是可匯入的 JPG、PNG、GIF 或 WEBP 圖片" };
+  }
+
+  const declaredSize = Number(imageRes.headers.get("content-length") || 0);
+  if (declaredSize > MAX_BULLETIN_IMAGE_BYTES) {
+    return { success: false, error: "圖片檔案太大，請控制在 5MB 以內" };
+  }
+  const bytes = new Uint8Array(await imageRes.arrayBuffer());
+  if (bytes.byteLength > MAX_BULLETIN_IMAGE_BYTES) {
+    return { success: false, error: "圖片檔案太大，請控制在 5MB 以內" };
+  }
+  if (!env.GOOGLE_OAUTH_CLIENT_ID || !env.GOOGLE_DRIVE_FOLDER_ID) {
+    return { success: false, error: "Drive 未設定" };
+  }
+
+  const ext = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+  const url = await uploadBytesToDrive(
+    env,
+    bytes,
+    mimeType,
+    `bulletin_fb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`,
+  );
   return { success: true, url };
 }

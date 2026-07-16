@@ -589,10 +589,10 @@ a{text-decoration:none;color:inherit}
         <div class="upload-actions">
           <button class="btn" type="button" id="removeImageBtn" onclick="clearBulletinImage()" style="display:none">移除圖片</button>
         </div>
-        <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。</div>
+        <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。Facebook 圖片網址會立即轉存到 Drive，不會保存容易失效的原始網址。</div>
         <div class="upload-row" style="margin-top:10px">
-          <input class="input" id="imageUrlInput" type="url" placeholder="或貼上圖片網址（例如臉書貼文圖片網址）" style="flex:1">
-          <button class="btn" type="button" onclick="addImageUrlFromInput()">加入圖片網址</button>
+          <input class="input" id="imageUrlInput" type="url" placeholder="貼上 Facebook 圖片網址（不是貼文網址）" style="flex:1">
+          <button class="btn" type="button" onclick="addImageUrlFromInput()">匯入並轉存</button>
         </div>
       </div>
 
@@ -984,7 +984,7 @@ function updateImageMeta(urls) {
   removeBtn.style.display = 'none';
 }
 
-function addImageUrlFromInput() {
+async function addImageUrlFromInput() {
   const input = document.getElementById('imageUrlInput');
   const url = input.value.trim();
   if (!url) return;
@@ -992,13 +992,33 @@ function addImageUrlFromInput() {
     showMessage('圖片網址需以 http:// 或 https:// 開頭。', false);
     return;
   }
-  const urls = getImageUrls();
-  urls.push(url);
-  setImageUrls(urls);
-  updateImageMeta(urls);
-  input.value = '';
-  refreshPreview();
-  persistCurrentDraftCache();
+  if (uploadingBulletinImage) return;
+  uploadingBulletinImage = true;
+  updateImageMeta(getImageUrls());
+  hideMessage();
+  try {
+    const json = await workerCall('importBulletinImageUrl', { imageUrl: url });
+    if (json.code === 401) {
+      clearSession();
+      location.reload();
+      return;
+    }
+    if (!json.success || !json.url) {
+      throw new Error(json.error || 'Facebook 圖片匯入失敗。');
+    }
+    const urls = getImageUrls();
+    urls.push(json.url);
+    setImageUrls(urls);
+    input.value = '';
+    refreshPreview();
+    persistCurrentDraftCache();
+    showMessage('Facebook 圖片已轉存到 Drive。', true);
+  } catch (error) {
+    showMessage(error.message || 'Facebook 圖片匯入失敗，請稍後再試。', false);
+  } finally {
+    uploadingBulletinImage = false;
+    updateImageMeta(getImageUrls());
+  }
 }
 
 function removeBulletinImage(index) {
