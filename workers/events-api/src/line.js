@@ -694,16 +694,8 @@ async function submitRegistrationFromLine(env, ctx, userId, state) {
     const quota = parseInt(text(event.quota)) || 0;
     if (quota > 0 && regCount >= quota) return { success: false, error: "此活動名額已滿" };
 
-    let displayName = "";
-    if (env.LINE_CHANNEL_ACCESS_TOKEN) {
-      try {
-        const profileResp = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
-          headers: { Authorization: "Bearer " + env.LINE_CHANNEL_ACCESS_TOKEN },
-        });
-        const profile = await profileResp.json();
-        displayName = text(profile.displayName);
-      } catch {}
-    }
+    const profile = await getLineProfile(env, userId);
+    const displayName = text(profile?.displayName);
 
     const now = new Date();
     const regId = ensureEvtSubmissionId(state, userId);
@@ -978,14 +970,62 @@ async function getActiveEventsForLine(env) {
 
 // ── LINE API ──────────────────────────────────────────────────────────────────
 
+// ── Channel access token ─────────────────────────────────────────────────────
+// 用 client_credentials 換來的 token 只有 30 天效期，過期後 LINE 會靜默拒絕所有
+// 請求（訊息收不到、推播發不出，且沒有任何警報）。所以不存 token，只存永不過期的
+// LINE_CHANNEL_ID / LINE_CHANNEL_SECRET，需要時自行換取並快取，到期前自動更新。
+//
+// 相容性：若仍設有 LINE_CHANNEL_ACCESS_TOKEN（測試帳號沿用的固定 token），優先使用它，
+// 這樣切換正式帳號前後都不用改程式。
+const TOKEN_CACHE_KEY = "line:channel_access_token";
+const TOKEN_CACHE_TTL = 27 * 24 * 60 * 60; // 27 天 < LINE 的 30 天，留 3 天緩衝
+
+async function getAccessToken(env) {
+  if (env.LINE_CHANNEL_ACCESS_TOKEN) return env.LINE_CHANNEL_ACCESS_TOKEN;
+  if (!env.LINE_CHANNEL_ID || !env.LINE_CHANNEL_SECRET || !env.SESSIONS) {
+    console.error(JSON.stringify({ fn: "getAccessToken", error: "channel credentials not configured" }));
+    return "";
+  }
+
+  const cached = await env.SESSIONS.get(TOKEN_CACHE_KEY);
+  if (cached) return cached;
+
+  try {
+    const resp = await fetch("https://api.line.me/v2/oauth/accessToken", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: env.LINE_CHANNEL_ID,
+        client_secret: env.LINE_CHANNEL_SECRET,
+      }),
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      console.error(JSON.stringify({ fn: "getAccessToken", status: resp.status, body: body.slice(0, 200) }));
+      return "";
+    }
+    const data = await resp.json();
+    const token = text(data.access_token);
+    if (!token) return "";
+    await env.SESSIONS.put(TOKEN_CACHE_KEY, token, { expirationTtl: TOKEN_CACHE_TTL });
+    console.log(JSON.stringify({ fn: "getAccessToken", renewed: true, expiresIn: data.expires_in }));
+    return token;
+  } catch (err) {
+    console.error(JSON.stringify({ fn: "getAccessToken", error: err.message }));
+    return "";
+  }
+}
+
 async function lineReply(env, replyToken, messages) {
-  if (!env.LINE_CHANNEL_ACCESS_TOKEN || !replyToken) {
+  const accessToken = await getAccessToken(env);
+  if (!accessToken || !replyToken) {
     console.error(JSON.stringify({ fn: "lineReply", error: "missing token or replyToken" }));
     return;
   }
   const resp = await fetch(LINE_REPLY_API, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.LINE_CHANNEL_ACCESS_TOKEN },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + accessToken },
     body: JSON.stringify({ replyToken, messages }),
   });
   if (!resp.ok) {
@@ -995,11 +1035,12 @@ async function lineReply(env, replyToken, messages) {
 }
 
 export async function linePush(env, to, messages) {
-  if (!env.LINE_CHANNEL_ACCESS_TOKEN || !to) return false;
+  const accessToken = await getAccessToken(env);
+  if (!accessToken || !to) return false;
   try {
     const resp = await fetch(LINE_PUSH_API, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.LINE_CHANNEL_ACCESS_TOKEN },
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + accessToken },
       body: JSON.stringify({ to, messages }),
     });
     if (!resp.ok) {
@@ -1047,11 +1088,12 @@ async function notifyHub(env, messages) {
 }
 
 export async function lineMulticast(env, userIds, messages) {
-  if (!env.LINE_CHANNEL_ACCESS_TOKEN || !userIds.length) return;
+  const accessToken = await getAccessToken(env);
+  if (!accessToken || !userIds.length) return;
   try {
     const resp = await fetch(LINE_MULTICAST_API, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.LINE_CHANNEL_ACCESS_TOKEN },
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + accessToken },
       body: JSON.stringify({ to: userIds, messages }),
     });
     if (!resp.ok) {
@@ -1081,8 +1123,10 @@ async function forwardLineEventToGas(env, event) {
 
 async function getLineProfile(env, userId) {
   try {
+    const accessToken = await getAccessToken(env);
+    if (!accessToken) return null;
     const resp = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
-      headers: { Authorization: "Bearer " + env.LINE_CHANNEL_ACCESS_TOKEN },
+      headers: { Authorization: "Bearer " + accessToken },
     });
     if (!resp.ok) return null;
     return await resp.json();
@@ -1254,7 +1298,40 @@ async function handleLineKeywordEvent(env, replyToken, event) {
   const msg = String(event.message.text || "").trim();
   if (!msg || !replyToken) return false;
 
-  if (/^(美食地圖|特約商店|特約商家|商家清單|店家清單|查商家|找商家|找店家|商家|店家)$/.test(msg)) {
+  // 舊官方帳號的圖文選單按鈕送的是純文字（查看特約商店／舊社里公佈欄／學校專區／
+  // 治安通報／留言給我）。切換 Webhook 後選單圖片可能還沒換、里民也可能記得舊說法，
+  // 所以這些詞一律導到我們對應的新功能，讓切換對里民無感。
+  if (/^(舊社里公佈欄|公佈欄|公布欄)$/.test(msg)) {
+    const bulletins = await fetchBulletinsByCategories(env, ["最新消息", "里民活動"]);
+    if (!bulletins.length) {
+      await lineReply(env, replyToken, [{ type: "text", text: "目前尚無最新消息，敬請期待！" }]);
+      return true;
+    }
+    await lineReply(env, replyToken, [buildBulletinCarousel("最新消息", bulletins)]);
+    return true;
+  }
+  if (/^(學校專區|教育專區)$/.test(msg)) {
+    const bulletins = await fetchBulletinsByCategories(env, ["教育課程"]);
+    if (!bulletins.length) {
+      await lineReply(env, replyToken, [{ type: "text", text: "目前尚無教育課程內容，敬請期待！" }]);
+      return true;
+    }
+    await lineReply(env, replyToken, [buildBulletinCarousel("教育課程", bulletins)]);
+    return true;
+  }
+  if (/^(治安通報|線上陳情|我要陳情)$/.test(msg)) {
+    await lineReply(env, replyToken, [{
+      type: "text",
+      text: "請點此填寫通報表單，里長會盡快處理：\nhttps://gsnbhs.pages.dev/report",
+    }]);
+    return true;
+  }
+  if (/^(留言給我|我想建議|里長幫幫忙)$/.test(msg)) {
+    await lineReply(env, replyToken, [{ type: "text", text: "請直接在這裡留言，我等等就會回覆您 😊" }]);
+    return true;
+  }
+
+  if (/^(美食地圖|特約商店|特約商家|商家清單|店家清單|查商家|找商家|找店家|商家|店家|查看特約商店|查看美食地圖)$/.test(msg)) {
     await lineReply(env, replyToken, [await buildFoodMapMenu(env)]);
     return true;
   }

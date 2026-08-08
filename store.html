@@ -745,9 +745,13 @@ body.loading-submit { overflow: hidden; }
           <div class="photo-preview-grid" id="storePhotoGrid"></div>
           <label class="photo-add-btn" id="storePhotoAddBtn">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            新增照片（最多 10 張）
-            <input type="file" accept="image/*" multiple id="storePhotoInput" style="display:none" onchange="handleStorePhotoAdd(this)">
+            上傳商家 LOGO（一張）
+            <input type="file" accept="image/*" id="storePhotoInput" style="display:none" onchange="handleStorePhotoAdd(this)">
           </label>
+        </div>
+        <div class="field-hint">
+          <svg class="icon"><use href="#i-info"/></svg>
+          這張圖會顯示在 LINE 商家卡片與商家列表上，建議使用方形、清楚的品牌 LOGO
         </div>
       </div>
 
@@ -991,7 +995,7 @@ function renderStorePhotoGrid() {
     }
     grid.appendChild(div);
   });
-  if (addBtn) addBtn.classList.toggle('hidden', storePhotos.length >= 10);
+  if (addBtn) addBtn.classList.toggle('hidden', storePhotos.length >= 1);
   if (storePhotoSortable) { storePhotoSortable.destroy(); storePhotoSortable = null; }
   if (storePhotos.length > 1) {
     storePhotoSortable = new SortableOrder(grid, {
@@ -1018,7 +1022,7 @@ function syncStorePhotosFromDOM() {
 
 function handleStorePhotoAdd(input) {
   if (!input.files || !input.files.length) return;
-  var slots = 10 - storePhotos.length;
+  var slots = 1 - storePhotos.length; // 只收一張商家 LOGO
   if (slots <= 0) return;
   var files = Array.prototype.slice.call(input.files, 0, slots);
   var pending = files.length;
