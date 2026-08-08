@@ -50,6 +50,10 @@ const COM_INTRO_TEXT =
   "為維護學生權益與安全，本版為半實名制，加入需先與里長登記，" +
   "目前僅開放幼稚園以上學童家長參加。\n\n" +
   "接下來會請您回答 3 個問題，送出後由里長審核，通過就會把社群連結傳給您 😊";
+// 公告的「原始連結」欄位填這些關鍵字時，卡片按鈕改成觸發 LINE 內的流程。
+const BULLETIN_ACTIONS = {
+  "action:community": { label: "加入共學群", data: "action=menu&menu=community" },
+};
 const COM_JOINED_NOTE =
   "加入後請注意：\n" +
   "・暱稱請與您現在的 LINE 名稱一致\n" +
@@ -1010,17 +1014,20 @@ export async function linePush(env, to, messages) {
 }
 
 // 把訊息交給通報中心（village-notify-hub），由它推播到本里綁定的里長群組。
+// 同帳號 Worker 之間用公開網址互打會被 Cloudflare 擋（error 1042），
+// 所以優先走 NOTIFY_HUB service binding，沒綁定時才退回公開網址。
 async function notifyHub(env, messages) {
   if (!env.NOTIFY_HUB_URL || !env.NOTIFY_HUB_SECRET) {
     console.error(JSON.stringify({ fn: "notifyHub", error: "hub not configured" }));
     return false;
   }
   try {
-    const resp = await fetch(env.NOTIFY_HUB_URL, {
+    const request = new Request(env.NOTIFY_HUB_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.NOTIFY_HUB_SECRET },
       body: JSON.stringify({ villageCode: env.NOTIFY_HUB_VILLAGE_CODE || "GSNBHS", messages }),
     });
+    const resp = env.NOTIFY_HUB ? await env.NOTIFY_HUB.fetch(request) : await fetch(request);
     const bodyText = await resp.text().catch(() => "");
     if (!resp.ok) {
       console.error(JSON.stringify({ fn: "notifyHub", status: resp.status, body: bodyText.slice(0, 200) }));
@@ -1359,11 +1366,18 @@ function buildBulletinBubble(b) {
   const linkUrl = String(b.linkUrl || "").trim();
   const cate = b.category || "里民活動";
   const detailUrl = /^https?:\/\//i.test(linkUrl) ? linkUrl : BULLETIN_URL + "?category=" + encodeURIComponent(cate);
+  // 公告的「原始連結」填 action:community 時，卡片改成觸發共學社群申請流程，
+  // 而不是連到外部網頁（里長希望里民點了直接在 LINE 裡收到說明與問題）。
+  const cardAction = BULLETIN_ACTIONS[linkUrl];
+  const tapAction = cardAction
+    ? { type: "postback", data: cardAction.data }
+    : { type: "uri", uri: detailUrl };
+  const buttonLabel = cardAction ? cardAction.label : "查看詳情";
   return {
     type: "bubble", size: "mega",
     body: {
       type: "box", layout: "vertical", paddingAll: "0px", spacing: "none",
-      action: { type: "uri", uri: detailUrl },
+      action: tapAction,
       contents: [
         {
           type: "box", layout: "vertical",
@@ -1387,7 +1401,7 @@ function buildBulletinBubble(b) {
     },
     footer: {
       type: "box", layout: "vertical", paddingAll: "16px",
-      contents: [{ type: "button", style: "primary", color: "#3B82F6", height: "sm", action: { type: "uri", label: "查看詳情", uri: detailUrl } }],
+      contents: [{ type: "button", style: "primary", color: "#3B82F6", height: "sm", action: { ...tapAction, label: buttonLabel } }],
     },
   };
 }

@@ -16,6 +16,13 @@
     "NOTIFY_HUB_VILLAGE_CODE": "GSNBHS",
     "COMMUNITY_INVITE_URL": "https://line.me/ti/g2/7qgTAHjPmJOMSpz5FnYxCaimZuGUazMJxRuUOA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
   },
+  // 同帳號 Worker 之間不能用公開網址互打（Cloudflare error 1042），改走內部直連。
+  "services": [
+    {
+      "binding": "NOTIFY_HUB",
+      "service": "village-notify-hub"
+    }
+  ],
   "kv_namespaces": [
     {
       "binding": "SESSIONS",
