@@ -12,5 +12,5 @@ const CONFIG = {
   BULLETIN_API_URL: 'https://gsnbhs-bulletins-api.ulch0709.workers.dev',
   BASE_URL: 'https://gsnbhs.pages.dev',
   GOOGLE_CLIENT_ID: '998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com',
-  LINE_BOT_ID: '@649jhuge',
+  LINE_BOT_ID: '@900rucza',
 };

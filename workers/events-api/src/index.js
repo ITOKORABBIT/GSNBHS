@@ -1,5 +1,6 @@
 // ── Router entry point ────────────────────────────────────────────────────────
 import { handleLineWebhook, handleHubCallback } from "./line.js";
+import { submitConsult } from "./consult.js";
 import { closeEndedEvents, sendEventReminders, sendPostEventSurveys, resetReminderSent, resetSurveySentAt } from "./scheduled.js";
 import { getEvents, getEvent, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
 import { getRegistrations, getEventStats, checkInRegistration, updateRegistration, deleteRegistration } from "./registrations.js";
@@ -57,9 +58,10 @@ const ACTIONS = new Set([
   "deleteEmergencyContact",
   "getChatThreads",
   "getChatMessages",
+  "submitConsult",
 ]);
 
-const PUBLIC_ACTIONS = new Set(["getSurveyPublic", "submitSurveyResponse", "submitRegistration", "uploadPublicPhoto"]);
+const PUBLIC_ACTIONS = new Set(["getSurveyPublic", "submitSurveyResponse", "submitRegistration", "uploadPublicPhoto", "submitConsult"]);
 
 export default {
   async scheduled(controller, env) {
@@ -165,6 +167,7 @@ export default {
         if (action === "submitSurveyResponse") return corsJson(env, await submitSurveyResponse(env, ctx, data));
         if (action === "submitRegistration") return corsJson(env, await submitRegistration(env, ctx, data));
         if (action === "uploadPublicPhoto") return corsJson(env, await uploadPublicPhoto(env, data, request));
+        if (action === "submitConsult") return corsJson(env, await submitConsult(env, ctx, data));
       }
 
       // For read-only bundle requests, run auth + D1 reads in parallel so

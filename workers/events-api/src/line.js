@@ -1058,7 +1058,7 @@ export async function linePush(env, to, messages) {
 // 把訊息交給通報中心（village-notify-hub），由它推播到本里綁定的里長群組。
 // 同帳號 Worker 之間用公開網址互打會被 Cloudflare 擋（error 1042），
 // 所以優先走 NOTIFY_HUB service binding，沒綁定時才退回公開網址。
-async function notifyHub(env, messages) {
+export async function notifyHub(env, messages) {
   if (!env.NOTIFY_HUB_URL || !env.NOTIFY_HUB_SECRET) {
     console.error(JSON.stringify({ fn: "notifyHub", error: "hub not configured" }));
     return false;
