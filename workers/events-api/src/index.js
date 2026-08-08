@@ -1,5 +1,5 @@
 // ── Router entry point ────────────────────────────────────────────────────────
-import { handleLineWebhook } from "./line.js";
+import { handleLineWebhook, handleHubCallback } from "./line.js";
 import { closeEndedEvents, sendEventReminders, sendPostEventSurveys, resetReminderSent, resetSurveySentAt } from "./scheduled.js";
 import { getEvents, getEvent, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
 import { getRegistrations, getEventStats, checkInRegistration, updateRegistration, deleteRegistration } from "./registrations.js";
@@ -74,6 +74,10 @@ export default {
   async fetch(request, env, ctx) {
     if (request.method === "POST" && new URL(request.url).pathname === "/line-webhook") {
       return handleLineWebhook(request, env, ctx);
+    }
+
+    if (request.method === "POST" && new URL(request.url).pathname === "/hub-callback") {
+      return handleHubCallback(request, env);
     }
 
     if (request.method === "POST" && new URL(request.url).pathname === "/scheduled") {

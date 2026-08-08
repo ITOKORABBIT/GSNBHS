@@ -8,6 +8,7 @@ import { insertChatMessage } from "./chat.js";
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const LINE_REPLY_API = "https://api.line.me/v2/bot/message/reply";
+const LINE_PUSH_API = "https://api.line.me/v2/bot/message/push";
 const LINE_MULTICAST_API = "https://api.line.me/v2/bot/message/multicast";
 export const SURVEY_BASE_URL = "https://gsnbhs.pages.dev/survey";
 const VOUCHER_URL = "https://gsnbhs.pages.dev/voucher.html";
@@ -26,6 +27,33 @@ const EVT_WALKIN_QR_RE = /^現場報名_(EVT[\w]+)$/;
 const RPT_TYPES = ["道路及交通", "環境及衛生", "公共設施", "安全疑慮", "其他"];
 const RPT_START_RE = /^(我要通報|通報問題|里民通報|問題通報)$/;
 const RPT_CANCEL_RE_R = /^(取消|離開|結束|算了|不通報了)$/;
+
+// ── 家長共學社群 ──────────────────────────────────────────────────────────────
+// 半實名制：里民在 LINE 逐題作答 → 推播審核卡片到里長群組（經 village-notify-hub）
+// → 里長按「通過」→ hub 回呼 /hub-callback → 這裡用舊社里帳號私訊社群連結。
+const COM_START_RE = /^(加入共學社群|共學社群|家長共學社群|加入家長共學社群)$/;
+const COM_CANCEL_RE = /^(取消|離開|結束|算了|不加了)$/;
+const COM_QUESTIONS = [
+  { key: "current_school", prompt: "1️⃣ 請問孩子「目前就讀的學校與年級」？\n（例：舊社國小 三年級）" },
+  { key: "target_school", prompt: "2️⃣ 請問「預計就讀的學校」？\n（若暫時還沒有，可回覆「未定」）" },
+  { key: "residence", prompt: "3️⃣ 請問您的「居住地名」？\n（例：北屯區敦南路，不需填完整門牌）" },
+];
+const COM_INTRO_TEXT =
+  "為了讓家長能更方便取得［教育相關資訊］，並在求學過程中［遇到事情即時通報反應］，" +
+  "里長建立了「里想生活｜國中小家長共學版」。\n\n" +
+  "除了家長之間資訊交流與經驗分享，也讓孩子在不同學習階段都能有更好的支持與資源。\n\n" +
+  "📌 社群交流原則\n" +
+  "✔ 分享資訊盡量附來源\n" +
+  "✔ 尊重不同家長的經驗\n" +
+  "✔ 不傳播未經證實消息\n" +
+  "✔ 不進行攻擊或謾罵\n\n" +
+  "為維護學生權益與安全，本版為半實名制，加入需先與里長登記，" +
+  "目前僅開放幼稚園以上學童家長參加。\n\n" +
+  "接下來會請您回答 3 個問題，送出後由里長審核，通過就會把社群連結傳給您 😊";
+const COM_JOINED_NOTE =
+  "加入後請注意：\n" +
+  "・暱稱請與您現在的 LINE 名稱一致\n" +
+  "・加入後請勿更改名稱，資料無法比對將會移出群組";
 
 // 圖文選單噪音問題已用 postback 解決，AI 留言蒐集暫時停用（先掛著、保留程式碼，
 // 之後若需要再開回 true 即可）。停用時點「只想聊聊」只會提示直接留言，
@@ -132,6 +160,13 @@ async function processLineEvent(env, ctx, event) {
       handled = await handleLineReportEvent(env, userId, replyToken, event);
     } catch (err) {
       console.error(JSON.stringify({ fn: "handleLineReportEvent", error: err.message }));
+    }
+  }
+  if (!handled) {
+    try {
+      handled = await handleLineCommunityEvent(env, userId, replyToken, event);
+    } catch (err) {
+      console.error(JSON.stringify({ fn: "handleLineCommunityEvent", error: err.message }));
     }
   }
   if (!handled) {
@@ -780,6 +815,18 @@ async function clearEvtSession(env, userId) {
   return clearLineSession(env, "evt", userId);
 }
 
+async function getComSession(env, userId) {
+  return getLineSession(env, "com", userId);
+}
+
+async function saveComSession(env, userId, state) {
+  return saveLineSession(env, "com", userId, state);
+}
+
+async function clearComSession(env, userId) {
+  return clearLineSession(env, "com", userId);
+}
+
 async function getRptSession(env, userId) {
   return getLineSession(env, "rpt", userId);
 }
@@ -939,6 +986,55 @@ async function lineReply(env, replyToken, messages) {
   if (!resp.ok) {
     const errText = await resp.text().catch(() => "");
     console.error(JSON.stringify({ fn: "lineReply", status: resp.status, body: errText }));
+  }
+}
+
+export async function linePush(env, to, messages) {
+  if (!env.LINE_CHANNEL_ACCESS_TOKEN || !to) return false;
+  try {
+    const resp = await fetch(LINE_PUSH_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.LINE_CHANNEL_ACCESS_TOKEN },
+      body: JSON.stringify({ to, messages }),
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      console.error(JSON.stringify({ fn: "linePush", status: resp.status, body }));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ fn: "linePush", error: err.message }));
+    return false;
+  }
+}
+
+// 把訊息交給通報中心（village-notify-hub），由它推播到本里綁定的里長群組。
+async function notifyHub(env, messages) {
+  if (!env.NOTIFY_HUB_URL || !env.NOTIFY_HUB_SECRET) {
+    console.error(JSON.stringify({ fn: "notifyHub", error: "hub not configured" }));
+    return false;
+  }
+  try {
+    const resp = await fetch(env.NOTIFY_HUB_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + env.NOTIFY_HUB_SECRET },
+      body: JSON.stringify({ villageCode: env.NOTIFY_HUB_VILLAGE_CODE || "GSNBHS", messages }),
+    });
+    const bodyText = await resp.text().catch(() => "");
+    if (!resp.ok) {
+      console.error(JSON.stringify({ fn: "notifyHub", status: resp.status, body: bodyText.slice(0, 200) }));
+      return false;
+    }
+    const result = parseJson(bodyText);
+    if (result.success === false) {
+      console.error(JSON.stringify({ fn: "notifyHub", error: result.error }));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ fn: "notifyHub", error: err.message }));
+    return false;
   }
 }
 
@@ -1112,6 +1208,10 @@ async function handleLineMenuEvent(env, userId, replyToken, event) {
   }
   if (pb.menu === "chat_start") {
     await startChatFlow(env, userId, replyToken);
+    return true;
+  }
+  if (pb.menu === "community") {
+    await startCommunityFlow(env, userId, replyToken);
     return true;
   }
   // findchief / apply / backmain 是 richmenuswitch 按鈕，畫面已經由 LINE
@@ -1335,6 +1435,212 @@ async function startReportFlow(env, userId, replyToken) {
   await clearRptSession(env, userId);
   await saveRptSession(env, userId, { stage: "select_type" });
   await lineReply(env, replyToken, [buildRptTypeFlex()]);
+}
+
+// ── 家長共學社群：申請 → 里長審核 → 發連結 ──────────────────────────────────
+
+async function startCommunityFlow(env, userId, replyToken) {
+  const pending = await env.DB.prepare(
+    "SELECT status FROM community_applications WHERE line_user_id = ? AND status IN ('pending','approved') ORDER BY submitted_at DESC LIMIT 1",
+  ).bind(userId).first().catch(() => null);
+
+  if (pending?.status === "approved") {
+    await lineReply(env, replyToken, [{
+      type: "text",
+      text: "您先前的申請已通過審核 😊\n\n社群連結：\n" + communityInviteUrl(env) + "\n\n" + COM_JOINED_NOTE,
+    }]);
+    return;
+  }
+  if (pending?.status === "pending") {
+    await lineReply(env, replyToken, [{ type: "text", text: "您已經送出申請囉，里長審核後會主動把社群連結傳給您，請耐心等候 🙏" }]);
+    return;
+  }
+
+  await saveComSession(env, userId, { stage: "q0", answers: {} });
+  await lineReply(env, replyToken, [
+    { type: "text", text: COM_INTRO_TEXT },
+    { type: "text", text: COM_QUESTIONS[0].prompt + "\n\n（隨時輸入「取消」可結束申請）" },
+  ]);
+}
+
+function communityInviteUrl(env) {
+  return text(env.COMMUNITY_INVITE_URL);
+}
+
+async function handleLineCommunityEvent(env, userId, replyToken, event) {
+  if (event.type !== "message" || event.message?.type !== "text" || !replyToken) return false;
+  const msg = String(event.message.text || "").trim();
+
+  if (COM_START_RE.test(msg)) {
+    await startCommunityFlow(env, userId, replyToken);
+    return true;
+  }
+
+  const state = await getComSession(env, userId);
+  if (!state.stage) return false;
+
+  if (COM_CANCEL_RE.test(msg)) {
+    await clearComSession(env, userId);
+    await lineReply(env, replyToken, [{ type: "text", text: "已取消申請。需要時再輸入「加入共學社群」即可重新開始 😊" }]);
+    return true;
+  }
+
+  const idx = parseInt(String(state.stage).slice(1), 10) || 0;
+  const question = COM_QUESTIONS[idx];
+  if (!question) {
+    await clearComSession(env, userId);
+    return false;
+  }
+
+  const answers = { ...(state.answers || {}), [question.key]: msg.substring(0, 100) };
+  const next = COM_QUESTIONS[idx + 1];
+
+  if (next) {
+    await saveComSession(env, userId, { stage: "q" + (idx + 1), answers });
+    await lineReply(env, replyToken, [{ type: "text", text: next.prompt }]);
+    return true;
+  }
+
+  await clearComSession(env, userId);
+  await submitCommunityApplication(env, userId, replyToken, answers);
+  return true;
+}
+
+async function submitCommunityApplication(env, userId, replyToken, answers) {
+  const profile = await getLineProfile(env, userId);
+  const displayName = profile?.displayName || "";
+  const applicationId = crypto.randomUUID();
+  const submittedAt = taiwanIsoNow();
+
+  await env.DB.prepare(
+    `INSERT INTO community_applications
+       (application_id, line_user_id, display_name, current_school, target_school, residence, status, submitted_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
+  ).bind(
+    applicationId, userId, displayName,
+    text(answers.current_school), text(answers.target_school), text(answers.residence),
+    submittedAt,
+  ).run();
+
+  const pushed = await notifyHub(env, [buildCommunityReviewCard({
+    applicationId, displayName, submittedAt,
+    currentSchool: text(answers.current_school),
+    targetSchool: text(answers.target_school),
+    residence: text(answers.residence),
+  })]);
+
+  if (!pushed) {
+    console.error(JSON.stringify({ fn: "submitCommunityApplication", error: "hub notify failed", applicationId }));
+  }
+
+  await lineReply(env, replyToken, [{
+    type: "text",
+    text: "✅ 已收到您的申請！\n\n" +
+      `・目前就讀：${text(answers.current_school)}\n` +
+      `・預計就讀：${text(answers.target_school)}\n` +
+      `・居住地名：${text(answers.residence)}\n\n` +
+      "里長審核通過後，會直接把社群連結傳給您，請稍候 🙏",
+  }]);
+}
+
+function buildCommunityReviewCard(app) {
+  const row = (label, value) => ({
+    type: "box", layout: "baseline", spacing: "sm",
+    contents: [
+      { type: "text", text: label, size: "sm", color: "#8C8C8C", flex: 2 },
+      { type: "text", text: value || "—", size: "sm", color: "#111111", flex: 5, wrap: true },
+    ],
+  });
+
+  return {
+    type: "flex",
+    altText: `共學社群申請：${app.displayName || "里民"}`,
+    contents: {
+      type: "bubble",
+      header: {
+        type: "box", layout: "vertical", paddingAll: "12px", backgroundColor: "#1F7A4D",
+        contents: [{ type: "text", text: "🎓 家長共學社群申請", color: "#FFFFFF", weight: "bold", size: "md" }],
+      },
+      body: {
+        type: "box", layout: "vertical", spacing: "md",
+        contents: [
+          { type: "text", text: app.displayName || "（未取得 LINE 名稱）", weight: "bold", size: "lg", wrap: true },
+          { type: "separator" },
+          {
+            type: "box", layout: "vertical", spacing: "sm",
+            contents: [
+              row("目前就讀", app.currentSchool),
+              row("預計就讀", app.targetSchool),
+              row("居住地名", app.residence),
+              row("申請時間", app.submittedAt),
+            ],
+          },
+        ],
+      },
+      footer: {
+        type: "box", layout: "horizontal", spacing: "sm",
+        contents: [
+          {
+            type: "button", style: "primary", color: "#1F7A4D", height: "sm",
+            action: { type: "postback", label: "✅ 通過", data: `hub:review:GSNBHS:community:${app.applicationId}:approve` },
+          },
+          {
+            type: "button", style: "secondary", height: "sm",
+            action: { type: "postback", label: "🚫 婉拒", data: `hub:review:GSNBHS:community:${app.applicationId}:reject` },
+          },
+        ],
+      },
+    },
+  };
+}
+
+// 通報中心轉交里長的審核結果：更新狀態，並用本里帳號把結果私訊給里民。
+export async function handleHubCallback(request, env) {
+  const auth = request.headers.get("authorization") || "";
+  if (!env.NOTIFY_HUB_SECRET || auth !== "Bearer " + env.NOTIFY_HUB_SECRET) {
+    return new Response(JSON.stringify({ success: false, error: "unauthorized" }), {
+      status: 401, headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const data = parseJson(await request.text());
+  const kind = text(data.kind);
+  const id = text(data.id);
+  const action = text(data.action);
+
+  const reply = (body, status = 200) => new Response(JSON.stringify(body), {
+    status, headers: { "Content-Type": "application/json" },
+  });
+
+  if (kind !== "community") return reply({ success: false, error: "unknown kind: " + kind }, 400);
+
+  const app = await env.DB.prepare(
+    "SELECT line_user_id, display_name, status FROM community_applications WHERE application_id = ?",
+  ).bind(id).first();
+
+  if (!app) return reply({ success: false, error: "找不到這筆申請" }, 404);
+  if (app.status !== "pending") {
+    return reply({ success: false, error: `這筆申請已經處理過了（${app.status === "approved" ? "已通過" : "已婉拒"}）` });
+  }
+
+  const approved = action === "approve";
+  const inviteUrl = communityInviteUrl(env);
+  if (approved && !inviteUrl) {
+    return reply({ success: false, error: "尚未設定社群邀請連結" }, 500);
+  }
+
+  await env.DB.prepare(
+    "UPDATE community_applications SET status = ?, reviewer_id = ?, reviewed_at = ? WHERE application_id = ?",
+  ).bind(approved ? "approved" : "rejected", text(data.reviewerId), text(data.reviewedAt) || taiwanIsoNow(), id).run();
+
+  const sent = await linePush(env, app.line_user_id, [{
+    type: "text",
+    text: approved
+      ? "🎉 您的共學社群申請已通過審核！\n\n請點以下連結加入「里想生活｜國中小家長共學版」：\n" + inviteUrl + "\n\n" + COM_JOINED_NOTE
+      : "感謝您申請加入共學社群。\n\n經里長確認，您的申請目前未能通過（本社群僅開放幼稚園以上學童家長參加）。\n如有疑問歡迎直接留言詢問里長 🙏",
+  }]);
+
+  return reply({ success: true, applicantName: app.display_name, delivered: sent });
 }
 
 async function handleLineReportEvent(env, userId, replyToken, event) {
