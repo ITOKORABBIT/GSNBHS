@@ -20,3 +20,7 @@ d1-backups/
 NOPHOTO.png
 Q版人像.png
 playwright-mcp/
+
+# wrangler --dry-run 的建置產物
+tmp/
+**/tmp/
