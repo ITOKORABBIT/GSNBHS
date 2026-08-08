@@ -975,14 +975,14 @@ async function getActiveEventsForLine(env) {
 // 請求（訊息收不到、推播發不出，且沒有任何警報）。所以不存 token，只存永不過期的
 // LINE_CHANNEL_ID / LINE_CHANNEL_SECRET，需要時自行換取並快取，到期前自動更新。
 //
-// 相容性：若仍設有 LINE_CHANNEL_ACCESS_TOKEN（測試帳號沿用的固定 token），優先使用它，
-// 這樣切換正式帳號前後都不用改程式。
+// 優先序：設有 LINE_CHANNEL_ID 就一律走自動換發；沒有時才退回舊的固定
+// LINE_CHANNEL_ACCESS_TOKEN，讓尚未搬移的環境仍能運作。
 const TOKEN_CACHE_KEY = "line:channel_access_token";
 const TOKEN_CACHE_TTL = 27 * 24 * 60 * 60; // 27 天 < LINE 的 30 天，留 3 天緩衝
 
 async function getAccessToken(env) {
-  if (env.LINE_CHANNEL_ACCESS_TOKEN) return env.LINE_CHANNEL_ACCESS_TOKEN;
   if (!env.LINE_CHANNEL_ID || !env.LINE_CHANNEL_SECRET || !env.SESSIONS) {
+    if (env.LINE_CHANNEL_ACCESS_TOKEN) return env.LINE_CHANNEL_ACCESS_TOKEN;
     console.error(JSON.stringify({ fn: "getAccessToken", error: "channel credentials not configured" }));
     return "";
   }
