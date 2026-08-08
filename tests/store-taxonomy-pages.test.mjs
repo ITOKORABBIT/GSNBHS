@@ -31,7 +31,11 @@ test("store admin cards split metadata from labeled offer content", () => {
 });
 
 test("store application and review pages read shared store taxonomy", () => {
-  assert.match(page("store.html"), /getPublicStoreTaxonomy/);
+  const storeHtml = page("store.html");
+  assert.match(storeHtml, /getPublicStoreTaxonomy/);
+  assert.match(storeHtml, /uploadedMimeType = \(dataUrl\.match/);
+  assert.match(storeHtml, /mimeType: uploadedMimeType/);
+  assert.doesNotMatch(storeHtml, /mimeType: file\.type/);
   assert.match(page("storedetail.html"), /getPublicStoreTaxonomy/);
 });
 
