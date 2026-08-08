@@ -15,6 +15,7 @@ const VOUCHER_URL = "https://gsnbhs.pages.dev/voucher.html";
 const BULLETIN_URL = "https://gsnbhs.pages.dev/bulletin.html";
 const STORE_DETAIL_URL = "https://gsnbhs.pages.dev/storeopendetail.html?id=";
 const STORE_LIST_URL = "https://gsnbhs.pages.dev/storeopenlist.html";
+const STORE_APPLY_URL = "https://gsnbhs.pages.dev/store";
 const STORE_IMG_FALLBACK = "https://lh3.googleusercontent.com/d/1GAb13SxqDBjTnnwZZjNubyJEWxqibs-Z";
 const EVENT_IMG_FALLBACK = "https://gsnbhs.pages.dev/HP_logo.png";
 const KV_SESSION_TTL = 6 * 60 * 60; // seconds
@@ -1266,7 +1267,8 @@ async function handleLineKeywordEvent(env, replyToken, event) {
     return true;
   }
   if (/^(商家申請|店家申請|我要申請|申請商家|申請特約)$/.test(msg)) {
-    await lineReply(env, replyToken, [{ type: "text", text: "特約商家申請請點此填寫：\nhttps://gsnbhs.pages.dev/store" }]);
+    const applyUrl = await buildStoreApplyUrl(env, event.source?.userId);
+    await lineReply(env, replyToken, [{ type: "text", text: "特約商家申請請點此填寫：\n" + applyUrl }]);
     return true;
   }
   if (/^(里民憑證|出示憑證|憑證|出示里民憑證)$/.test(msg)) {
@@ -1479,6 +1481,17 @@ async function startCommunityFlow(env, userId, replyToken) {
 
 function communityInviteUrl(env) {
   return text(env.COMMUNITY_INVITE_URL);
+}
+
+// 商家申請表單網址。從 LINE 進來時帶上 userId／displayName，
+// 讓里長在後台看得出申請人是哪個 LINE 帳號（填表者看不到這兩個值）。
+async function buildStoreApplyUrl(env, userId) {
+  if (!userId) return STORE_APPLY_URL;
+  const profile = await getLineProfile(env, userId);
+  const displayName = profile?.displayName || "";
+  return STORE_APPLY_URL +
+    "?lineUserId=" + encodeURIComponent(userId) +
+    (displayName ? "&displayName=" + encodeURIComponent(displayName) : "");
 }
 
 async function handleLineCommunityEvent(env, userId, replyToken, event) {

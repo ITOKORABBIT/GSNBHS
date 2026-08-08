@@ -547,6 +547,9 @@ function renderStore() {
   html += '<div class="status-bar-item"><div class="sb-lbl">狀態</div><div class="sb-val"><span class="badge ' + badgeCls(d.status) + '">' + esc(d.status || '未設定') + '</span></div></div>';
   html += '<div class="status-bar-item"><div class="sb-lbl">申請人姓名</div><div class="sb-val">' + (v(d.name)) + '</div></div>';
   html += '<div class="status-bar-item"><div class="sb-lbl">申請人電話</div><div class="sb-val">' + (d.phone ? '<a href="tel:' + esc(d.phone) + '">' + esc(d.phone) + '</a>' : '—') + '</div></div>';
+  // 從 LINE 選單進來申請時自動記錄，可用來核對申請人身分
+  html += '<div class="status-bar-item"><div class="sb-lbl">LINE 名稱</div><div class="sb-val">' + (v(d.lineDisplayName)) + '</div></div>';
+  html += '<div class="status-bar-item"><div class="sb-lbl">LINE ID</div><div class="sb-val" style="font-size:11px;word-break:break-all">' + (v(d.lineId)) + '</div></div>';
   html += '</div>';
 
   // ── 商家資訊 ──

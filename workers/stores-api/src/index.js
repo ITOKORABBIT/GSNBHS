@@ -247,6 +247,7 @@ async function submitStore(env, data) {
     name: text(data.name),
     phone: text(data.phone),
     lineId: text(data.lineId),
+    lineDisplayName: text(data.lineDisplayName),
     storeName: text(data.title),
     storePhone: text(data.storephone),
     storeNum: text(data.taxid),

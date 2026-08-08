@@ -520,32 +520,29 @@ body.loading-submit { overflow: hidden; }
     <!-- 蜜罐：機器人才會填這個欄位 -->
     <input type="text" name="website" id="f_website" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
 
-    <!-- 卡片 1：申請人資訊（暫時隱藏，目前由里長直接建立） -->
-    <div class="card" id="card-applicant" style="display:none">
+    <!-- 卡片 1：申請人資訊 -->
+    <div class="card" id="card-applicant">
       <div class="section-title"><span class="title-bar"></span>申請人資訊</div>
 
       <div class="field-group">
         <label class="field-label">
-          <svg class="icon"><use href="#i-user"/></svg> 姓名
+          <svg class="icon"><use href="#i-user"/></svg> 申請人姓名
         </label>
         <input type="text" id="f_name" placeholder="真實姓名">
-        <div class="error-text">請輸入姓名</div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">
-          <svg class="icon"><use href="#i-phone"/></svg> 電話
-        </label>
-        <input type="text" inputmode="tel" id="f_phone" placeholder="務必留下手機或住家電話以利聯絡">
-        <div class="error-text">請輸入電話</div>
+        <div class="error-text">請輸入申請人姓名</div>
       </div>
 
       <div class="field-group" style="margin-bottom:0">
         <label class="field-label">
-          <svg class="icon"><use href="#i-message"/></svg> Line ID
+          <svg class="icon"><use href="#i-phone"/></svg> 申請人聯絡電話
         </label>
-        <input type="text" id="f_line" placeholder="請留下 LINE ID 以利聯絡">
+        <input type="text" inputmode="tel" id="f_phone" placeholder="務必留下手機或住家電話以利聯絡">
+        <div class="error-text">請輸入申請人聯絡電話</div>
       </div>
+
+      <!-- 從 LINE 選單進入時自動帶入，供里長辨識申請人身分；不顯示給填表者 -->
+      <input type="hidden" id="f_line_user_id">
+      <input type="hidden" id="f_line_display_name">
     </div>
 
     <!-- 卡片 2：商家方案（暫時隱藏，目前由里長統一管理） -->
@@ -716,7 +713,7 @@ body.loading-submit { overflow: hidden; }
         <div class="brand-tag-picker">
           <div class="brand-tag-selected" id="brandTagSelected"></div>
           <div class="brand-tag-input-row">
-            <input type="text" id="f_brandtag_new" placeholder="沒有適合的標籤時輸入新的" maxlength="6">
+            <input type="text" id="f_brandtag_new" placeholder="例如：親子餐廳、寵物友善…" maxlength="6">
             <button type="button" class="brand-tag-add" onclick="addBrandTagInput()">新增</button>
           </div>
           <div class="brand-tag-options" id="brandTagOptions"></div>
@@ -741,7 +738,7 @@ body.loading-submit { overflow: hidden; }
 
     <!-- 卡片 4：照片附件 -->
     <div class="card">
-      <div class="section-title"><span class="title-bar"></span>店家照片附件</div>
+      <div class="section-title"><span class="title-bar"></span>商家LOGO圖片</div>
 
       <div class="field-group">
         <div class="photo-upload-area" id="storePhotoArea">
@@ -782,6 +779,16 @@ body.loading-submit { overflow: hidden; }
 <script>
 // 記錄頁面開啟時間，用於防機器人驗證
 window._storeFormTs = Date.now();
+
+// 從 LINE 選單進來時網址會帶 lineUserId／displayName，存進隱藏欄位一併送出，
+// 讓里長在後台看得出是誰申請的。直接開網址（沒有這些參數）時留空即可。
+(function captureLineIdentity() {
+  var q = new URLSearchParams(location.search);
+  var uid = q.get('lineUserId') || '';
+  var dname = q.get('displayName') || '';
+  if (uid) document.getElementById('f_line_user_id').value = uid;
+  if (dname) document.getElementById('f_line_display_name').value = dname;
+})();
 
 // ── 方案選擇邏輯 ──
 var PLAN_FEATURES = {
@@ -1091,6 +1098,29 @@ async function uploadAllPhotos(btn) {
 function validateForm() {
   var valid = true;
 
+  // 申請人姓名、聯絡電話必填——里長要靠這兩項聯繫申請人。
+  var nameEl = document.getElementById('f_name');
+  var nameErr = nameEl.parentElement.querySelector('.error-text');
+  if (!nameEl.value.trim()) {
+    nameEl.classList.add('invalid');
+    if (nameErr) nameErr.style.display = 'block';
+    valid = false;
+  } else {
+    nameEl.classList.remove('invalid');
+    if (nameErr) nameErr.style.display = 'none';
+  }
+
+  var phoneEl = document.getElementById('f_phone');
+  var phoneErr = phoneEl.parentElement.querySelector('.error-text');
+  if (phoneEl.value.replace(/[^\d]/g, '').length < 8) {
+    phoneEl.classList.add('invalid');
+    if (phoneErr) phoneErr.style.display = 'block';
+    valid = false;
+  } else {
+    phoneEl.classList.remove('invalid');
+    if (phoneErr) phoneErr.style.display = 'none';
+  }
+
   // 店家電話可留空；有填時才檢查格式。
   var storePhoneEl = document.getElementById('f_store_phone');
   var storePhoneErr = storePhoneEl.parentElement.querySelector('.error-text');
@@ -1134,6 +1164,10 @@ async function doSubmit() {
       action:      'submitStore',
       website:     document.getElementById('f_website').value,
       formTs:      window._storeFormTs || 0,
+      name:        document.getElementById('f_name').value.trim(),
+      phone:       document.getElementById('f_phone').value.trim(),
+      lineId:      document.getElementById('f_line_user_id').value,
+      lineDisplayName: document.getElementById('f_line_display_name').value,
       cate:        document.getElementById('f_cate').value,
       title:       document.getElementById('f_title').value.trim(),
       storephone:  document.getElementById('f_store_phone').value.trim(),
