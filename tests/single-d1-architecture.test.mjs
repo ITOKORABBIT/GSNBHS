@@ -6,12 +6,13 @@ const projectRoot = new URL("../", import.meta.url);
 const workerDirs = ["events-api", "cases-api", "stores-api", "bulletins-api"];
 
 function readJson(relativePath) {
-  return JSON.parse(readFileSync(new URL(relativePath, projectRoot), "utf8"));
+  const jsonc = readFileSync(new URL(relativePath, projectRoot), "utf8");
+  return JSON.parse(jsonc.replace(/^\s*\/\/.*$/gm, ""));
 }
 
-test("all OMNBHS workers bind to the existing consolidated D1 database", () => {
-  const expectedName = "omnbhs-db";
-  const expectedId = "7e30d54c-c1ad-45fe-9b75-cff81e00c84b";
+test("all GSNBHS workers bind to the existing consolidated D1 database", () => {
+  const expectedName = "gsnbhs-db";
+  const expectedId = "3fb4a75a-7f61-480a-9ad2-dc4421519ad5";
 
   for (const worker of workerDirs) {
     const config = readJson(`workers/${worker}/wrangler.jsonc`);
@@ -22,7 +23,7 @@ test("all OMNBHS workers bind to the existing consolidated D1 database", () => {
   }
 });
 
-test("OMNBHS events LINE store lookup uses the primary DB binding", () => {
+test("GSNBHS events LINE store lookup uses the primary DB binding", () => {
   const lineJs = readFileSync(new URL("../workers/events-api/src/line.js", import.meta.url), "utf8");
   assert.doesNotMatch(lineJs, /env\.STORES_DB/);
   assert.match(lineJs, /queryStoresDb/);

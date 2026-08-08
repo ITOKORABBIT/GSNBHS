@@ -3,6 +3,12 @@
 // 並透過通報中心（village-notify-hub）推播到里長群組。
 import { text, taiwanIsoNow } from "./utils.js";
 import { notifyHub } from "./line.js";
+import {
+  claimPublicDedupe,
+  enforcePublicRateLimit,
+  httpError,
+  validatePublicFormEnvelope,
+} from "./public-guard.js";
 
 const CATEGORIES = ["法律諮詢", "清寒協助", "其它"];
 const TIME_SLOTS = [
@@ -14,7 +20,11 @@ const TIME_SLOTS = [
   "晚上 19:00~22:00",
 ];
 
-export async function submitConsult(env, ctx, data) {
+export async function submitConsult(env, ctx, data, request) {
+  const envelopeError = validatePublicFormEnvelope(data);
+  if (envelopeError) throw httpError(400, "表單已失效，請重新整理後再試");
+  await enforcePublicRateLimit(env, request, "consult-submit", 5, 60 * 60);
+
   const name = text(data.name).slice(0, 50);
   const phone = text(data.phone).slice(0, 30);
   const category = CATEGORIES.includes(text(data.category)) ? text(data.category) : "";
@@ -22,12 +32,21 @@ export async function submitConsult(env, ctx, data) {
   const timeSlot = TIME_SLOTS.includes(text(data.timeSlot)) ? text(data.timeSlot) : "";
   const note = text(data.note).slice(0, 500);
 
-  if (!phone) return { success: false, error: "請留下聯絡電話" };
+  const normalizedPhone = phone.replace(/[^\d]/g, "");
+  if (normalizedPhone.length < 8) return { success: false, error: "請留下正確的聯絡電話" };
   if (!category) return { success: false, error: "請選擇諮詢類別" };
   if (!detail) return { success: false, error: "請填寫諮詢事項說明" };
   if (!timeSlot) return { success: false, error: "請選擇預約時段" };
 
-  const consultId = "CSL" + Date.now().toString(36).toUpperCase();
+  const claimed = await claimPublicDedupe(
+    env,
+    "consult",
+    [normalizedPhone, category, detail, timeSlot],
+    5 * 60,
+  );
+  if (!claimed) throw httpError(429, "這份預約剛剛已送出，請勿重複送出");
+
+  const consultId = "CSL" + Date.now().toString(36).toUpperCase() + crypto.randomUUID().slice(0, 4).toUpperCase();
   const submittedAt = taiwanIsoNow();
 
   await env.DB.prepare(
@@ -39,14 +58,79 @@ export async function submitConsult(env, ctx, data) {
     text(data.lineUserId), text(data.lineDisplayName), submittedAt,
   ).run();
 
-  // 推播給里長群組；失敗不影響里民端，但要留下明確錯誤記錄
-  const push = notifyHub(env, [buildConsultCard({ consultId, name, phone, category, detail, timeSlot, note, submittedAt })])
-    .then((ok) => {
-      if (!ok) console.error(JSON.stringify({ fn: "submitConsult", error: "hub notify failed", consultId }));
-    });
+  const consult = { consultId, name, phone, category, detail, timeSlot, note, submittedAt };
+  const push = deliverConsultNotification(env, consult);
   if (ctx?.waitUntil) ctx.waitUntil(push); else await push;
 
   return { success: true, consultId };
+}
+
+export async function getConsultRequests(env, data = {}) {
+  const status = text(data.status);
+  const rows = status
+    ? await env.DB.prepare(
+        `SELECT * FROM consult_requests WHERE status = ? ORDER BY submitted_at DESC LIMIT 200`,
+      ).bind(status).all()
+    : await env.DB.prepare(
+        `SELECT * FROM consult_requests ORDER BY submitted_at DESC LIMIT 200`,
+      ).all();
+  return { success: true, consults: rows.results.map(mapConsultRow) };
+}
+
+export async function retryConsultNotification(env, data) {
+  const consultId = text(data.consultId);
+  if (!consultId) throw httpError(400, "Missing consultId");
+  const row = await env.DB.prepare("SELECT * FROM consult_requests WHERE consult_id = ?")
+    .bind(consultId).first();
+  if (!row) throw httpError(404, "找不到這筆諮詢預約");
+  const delivered = await deliverConsultNotification(env, mapConsultRow(row));
+  if (!delivered) throw httpError(502, "通知送出失敗，請稍後再試");
+  return { success: true, consultId };
+}
+
+export async function updateConsultStatus(env, data) {
+  const consultId = text(data.consultId);
+  const status = text(data.status);
+  if (!consultId) throw httpError(400, "Missing consultId");
+  if (!["待處理", "已聯繫", "已結案"].includes(status)) throw httpError(400, "Invalid status");
+  const result = await env.DB.prepare("UPDATE consult_requests SET status = ? WHERE consult_id = ?")
+    .bind(status, consultId).run();
+  if (!Number(result.meta?.changes || 0)) throw httpError(404, "找不到這筆諮詢預約");
+  return { success: true, consultId, status };
+}
+
+async function deliverConsultNotification(env, consult) {
+  const delivered = await notifyHub(env, [buildConsultCard(consult)]);
+  const notifiedAt = delivered ? taiwanIsoNow() : "";
+  const error = delivered ? "" : "hub notify failed";
+  await env.DB.prepare(
+    `UPDATE consult_requests
+        SET notify_status = ?, notify_error = ?, notify_attempts = notify_attempts + 1,
+            notified_at = CASE WHEN ? <> '' THEN ? ELSE notified_at END
+      WHERE consult_id = ?`,
+  ).bind(delivered ? "sent" : "failed", error, notifiedAt, notifiedAt, consult.consultId).run();
+  if (!delivered) console.error(JSON.stringify({ fn: "deliverConsultNotification", error, consultId: consult.consultId }));
+  return delivered;
+}
+
+function mapConsultRow(row) {
+  return {
+    consultId: text(row.consult_id || row.consultId),
+    name: text(row.name),
+    phone: text(row.phone),
+    category: text(row.category),
+    detail: text(row.detail),
+    timeSlot: text(row.time_slot || row.timeSlot),
+    note: text(row.note),
+    lineUserId: text(row.line_user_id || row.lineUserId),
+    displayName: text(row.display_name || row.displayName),
+    status: text(row.status),
+    submittedAt: text(row.submitted_at || row.submittedAt),
+    notifyStatus: text(row.notify_status || row.notifyStatus),
+    notifyError: text(row.notify_error || row.notifyError),
+    notifyAttempts: Number(row.notify_attempts || row.notifyAttempts || 0),
+    notifiedAt: text(row.notified_at || row.notifiedAt),
+  };
 }
 
 function buildConsultCard(c) {

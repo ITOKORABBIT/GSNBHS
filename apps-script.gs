@@ -3974,12 +3974,12 @@ var RICH_MENU_SETUP_ = {
       var row1Y = LOGO_BAND_H_;
       var row2Y = LOGO_BAND_H_ + ROW_H_;
       return [
-        { bounds: { x: 0, y: row1Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "最新消息", data: "action=menu&menu=news" } },
-        { bounds: { x: 833, y: row1Y, width: 834, height: ROW_H_ }, action: { type: "postback", label: "教育課程", data: "action=menu&menu=course" } },
+        { bounds: { x: 0, y: row1Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "最新消息", data: "action=menu&menu=news", displayText: "最新消息" } },
+        { bounds: { x: 833, y: row1Y, width: 834, height: ROW_H_ }, action: { type: "postback", label: "教育課程", data: "action=menu&menu=course", displayText: "教育課程" } },
         { bounds: { x: 1667, y: row1Y, width: 833, height: ROW_H_ }, action: { type: "richmenuswitch", label: "活動報名", richMenuAliasId: "richmenu-alias-apply", data: "action=menu&menu=apply" } },
-        { bounds: { x: 0, y: row2Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "商圈優惠", data: "action=menu&menu=store" } },
+        { bounds: { x: 0, y: row2Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "商圈優惠", data: "action=menu&menu=store", displayText: "商圈優惠" } },
         { bounds: { x: 833, y: row2Y, width: 834, height: ROW_H_ }, action: { type: "richmenuswitch", label: "找里長聊聊", richMenuAliasId: "richmenu-alias-findchief", data: "action=menu&menu=findchief" } },
-        { bounds: { x: 1667, y: row2Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "緊急聯絡", data: "action=menu&menu=emergency" } },
+        { bounds: { x: 1667, y: row2Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "緊急聯絡", data: "action=menu&menu=emergency", displayText: "緊急聯絡" } },
       ];
     })(),
   },
@@ -3991,7 +3991,7 @@ var RICH_MENU_SETUP_ = {
     imageFileId: "1GCVJ2rP7xj8awt_VwQBZMBA0cO2ZupIZ",
     areas: [
       { bounds: { x: 0, y: 0, width: 1250, height: 1500 }, action: { type: "uri", label: "案件通報", uri: "https://gsnbhs.pages.dev/report" } },
-      { bounds: { x: 1250, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "只想聊聊", data: "action=menu&menu=chat_start" } },
+      { bounds: { x: 1250, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "只想聊聊", data: "action=menu&menu=chat_start", displayText: "只想聊聊" } },
       { bounds: { x: 0, y: 1500, width: 2500, height: 186 }, action: { type: "richmenuswitch", label: "返回主選單", richMenuAliasId: "richmenu-alias-main", data: "action=menu&menu=backmain" } },
     ],
   },
@@ -4126,4 +4126,3 @@ function setupRichMenuPages() {
   setDefaultRichMenu_(ids.main);
   console.log("[richmenu] 設定完成，預設選單：main");
 }
-

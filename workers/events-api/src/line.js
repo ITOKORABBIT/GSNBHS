@@ -979,6 +979,9 @@ async function getActiveEventsForLine(env) {
 // LINE_CHANNEL_ACCESS_TOKEN，讓尚未搬移的環境仍能運作。
 const TOKEN_CACHE_KEY = "line:channel_access_token";
 const TOKEN_CACHE_TTL = 27 * 24 * 60 * 60; // 27 天 < LINE 的 30 天，留 3 天緩衝
+const TOKEN_MEMORY_TTL_MS = 5 * 60 * 1000;
+let tokenMemoryCache = "";
+let tokenMemoryExpiresAt = 0;
 
 async function getAccessToken(env) {
   if (!env.LINE_CHANNEL_ID || !env.LINE_CHANNEL_SECRET || !env.SESSIONS) {
@@ -987,8 +990,13 @@ async function getAccessToken(env) {
     return "";
   }
 
+  if (tokenMemoryCache && Date.now() < tokenMemoryExpiresAt) return tokenMemoryCache;
   const cached = await env.SESSIONS.get(TOKEN_CACHE_KEY);
-  if (cached) return cached;
+  if (cached) {
+    tokenMemoryCache = cached;
+    tokenMemoryExpiresAt = Date.now() + TOKEN_MEMORY_TTL_MS;
+    return cached;
+  }
 
   try {
     const resp = await fetch("https://api.line.me/v2/oauth/accessToken", {
@@ -1009,6 +1017,8 @@ async function getAccessToken(env) {
     const token = text(data.access_token);
     if (!token) return "";
     await env.SESSIONS.put(TOKEN_CACHE_KEY, token, { expirationTtl: TOKEN_CACHE_TTL });
+    tokenMemoryCache = token;
+    tokenMemoryExpiresAt = Date.now() + TOKEN_MEMORY_TTL_MS;
     console.log(JSON.stringify({ fn: "getAccessToken", renewed: true, expiresIn: data.expires_in }));
     return token;
   } catch (err) {
@@ -1018,6 +1028,7 @@ async function getAccessToken(env) {
 }
 
 async function lineReply(env, replyToken, messages) {
+  const startedAt = Date.now();
   const accessToken = await getAccessToken(env);
   if (!accessToken || !replyToken) {
     console.error(JSON.stringify({ fn: "lineReply", error: "missing token or replyToken" }));
@@ -1032,6 +1043,7 @@ async function lineReply(env, replyToken, messages) {
     const errText = await resp.text().catch(() => "");
     console.error(JSON.stringify({ fn: "lineReply", status: resp.status, body: errText }));
   }
+  console.log(JSON.stringify({ fn: "lineReply", ok: resp.ok, status: resp.status, durationMs: Date.now() - startedAt, messageCount: messages.length }));
 }
 
 export async function linePush(env, to, messages) {
@@ -1534,7 +1546,10 @@ async function startReportFlow(env, userId, replyToken) {
 
 async function startCommunityFlow(env, userId, replyToken) {
   const pending = await env.DB.prepare(
-    "SELECT status FROM community_applications WHERE line_user_id = ? AND status IN ('pending','approved') ORDER BY submitted_at DESC LIMIT 1",
+    `SELECT status FROM community_applications
+      WHERE line_user_id = ?
+        AND status IN ('pending','approved','approved_pending_delivery','rejected_pending_delivery','approved_delivering','rejected_delivering')
+      ORDER BY submitted_at DESC LIMIT 1`,
   ).bind(userId).first().catch(() => null);
 
   if (pending?.status === "approved") {
@@ -1546,6 +1561,13 @@ async function startCommunityFlow(env, userId, replyToken) {
   }
   if (pending?.status === "pending") {
     await lineReply(env, replyToken, [{ type: "text", text: "您已經送出申請囉，里長審核後會主動把社群連結傳給您，請耐心等候 🙏" }]);
+    return;
+  }
+  if (["approved_pending_delivery", "rejected_pending_delivery", "approved_delivering", "rejected_delivering"].includes(pending?.status)) {
+    await lineReply(env, replyToken, [{
+      type: "text",
+      text: "里長已完成審核，系統正在重新傳送結果，請稍候。",
+    }]);
     return;
   }
 
@@ -1717,25 +1739,49 @@ export async function handleHubCallback(request, env) {
   });
 
   if (kind !== "community") return reply({ success: false, error: "unknown kind: " + kind }, 400);
+  if (action !== "approve" && action !== "reject") {
+    return reply({ success: false, error: "unknown action: " + action }, 400);
+  }
 
   const app = await env.DB.prepare(
     "SELECT line_user_id, display_name, status FROM community_applications WHERE application_id = ?",
   ).bind(id).first();
 
   if (!app) return reply({ success: false, error: "找不到這筆申請" }, 404);
-  if (app.status !== "pending") {
-    return reply({ success: false, error: `這筆申請已經處理過了（${app.status === "approved" ? "已通過" : "已婉拒"}）` });
-  }
 
   const approved = action === "approve";
+  const finalStatus = approved ? "approved" : "rejected";
+  const deliveryStatus = approved ? "approved_pending_delivery" : "rejected_pending_delivery";
+  const deliveringStatus = approved ? "approved_delivering" : "rejected_delivering";
+  if (app.status === finalStatus) {
+    return reply({ success: false, error: `這筆申請已經處理過了（${approved ? "已通過" : "已婉拒"}）` });
+  }
+  if (app.status !== "pending" && app.status !== deliveryStatus && app.status !== deliveringStatus) {
+    return reply({ success: false, error: "這筆申請已由其他審核操作處理或正在傳送" }, 409);
+  }
+
   const inviteUrl = communityInviteUrl(env);
   if (approved && !inviteUrl) {
     return reply({ success: false, error: "尚未設定社群邀請連結" }, 500);
   }
 
-  await env.DB.prepare(
-    "UPDATE community_applications SET status = ?, reviewer_id = ?, reviewed_at = ? WHERE application_id = ?",
-  ).bind(approved ? "approved" : "rejected", text(data.reviewerId), text(data.reviewedAt) || taiwanIsoNow(), id).run();
+  const claim = await env.DB.prepare(
+    `UPDATE community_applications
+        SET status = ?, reviewer_id = ?, reviewed_at = ?
+      WHERE application_id = ?
+        AND (status IN ('pending', ?) OR (status = ? AND reviewed_at <= ?))`,
+  ).bind(
+    deliveringStatus,
+    text(data.reviewerId),
+    taiwanIsoNow(),
+    id,
+    deliveryStatus,
+    deliveringStatus,
+    new Date(Date.now() + 8 * 60 * 60 * 1000 - 2 * 60 * 1000).toISOString().slice(0, 16),
+  ).run();
+  if (!Number(claim.meta?.changes || 0)) {
+    return reply({ success: false, error: "這筆申請正在處理，請稍後再試" }, 409);
+  }
 
   const sent = await linePush(env, app.line_user_id, [{
     type: "text",
@@ -1744,7 +1790,23 @@ export async function handleHubCallback(request, env) {
       : "感謝您申請加入共學社群。\n\n經里長確認，您的申請目前未能通過（本社群僅開放幼稚園以上學童家長參加）。\n如有疑問歡迎直接留言詢問里長 🙏",
   }]);
 
-  return reply({ success: true, applicantName: app.display_name, delivered: sent });
+  if (!sent) {
+    await env.DB.prepare(
+      "UPDATE community_applications SET status = ? WHERE application_id = ? AND status = ?",
+    ).bind(deliveryStatus, id, deliveringStatus).run();
+    return reply({
+      success: false,
+      error: "LINE 私訊送出失敗，申請已保留，請稍後再按一次",
+      applicantName: app.display_name,
+      delivered: false,
+    }, 502);
+  }
+
+  await env.DB.prepare(
+    "UPDATE community_applications SET status = ? WHERE application_id = ? AND status = ?",
+  ).bind(finalStatus, id, deliveringStatus).run();
+
+  return reply({ success: true, applicantName: app.display_name, delivered: true });
 }
 
 async function handleLineReportEvent(env, userId, replyToken, event) {

@@ -1,6 +1,6 @@
 // ── Router entry point ────────────────────────────────────────────────────────
 import { handleLineWebhook, handleHubCallback } from "./line.js";
-import { submitConsult } from "./consult.js";
+import { getConsultRequests, retryConsultNotification, submitConsult, updateConsultStatus } from "./consult.js";
 import { closeEndedEvents, sendEventReminders, sendPostEventSurveys, resetReminderSent, resetSurveySentAt } from "./scheduled.js";
 import { getEvents, getEvent, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
 import { getRegistrations, getEventStats, checkInRegistration, updateRegistration, deleteRegistration } from "./registrations.js";
@@ -59,6 +59,9 @@ const ACTIONS = new Set([
   "getChatThreads",
   "getChatMessages",
   "submitConsult",
+  "getConsultRequests",
+  "retryConsultNotification",
+  "updateConsultStatus",
 ]);
 
 const PUBLIC_ACTIONS = new Set(["getSurveyPublic", "submitSurveyResponse", "submitRegistration", "uploadPublicPhoto", "submitConsult"]);
@@ -167,7 +170,7 @@ export default {
         if (action === "submitSurveyResponse") return corsJson(env, await submitSurveyResponse(env, ctx, data));
         if (action === "submitRegistration") return corsJson(env, await submitRegistration(env, ctx, data));
         if (action === "uploadPublicPhoto") return corsJson(env, await uploadPublicPhoto(env, data, request));
-        if (action === "submitConsult") return corsJson(env, await submitConsult(env, ctx, data));
+        if (action === "submitConsult") return corsJson(env, await submitConsult(env, ctx, data, request));
       }
 
       // For read-only bundle requests, run auth + D1 reads in parallel so
@@ -210,6 +213,9 @@ export default {
       }
 
       await requireAdmin(env, data);
+      if (action === "getConsultRequests") return corsJson(env, await getConsultRequests(env, data));
+      if (action === "retryConsultNotification") return corsJson(env, await retryConsultNotification(env, data));
+      if (action === "updateConsultStatus") return corsJson(env, await updateConsultStatus(env, data));
       if (action === "getEvent") return corsJson(env, await getEvent(env, data));
       if (action === "createEvent") return corsJson(env, await createEvent(env, data));
       if (action === "updateEvent") return corsJson(env, await updateEvent(env, ctx, data));

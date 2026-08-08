@@ -1,3 +1,10 @@
+import {
+  claimPublicDedupe,
+  enforcePublicRateLimit,
+  httpError as publicHttpError,
+  validatePublicFormEnvelope,
+} from "./public-guard.js";
+
 const STORE_ACTIONS = new Set([
   "health",
   "login",
@@ -97,7 +104,7 @@ export default {
           await requireAdmin(request, env, data);
           return corsJson(env, await getStoreTaxonomy(env));
         case "submitStore":
-          return corsJson(env, await submitStore(env, data), 201);
+          return corsJson(env, await submitStore(env, data, request), 201);
         case "updateStore":
           await requireAdmin(request, env, data);
           return corsJson(env, await updateStore(env, data));
@@ -124,7 +131,7 @@ export default {
           await requireImporter(env, data);
           return corsJson(env, await importStores(env, data));
         case "uploadStorePhoto":
-          return corsJson(env, await uploadStorePhoto(env, data));
+          return corsJson(env, await uploadPublicStorePhoto(env, data, request));
         case "uploadAdminPhoto":
           await requireAdmin(request, env, data);
           return corsJson(env, await uploadStorePhoto(env, data));
@@ -236,7 +243,21 @@ async function updateStoreTaxonomy(env, data) {
   };
 }
 
-async function submitStore(env, data) {
+async function submitStore(env, data, request) {
+  const envelopeError = validatePublicFormEnvelope(data);
+  if (envelopeError) throw publicHttpError(400, "表單已失效，請重新整理後再試");
+  await enforcePublicRateLimit(env, request, "store-submit", 5, 60 * 60);
+
+  const name = text(data.name).slice(0, 50);
+  const phone = text(data.phone).slice(0, 30);
+  const storeName = text(data.title).slice(0, 100);
+  const normalizedPhone = phone.replace(/[^\d]/g, "");
+  if (!name) throw httpError(400, "請輸入申請人姓名");
+  if (normalizedPhone.length < 8) throw httpError(400, "請輸入正確的申請人聯絡電話");
+  if (!storeName) throw httpError(400, "請輸入店家名稱");
+  const claimed = await claimPublicDedupe(env, "store", [normalizedPhone, storeName], 10 * 60);
+  if (!claimed) throw httpError(429, "這份申請剛剛已送出，請勿重複送出");
+
   const now = taipeiNowText();
   const storeId = await nextStoreId(env);
   const store = {
@@ -244,11 +265,11 @@ async function submitStore(env, data) {
     applyTime: now,
     status: "申請審核中",
     category: normalizeStoreCategory(data.cate),
-    name: text(data.name),
-    phone: text(data.phone),
+    name,
+    phone,
     lineId: text(data.lineId),
     lineDisplayName: text(data.lineDisplayName),
-    storeName: text(data.title),
+    storeName,
     storePhone: text(data.storephone),
     storeNum: text(data.taxid),
     desc: text(data.desc),
@@ -680,12 +701,16 @@ async function nextStoreId(env) {
   const datePart = yy + mm + dd;
   const monthPart = yy + mm;
   const row = await env.DB.prepare(
-    "SELECT store_id FROM stores WHERE store_id LIKE ? ORDER BY store_id DESC LIMIT 1",
-  )
-    .bind("STOR" + monthPart + "%")
-    .first();
-  const last = row ? Number(String(row.store_id).slice(-3)) || 0 : 0;
-  return "STOR" + datePart + String(last + 1).padStart(3, "0");
+    `INSERT INTO public_sequences(scope, value)
+     VALUES (?, COALESCE((
+       SELECT MAX(CAST(substr(store_id, -3) AS INTEGER))
+         FROM stores
+        WHERE store_id LIKE ?
+     ), 0) + 1)
+     ON CONFLICT(scope) DO UPDATE SET value = public_sequences.value + 1
+     RETURNING value`,
+  ).bind("store:" + monthPart, "STOR" + monthPart + "%").first();
+  return "STOR" + datePart + String(Number(row.value)).padStart(3, "0");
 }
 
 async function requireAdmin(request, env, data) {
@@ -893,8 +918,31 @@ async function uploadStorePhoto(env, data) {
   if (comma !== -1) b64 = b64.slice(comma + 1);
   if (b64.length * 0.75 > 2 * 1024 * 1024) return { success: false, error: "圖片過大，請壓縮至 2MB 以下" };
   if (!env.GOOGLE_OAUTH_CLIENT_ID || !env.GOOGLE_DRIVE_FOLDER_ID) return { success: false, error: "Drive 未設定" };
-  const mimeType = text(data.mimeType) || "image/jpeg";
+  const mimeType = text(data.mimeType).toLowerCase() || "image/jpeg";
+  if (!["image/jpeg", "image/png", "image/webp"].includes(mimeType)) {
+    throw httpError(400, "僅支援 JPEG、PNG 或 WebP 圖片");
+  }
+  if (!matchesImageSignature(b64, mimeType)) throw httpError(400, "圖片格式不正確");
   const ext = mimeType.split("/")[1] || "jpg";
   const url = await uploadToDrive(env, b64, mimeType, `store_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`);
   return { success: true, url };
+}
+
+async function uploadPublicStorePhoto(env, data, request) {
+  const envelopeError = validatePublicFormEnvelope(data);
+  if (envelopeError) throw publicHttpError(400, "表單已失效，請重新整理後再試");
+  await enforcePublicRateLimit(env, request, "store-upload", 20, 60 * 60);
+  return uploadStorePhoto(env, data);
+}
+
+function matchesImageSignature(base64, mimeType) {
+  try {
+    const bytes = Uint8Array.from(atob(base64.slice(0, 32)), (char) => char.charCodeAt(0));
+    if (mimeType === "image/jpeg") return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+    if (mimeType === "image/png") return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+    return bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+      bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+  } catch {
+    return false;
+  }
 }

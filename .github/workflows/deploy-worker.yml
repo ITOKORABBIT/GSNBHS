@@ -53,6 +53,7 @@ jobs:
           wranglerVersion: "4"
 
   deploy-stores-api:
+    needs: deploy-events-api
     runs-on: ubuntu-latest
     name: Deploy stores-api Worker
     steps:

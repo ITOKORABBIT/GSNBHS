@@ -99,6 +99,7 @@ textarea { resize: vertical; min-height: 90px; }
     </div>
 
     <form id="f" novalidate>
+      <input type="text" id="website" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
       <div class="field">
         <label class="lbl" for="q_name">姓名</label>
         <div class="hint">方便里長稱呼您，可填 LINE 暱稱</div>
@@ -162,7 +163,7 @@ textarea { resize: vertical; min-height: 90px; }
 <script src="config.js"></script>
 <script>
 // 從 LINE 進來時網址會帶身分參數，一併送出讓里長知道是誰預約的（填表者看不到）
-var LINE_ID = '', LINE_NAME = '';
+var LINE_ID = '', LINE_NAME = '', FORM_TS = Date.now();
 (function () {
   var q = new URLSearchParams(location.search);
   LINE_ID = q.get('lineUserId') || '';
@@ -218,7 +219,8 @@ document.getElementById('f').addEventListener('submit', async function (e) {
         action: 'submitConsult',
         name: val('q_name'), phone: phone,
         category: cate, detail: detail, timeSlot: slot, note: val('q_note'),
-        lineUserId: LINE_ID, lineDisplayName: LINE_NAME
+        lineUserId: LINE_ID, lineDisplayName: LINE_NAME,
+        website: val('website'), formTs: FORM_TS
       })
     });
     var json = await res.json();
