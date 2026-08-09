@@ -63,6 +63,10 @@ test("header LINE ID opens the official account and stays visible on mobile", ()
   assert.match(page, /\.top-links>a:not\(\.line-id\)\{display:none\}/);
 });
 
+test("homepage footer includes the ITOKO RABBIT copyright", () => {
+  assert.match(page, /<div class="footer-copyright">網頁版權 © ITOKO RABBIT<\/div>/);
+});
+
 test("public case pages are retired and admin no longer links to them", () => {
   const redirectLines = new Set(redirects.trim().split(/\r?\n/));
   for (const path of ["/openlist", "/openlist.html", "/opendetail", "/opendetail.html"]) {
