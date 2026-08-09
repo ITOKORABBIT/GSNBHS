@@ -11,6 +11,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+window.addEventListener('pageshow',function(){
+  if(!window.location.hash)requestAnimationFrame(function(){window.scrollTo(0,0);});
+});
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -53,12 +59,12 @@ img{display:block;max-width:100%}
   position:absolute;
   inset:0;
   z-index:-3;
-  opacity:.45;
-  background-image:
-    linear-gradient(rgba(37,59,51,.06) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(37,59,51,.06) 1px,transparent 1px);
-  background-size:52px 52px;
-  mask-image:linear-gradient(to bottom,black 0%,transparent 88%);
+  opacity:.03;
+  pointer-events:none;
+  background:url('./圖庫/S__27246628_0.jpg') 10% 64%/min(64vw,820px) auto no-repeat;
+  filter:grayscale(1) invert(1);
+  mix-blend-mode:multiply;
+  mask-image:linear-gradient(to bottom,transparent 2%,black 22%,black 82%,transparent 100%);
 }
 .hero::after{content:"";position:absolute;z-index:-2;inset:0;background:linear-gradient(115deg,transparent 58%,rgba(255,255,255,.58) 58.2%,transparent 76%);pointer-events:none}
 
@@ -190,12 +196,15 @@ img{display:block;max-width:100%}
 }
 .portrait-glow{
   position:absolute;
-  width:74%;
+  z-index:0;
+  width:min(108%,620px);
   aspect-ratio:1;
   bottom:13%;
   border:1px solid rgba(41,72,61,.13);
   border-radius:50%;
   box-shadow:0 0 80px rgba(61,78,71,.06),inset 0 0 80px rgba(61,78,71,.04);
+  -webkit-mask-image:linear-gradient(to right,#000 0%,#000 8%,transparent 22%,transparent 78%,#000 92%,#000 100%);
+  mask-image:linear-gradient(to right,#000 0%,#000 8%,transparent 22%,transparent 78%,#000 92%,#000 100%);
 }
 .portrait-glow::before,.portrait-glow::after{content:"";position:absolute;border:1px solid rgba(41,72,61,.09);border-radius:50%;inset:9%}
 .portrait-glow::after{inset:20%}
@@ -368,6 +377,7 @@ img{display:block;max-width:100%}
 
 @media(max-width:920px){
   .shell{width:min(100% - 32px,760px)}
+  .hero::before{opacity:.035;background-position:center 34%;background-size:clamp(440px,110vw,620px) auto}
   .top-links>a:not(.line-id){display:none}
   .hero-grid{grid-template-columns:1fr;padding:72px 0 34px;gap:0}
   .hero-copy{z-index:3}

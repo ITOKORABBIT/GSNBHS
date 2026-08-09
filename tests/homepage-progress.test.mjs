@@ -17,9 +17,22 @@ test("homepage uses the official aggregate case stats without synthetic growth",
   assert.doesNotMatch(page, /資料來源|統計口徑|正式案件系統|SERVICE PROGRESS|DIGITAL CIVIC SERVICE|SYSTEM ONLINE|PUBLIC SERVICES|HOW IT WORKS/);
 });
 
+test("homepage opens at the top unless an explicit section hash is present", () => {
+  assert.match(page, /history\.scrollRestoration='manual'/);
+  assert.match(page, /if\(!window\.location\.hash\)requestAnimationFrame\(function\(\)\{window\.scrollTo\(0,0\);\}\)/);
+});
+
 test("homepage uses the GSNBHS logo instead of the HPNBHS dove", () => {
   assert.match(page, /圖庫\/S__27246628_0\.jpg/);
   assert.doesNotMatch(page, /HP_logo\.png/);
+});
+
+test("hero uses the village logo watermark and keeps portrait rings behind the photo", () => {
+  assert.match(page, /background:url\('\.\/圖庫\/S__27246628_0\.jpg'\)[^;]+no-repeat/);
+  assert.match(page, /filter:grayscale\(1\) invert\(1\)/);
+  assert.doesNotMatch(page, /background-size:52px 52px/);
+  assert.match(page, /\.portrait-glow\{[\s\S]*?z-index:0[\s\S]*?mask-image:linear-gradient\(to right/);
+  assert.match(page, /\.portrait\{[\s\S]*?z-index:1[\s\S]*?mix-blend-mode:multiply/);
 });
 
 test("demo mode uses labeled sample progress without changing the default data path", () => {
