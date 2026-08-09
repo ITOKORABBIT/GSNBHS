@@ -48,3 +48,12 @@ CREATE TABLE IF NOT EXISTS case_views (
   case_id    TEXT PRIMARY KEY,
   view_count INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS case_notifications (
+  case_id        TEXT PRIMARY KEY,
+  notify_status  TEXT NOT NULL DEFAULT 'pending',
+  notify_error   TEXT NOT NULL DEFAULT '',
+  notify_attempts INTEGER NOT NULL DEFAULT 0,
+  notified_at    TEXT NOT NULL DEFAULT '',
+  updated_at     TEXT NOT NULL DEFAULT ''
+);

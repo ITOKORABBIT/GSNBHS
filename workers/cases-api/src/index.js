@@ -260,6 +260,7 @@ async function submitReport(env, ctx, data) {
   const now = nowTW();
   const c = buildCaseFromSubmit(data, caseId, now);
   await upsertCaseStatement(env, c).run();
+  const notificationSent = await deliverCaseNotification(env, c);
 
   ctx.waitUntil(
     forwardToGas(env, { ...data, action: "submitReport", caseId })
@@ -268,7 +269,7 @@ async function submitReport(env, ctx, data) {
       }),
   );
 
-  return { success: true, caseId };
+  return { success: true, caseId, notificationSent };
 }
 
 async function validatePublicReport(env, data) {
@@ -305,13 +306,14 @@ async function submitAdminReport(env, ctx, data) {
   const now = nowTW();
   const c = buildCaseFromSubmit(data, caseId, now);
   await upsertCaseStatement(env, c).run();
+  const notificationSent = await deliverCaseNotification(env, c);
 
   ctx.waitUntil(
     forwardToGas(env, { ...data, action: "submitReport", caseId })
       .catch(logSyncError("submitAdminReport", caseId)),
   );
 
-  return { success: true, caseId };
+  return { success: true, caseId, notificationSent };
 }
 
 function normalizePhone(phone) {
@@ -637,6 +639,146 @@ function upsertCaseStatement(env, c) {
     Number(c.sortOrder || 0),
     payload,
   );
+}
+
+async function deliverCaseNotification(env, c) {
+  const delivered = await notifyHub(env, [buildCaseNotification(c)]);
+  const notifiedAt = delivered ? nowTW() : "";
+  const error = delivered ? "" : "hub notify failed";
+
+  try {
+    await env.DB.prepare(
+      `INSERT INTO case_notifications
+         (case_id, notify_status, notify_error, notify_attempts, notified_at, updated_at)
+       VALUES (?, ?, ?, 1, ?, ?)
+       ON CONFLICT(case_id) DO UPDATE SET
+         notify_status = excluded.notify_status,
+         notify_error = excluded.notify_error,
+         notify_attempts = case_notifications.notify_attempts + 1,
+         notified_at = CASE WHEN excluded.notified_at <> '' THEN excluded.notified_at ELSE case_notifications.notified_at END,
+         updated_at = excluded.updated_at`,
+    ).bind(
+      text(c.caseId),
+      delivered ? "sent" : "failed",
+      error,
+      notifiedAt,
+      nowTW(),
+    ).run();
+  } catch (err) {
+    console.error(JSON.stringify({ fn: "deliverCaseNotification", caseId: text(c.caseId), trackingError: err.message }));
+  }
+
+  if (!delivered) {
+    console.error(JSON.stringify({ fn: "deliverCaseNotification", caseId: text(c.caseId), error }));
+  }
+  return delivered;
+}
+
+async function notifyHub(env, messages) {
+  if (!env.NOTIFY_HUB_URL || !env.NOTIFY_HUB_SECRET) {
+    console.error(JSON.stringify({ fn: "notifyHub", error: "hub not configured" }));
+    return false;
+  }
+
+  try {
+    const request = new Request(env.NOTIFY_HUB_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + env.NOTIFY_HUB_SECRET,
+      },
+      body: JSON.stringify({
+        villageCode: env.NOTIFY_HUB_VILLAGE_CODE || "GSNBHS",
+        messages,
+      }),
+    });
+    const response = env.NOTIFY_HUB
+      ? await env.NOTIFY_HUB.fetch(request)
+      : await fetch(request);
+    const bodyText = await response.text().catch(() => "");
+    if (!response.ok) {
+      console.error(JSON.stringify({ fn: "notifyHub", status: response.status, body: bodyText.slice(0, 200) }));
+      return false;
+    }
+    const result = parseJson(bodyText);
+    if (result.success === false) {
+      console.error(JSON.stringify({ fn: "notifyHub", error: text(result.error) || "hub rejected notification" }));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ fn: "notifyHub", error: err.message }));
+    return false;
+  }
+}
+
+function buildCaseNotification(c) {
+  const flexRow = (label, value) => ({
+    type: "box",
+    layout: "baseline",
+    spacing: "sm",
+    contents: [
+      { type: "text", text: label, color: "#8C8C8C", size: "sm", flex: 2 },
+      { type: "text", text: text(value) || "—", color: "#111111", size: "sm", flex: 5, wrap: true },
+    ],
+  });
+  const detail = text(c.description || c.desc);
+  const rows = [
+    flexRow("編號", c.caseId),
+    flexRow("類別", c.category || c.cate),
+    flexRow("標題", c.title),
+    flexRow("地址", c.addr),
+    flexRow("通報人", text(c.name) + (text(c.phone) ? `（${text(c.phone)}）` : "")),
+    flexRow("通報時間", c.reportTime),
+  ];
+  if (detail) rows.splice(3, 0, flexRow("內容", detail.length > 120 ? detail.slice(0, 120) + "…" : detail));
+
+  const bubble = {
+    type: "bubble",
+    header: {
+      type: "box",
+      layout: "vertical",
+      backgroundColor: "#3A6B52",
+      paddingAll: "12px",
+      contents: [
+        { type: "text", text: "🆕 新案件通報", color: "#FFFFFF", weight: "bold", size: "md" },
+        { type: "text", text: text(c.caseId), color: "#FFFFFFCC", size: "xs", margin: "xs" },
+      ],
+    },
+    body: {
+      type: "box",
+      layout: "vertical",
+      spacing: "sm",
+      contents: rows,
+    },
+    footer: {
+      type: "box",
+      layout: "vertical",
+      contents: [{
+        type: "button",
+        style: "primary",
+        color: "#3A6B52",
+        action: { type: "uri", label: "查看／回覆", uri: text(c.replyUrl) },
+      }],
+    },
+  };
+
+  const photo = normalizePublicUrl(c.photo1);
+  if (photo) {
+    bubble.hero = {
+      type: "image",
+      url: photo,
+      size: "full",
+      aspectRatio: "20:13",
+      aspectMode: "cover",
+    };
+  }
+
+  return {
+    type: "flex",
+    altText: `🆕 新案件通報 ${text(c.caseId)}`,
+    contents: bubble,
+  };
 }
 
 function logSyncError(action, id) {

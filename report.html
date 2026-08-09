@@ -1143,7 +1143,11 @@ document.getElementById('reportForm').addEventListener('submit', async function(
     document.getElementById('successMsg').style.display = 'block';
     if (json.caseId) {
       var successText = document.querySelector('#successMsg p');
-      if (successText) successText.textContent = '案件已成功送出，案件編號：' + json.caseId + '。里辦公處會盡快處理。';
+      if (successText) {
+        successText.textContent = json.notificationSent === false
+          ? '案件已成立，案件編號：' + json.caseId + '。群組通知暫時延遲，但里辦後台仍可查看，請勿重複送出。'
+          : '案件已成功送出，案件編號：' + json.caseId + '。已通知里辦公處。';
+      }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 

@@ -77,6 +77,14 @@ jobs:
       - name: Install dependencies
         working-directory: workers/cases-api
         run: npm ci --include=optional
+      - name: Apply D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/cases-api
+          wranglerVersion: "4"
+          command: d1 migrations apply gsnbhs-db --remote
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
