@@ -32,4 +32,5 @@ test("homepage service links stay inside the GSNBHS site", () => {
     assert.match(page, new RegExp(`href="\\./${path}"`));
   }
   assert.doesNotMatch(page, /HPNBHS/);
+  assert.doesNotMatch(page, /class="service-row" href="\.\/openlist\.html"/);
 });
