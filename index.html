@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#061d18">
+<meta name="theme-color" content="#f2f3f1">
 <meta name="description" content="舊社里里民小幫手，整合案件通報、公開進度、里內公告、商圈優惠與諮詢服務。">
 <title>舊社里 里民小幫手｜數位服務入口</title>
-<link rel="icon" type="image/png" href="./HP_logo.png?v=6">
-<link rel="apple-touch-icon" href="./HP_logo.png?v=6">
+<link rel="icon" type="image/jpeg" href="./圖庫/S__27246628_0.jpg?v=1">
+<link rel="apple-touch-icon" href="./圖庫/S__27246628_0.jpg?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -17,8 +17,8 @@ html{scroll-behavior:smooth}
 body,h1,h2,h3,p{margin:0}
 body{
   min-width:320px;
-  color:#eaf8f2;
-  background:#061511;
+  color:#1c211f;
+  background:#f2f3f1;
   font-family:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
   -webkit-font-smoothing:antialiased;
 }
@@ -27,16 +27,15 @@ button{font:inherit}
 img{display:block;max-width:100%}
 
 :root{
-  --ink:#061511;
-  --deep:#061d18;
-  --panel:#0a2b23;
-  --signal:#63f2b4;
-  --signal-soft:#9ff7d2;
-  --gold:#d6aa4b;
-  --paper:#f2f6f1;
-  --paper-ink:#10251e;
-  --muted:#91aea3;
-  --line:rgba(159,247,210,.18);
+  --ink:#1c211f;
+  --deep:#f2f3f1;
+  --panel:#e7e9e6;
+  --signal:#26735a;
+  --signal-soft:#4f8d75;
+  --paper:#ffffff;
+  --paper-ink:#1c211f;
+  --muted:#69736f;
+  --line:rgba(28,47,40,.14);
   --completion-angle:0deg;
 }
 
@@ -46,30 +45,22 @@ img{display:block;max-width:100%}
   overflow:hidden;
   isolation:isolate;
   background:
-    radial-gradient(circle at 75% 38%, rgba(43,130,99,.28), transparent 30%),
-    linear-gradient(135deg,#061511 0%,#08251e 56%,#0a3128 100%);
+    radial-gradient(circle at 76% 38%,rgba(195,201,197,.46),transparent 31%),
+    linear-gradient(135deg,#fafaf8 0%,#eef0ed 58%,#e4e7e3 100%);
 }
 .hero::before{
   content:"";
   position:absolute;
   inset:0;
   z-index:-3;
-  opacity:.34;
+  opacity:.45;
   background-image:
-    linear-gradient(rgba(114,235,190,.08) 1px, transparent 1px),
-    linear-gradient(90deg,rgba(114,235,190,.08) 1px, transparent 1px);
+    linear-gradient(rgba(37,59,51,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(37,59,51,.06) 1px,transparent 1px);
   background-size:52px 52px;
   mask-image:linear-gradient(to bottom,black 0%,transparent 88%);
 }
-.hero::after{
-  content:"";
-  position:absolute;
-  z-index:-2;
-  inset:-35% -20%;
-  background:linear-gradient(105deg,transparent 42%,rgba(99,242,180,.08) 49%,transparent 56%);
-  animation:scan 10s linear infinite;
-  pointer-events:none;
-}
+.hero::after{content:"";position:absolute;z-index:-2;inset:0;background:linear-gradient(115deg,transparent 58%,rgba(255,255,255,.58) 58.2%,transparent 76%);pointer-events:none}
 
 .shell{width:min(1180px,calc(100% - 48px));margin-inline:auto}
 .topbar{
@@ -82,18 +73,17 @@ img{display:block;max-width:100%}
 }
 .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.04em}
 .brand-logo{
-  width:38px;
+  width:112px;
   height:38px;
-  padding:5px;
-  border:1px solid rgba(159,247,210,.32);
-  border-radius:12px;
-  background:rgba(255,255,255,.08);
+  overflow:hidden;
+  border-radius:3px;
+  background:#211f1f;
 }
-.brand-logo img{width:100%;height:100%;object-fit:contain;border-radius:7px}
+.brand-logo img{width:100%;height:100%;object-fit:cover}
 .brand-copy{display:flex;flex-direction:column;line-height:1.15}
 .brand-copy strong{font-size:15px}
-.brand-copy small{margin-top:5px;color:var(--muted);font:600 10px/1 'DM Sans',sans-serif;letter-spacing:.18em}
-.top-links{display:flex;align-items:center;gap:28px;color:#bbd1c8;font-size:14px;font-weight:600}
+.brand-copy small{margin-top:5px;color:var(--muted);font-size:10px;letter-spacing:.08em}
+.top-links{display:flex;align-items:center;gap:28px;color:#59635f;font-size:14px;font-weight:600}
 .top-links a{transition:color .18s ease}
 .top-links a:hover{color:var(--signal)}
 .line-id{
@@ -101,12 +91,12 @@ img{display:block;max-width:100%}
   align-items:center;
   gap:8px;
   padding:9px 13px;
-  border:1px solid rgba(159,247,210,.25);
+  border:1px solid rgba(28,47,40,.18);
   border-radius:999px;
-  color:#dff6ed;
+  color:#35413c;
   font:600 12px/1 'DM Sans','Noto Sans TC',sans-serif;
 }
-.live-dot,.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(99,242,180,.12),0 0 16px rgba(99,242,180,.7)}
+.live-dot,.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(38,115,90,.1)}
 
 .hero-grid{
   min-height:calc(100svh - 76px);
@@ -122,9 +112,9 @@ img{display:block;max-width:100%}
   align-items:center;
   gap:12px;
   color:var(--signal);
-  font:700 12px/1 'DM Sans','Noto Sans TC',sans-serif;
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.12em;
 }
 .kicker::before{content:"";width:42px;height:1px;background:var(--signal)}
 .hero h1{
@@ -134,22 +124,21 @@ img{display:block;max-width:100%}
   letter-spacing:-.07em;
   font-weight:900;
 }
-.hero h1 .village{display:block;color:#fff}
+.hero h1 .village{display:block;color:#161a18}
 .hero h1 .helper{
   display:block;
   margin-top:12px;
-  color:transparent;
-  -webkit-text-stroke:1px rgba(218,247,235,.78);
+  color:#59615d;
 }
 .hero-lead{
   max-width:570px;
   margin-top:28px;
-  color:#c2d8cf;
+  color:#525d58;
   font-size:clamp(17px,2vw,20px);
   line-height:1.8;
   letter-spacing:.03em;
 }
-.hero-lead strong{color:#fff;font-weight:700}
+.hero-lead strong{color:#171c1a;font-weight:800}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
 .button{
   min-height:52px;
@@ -164,19 +153,10 @@ img{display:block;max-width:100%}
   transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
 }
 .button:hover{transform:translateY(-2px)}
-.button-primary{color:#042018;background:var(--signal);box-shadow:0 12px 32px rgba(32,198,132,.18)}
-.button-primary:hover{box-shadow:0 16px 34px rgba(32,198,132,.3)}
-.button-secondary{border:1px solid rgba(214,235,226,.3);background:rgba(255,255,255,.04);color:#f1fbf7}
+.button-primary{color:#fff;background:#256f56;box-shadow:0 12px 26px rgba(36,82,65,.16)}
+.button-primary:hover{box-shadow:0 15px 30px rgba(36,82,65,.24)}
+.button-secondary{border:1px solid rgba(28,47,40,.22);background:rgba(255,255,255,.62);color:#222a27}
 .button svg{width:18px;height:18px}
-.source-line{
-  margin-top:28px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  color:#89a99c;
-  font-size:12px;
-}
-
 .portrait-stage{
   position:relative;
   align-self:stretch;
@@ -190,11 +170,11 @@ img{display:block;max-width:100%}
   width:74%;
   aspect-ratio:1;
   bottom:13%;
-  border:1px solid rgba(99,242,180,.2);
+  border:1px solid rgba(41,72,61,.13);
   border-radius:50%;
-  box-shadow:0 0 80px rgba(52,190,135,.12),inset 0 0 80px rgba(52,190,135,.08);
+  box-shadow:0 0 80px rgba(61,78,71,.06),inset 0 0 80px rgba(61,78,71,.04);
 }
-.portrait-glow::before,.portrait-glow::after{content:"";position:absolute;border:1px solid rgba(99,242,180,.13);border-radius:50%;inset:9%}
+.portrait-glow::before,.portrait-glow::after{content:"";position:absolute;border:1px solid rgba(41,72,61,.09);border-radius:50%;inset:9%}
 .portrait-glow::after{inset:20%}
 .portrait{
   position:relative;
@@ -204,7 +184,7 @@ img{display:block;max-width:100%}
   object-fit:contain;
   object-position:center bottom;
   filter:saturate(.82) contrast(1.04);
-  mix-blend-mode:lighten;
+  mix-blend-mode:multiply;
   mask-image:linear-gradient(to bottom,black 0%,black 86%,transparent 100%);
   animation:portraitIn .9s .15s both cubic-bezier(.2,.8,.2,1);
 }
@@ -216,22 +196,20 @@ img{display:block;max-width:100%}
   width:184px;
   padding:14px 16px;
   border-left:2px solid var(--signal);
-  background:rgba(4,24,19,.78);
+  background:rgba(255,255,255,.82);
   backdrop-filter:blur(12px);
+  color:#1f2724;
 }
-.portrait-label small{display:block;color:var(--signal);font:700 10px/1 'DM Sans',sans-serif;letter-spacing:.16em}
+.portrait-label small{display:block;color:var(--signal);font-size:11px;font-weight:800;letter-spacing:.08em}
 .portrait-label strong{display:block;margin-top:8px;font-size:15px;line-height:1.5}
-.orbit-label{position:absolute;color:rgba(159,247,210,.52);font:600 10px/1 'DM Sans',sans-serif;letter-spacing:.16em}
-.orbit-label.one{top:20%;right:3%}
-.orbit-label.two{left:0;bottom:27%;transform:rotate(-90deg);transform-origin:left}
 
 .performance{
   position:relative;
   z-index:3;
   margin-top:-1px;
   color:var(--paper-ink);
-  background:var(--paper);
-  border-top:1px solid rgba(99,242,180,.3);
+  background:#fff;
+  border-top:1px solid rgba(28,47,40,.12);
 }
 .performance-inner{
   display:grid;
@@ -240,9 +218,8 @@ img{display:block;max-width:100%}
   padding:84px 0 92px;
 }
 .performance-head{padding-right:64px}
-.section-index{color:#3b7e64;font:700 11px/1 'DM Sans',sans-serif;letter-spacing:.18em}
 .section-title{margin-top:16px;font-size:clamp(34px,4.4vw,58px);line-height:1.12;letter-spacing:-.045em;font-weight:900}
-.section-desc{margin-top:20px;color:#537067;font-size:15px;line-height:1.85}
+.section-desc{margin-top:20px;color:#606a66;font-size:15px;line-height:1.85}
 .sync-state{
   display:flex;
   align-items:center;
@@ -254,6 +231,7 @@ img{display:block;max-width:100%}
 }
 .sync-state.error .sync-dot{background:#d47b64;box-shadow:0 0 0 4px rgba(212,123,100,.12)}
 .sync-state.loading .sync-dot{animation:pulse 1s infinite}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 
 .metrics-panel{
   display:grid;
@@ -285,7 +263,7 @@ img{display:block;max-width:100%}
 .rate-value{font:700 50px/.9 'DM Sans',sans-serif;letter-spacing:-.06em}
 .rate-unit{margin-left:3px;font-size:18px;color:#3d6757}
 .rate-label{display:block;margin-top:10px;color:#557066;font-size:12px;font-weight:700;letter-spacing:.08em}
-.rate-caption{margin-top:22px;color:#668076;font-size:12px;line-height:1.6;text-align:center}
+.rate-caption{margin-top:22px;color:#68736f;font-size:12px;line-height:1.6;text-align:center}
 .metrics-detail{display:grid;grid-template-rows:1fr auto}
 .metric-grid{display:grid;grid-template-columns:repeat(2,1fr)}
 .metric{
@@ -301,14 +279,13 @@ img{display:block;max-width:100%}
 .progress-copy{display:flex;justify-content:space-between;gap:18px;color:#46685b;font-size:12px;font-weight:700}
 .progress-track{height:5px;margin-top:13px;overflow:hidden;background:#d5e3dd}
 .progress-fill{height:100%;width:0;background:linear-gradient(90deg,#0f7552,var(--signal));transition:width .9s cubic-bezier(.2,.8,.2,1)}
-.stats-note{margin-top:18px;color:#70877f;font-size:11px;line-height:1.7}
 .empty-note{display:none;margin-top:16px;padding:14px 16px;border-left:2px solid #2f8a68;background:#e5efea;color:#35594c;font-size:13px;line-height:1.7}
 .empty-note.show{display:block}
 
-.services{color:#eaf8f2;background:#071b16;padding:94px 0 108px}
+.services{color:#1c211f;background:#f0f1ef;padding:94px 0 108px}
 .services-head{display:flex;align-items:end;justify-content:space-between;gap:32px;padding-bottom:28px;border-bottom:1px solid var(--line)}
 .services h2{font-size:clamp(36px,5vw,66px);line-height:1.05;letter-spacing:-.05em}
-.services-intro{max-width:400px;color:#8eaba0;font-size:14px;line-height:1.8}
+.services-intro{max-width:400px;color:#66716d;font-size:14px;line-height:1.8}
 .service-list{counter-reset:service}
 .service-row{
   counter-increment:service;
@@ -321,24 +298,24 @@ img{display:block;max-width:100%}
   transition:background .22s ease,padding .22s ease;
 }
 .service-row::before{content:"0" counter(service);color:#5a8675;font:600 11px/1 'DM Sans',sans-serif;letter-spacing:.12em}
-.service-row:hover{padding-inline:18px;background:rgba(99,242,180,.035)}
+.service-row:hover{padding-inline:18px;background:rgba(255,255,255,.72)}
 .service-name{font-size:clamp(23px,3vw,34px);font-weight:800;letter-spacing:-.03em}
-.service-desc{color:#8eaba0;font-size:13px;line-height:1.7}
+.service-desc{color:#66716d;font-size:13px;line-height:1.7}
 .service-arrow{
   width:40px;
   height:40px;
   display:grid;
   place-items:center;
-  border:1px solid rgba(159,247,210,.28);
+  border:1px solid rgba(38,115,90,.3);
   border-radius:50%;
   color:var(--signal);
   transition:transform .2s ease,background .2s ease;
 }
-.service-row:hover .service-arrow{transform:translateX(5px);background:rgba(99,242,180,.08)}
+.service-row:hover .service-arrow{transform:translateX(5px);background:rgba(38,115,90,.08)}
 
 .how{
   color:var(--paper-ink);
-  background:#e7eee9;
+  background:#fff;
   padding:94px 0;
 }
 .how-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:80px}
@@ -349,9 +326,9 @@ img{display:block;max-width:100%}
 .process-step h3{font-size:19px}
 .process-step p{margin-top:8px;color:#5a7168;font-size:13px;line-height:1.75}
 
-.footer{background:#04110e;border-top:1px solid var(--line);padding:34px 0;color:#78978b}
+.footer{background:#e6e8e5;border-top:1px solid var(--line);padding:34px 0;color:#65706c}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;font-size:11px;line-height:1.7}
-.footer strong{color:#bfd4cc;font-size:13px}
+.footer strong{color:#232a27;font-size:13px}
 .footer-meta{text-align:right}
 
 .reveal{opacity:1;transform:none}
@@ -360,7 +337,6 @@ img{display:block;max-width:100%}
 
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes portraitIn{from{opacity:0;transform:translateY(26px) scale(.98)}to{opacity:1;transform:none}}
-@keyframes scan{from{transform:translateX(-25%)}to{transform:translateX(25%)}}
 @keyframes pulse{50%{opacity:.35}}
 
 @media(max-width:920px){
@@ -387,11 +363,9 @@ img{display:block;max-width:100%}
   .hero-lead{font-size:16px;line-height:1.75}
   .hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .button{min-height:50px;padding:0 13px;font-size:13px}
-  .source-line{align-items:flex-start;line-height:1.6}
   .portrait-stage{min-height:390px;margin-top:-26px}
   .portrait{height:430px}
   .portrait-label{right:0;bottom:20px;width:166px}
-  .orbit-label{display:none}
   .performance-inner{padding:64px 0 70px}
   .metrics-panel{grid-template-columns:1fr}
   .rate-block{min-height:260px;border-right:0;border-bottom:1px solid #b9d2c7}
@@ -421,11 +395,11 @@ img{display:block;max-width:100%}
     <div class="shell">
       <nav class="topbar" aria-label="主要導覽">
         <a class="brand" href="#top" aria-label="回到舊社里里民小幫手首頁">
-          <span class="brand-logo"><img src="./HP_logo.png" alt=""></span>
-          <span class="brand-copy"><strong>舊社里 里民小幫手</strong><small>JIUSHELI SERVICE</small></span>
+          <span class="brand-logo"><img src="./圖庫/S__27246628_0.jpg" alt="舊社里標誌"></span>
+          <span class="brand-copy"><strong>里民小幫手</strong><small>舊社里便民服務</small></span>
         </a>
         <div class="top-links">
-          <a href="#performance">服務進度</a>
+          <a href="#performance">案件概況</a>
           <a href="#services">便民服務</a>
           <span class="line-id"><span class="live-dot"></span>LINE @900rucza</span>
         </div>
@@ -433,25 +407,22 @@ img{display:block;max-width:100%}
 
       <div class="hero-grid">
         <div class="hero-copy">
-          <div class="kicker">Digital civic service</div>
+          <div class="kicker">舊社里便民服務</div>
           <h1><span class="village">舊社里</span><span class="helper">里民小幫手</span></h1>
-          <p class="hero-lead"><strong>通報有進度，處理有紀錄。</strong><br>把案件、消息與便民服務整合在同一個入口，讓每一次需求都有清楚去向。</p>
+          <p class="hero-lead">案件通報、進度查詢、最新公告、在地商家與里民諮詢，都可以在這裡辦理。</p>
           <div class="hero-actions">
             <a class="button button-primary" href="./report.html">
-              立即通報
+              我要通報
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
-            <a class="button button-secondary" href="./openlist.html">查看公開案件</a>
+            <a class="button button-secondary" href="./openlist.html">查看案件</a>
           </div>
-          <div class="source-line"><span class="live-dot"></span>舊社里正式案件系統 · 統計資料自動同步</div>
         </div>
 
         <div class="portrait-stage" aria-label="舊社里辦公處線上服務">
           <div class="portrait-glow" aria-hidden="true"></div>
-          <span class="orbit-label one">SERVICE NODE / 406</span>
-          <span class="orbit-label two">JIUSHELI · BEITUN</span>
           <img class="portrait" src="./圖庫/XE209360_20260530_B.jpg" alt="舊社里辦公處服務形象照">
-          <div class="portrait-label"><small>SYSTEM ONLINE</small><strong>舊社里辦公處<br>線上服務中</strong></div>
+          <div class="portrait-label"><small>舊社里辦公處</small><strong>線上便民服務</strong></div>
         </div>
       </div>
     </div>
@@ -461,11 +432,10 @@ img{display:block;max-width:100%}
     <section class="performance" id="performance">
       <div class="shell performance-inner">
         <div class="performance-head reveal">
-          <div class="section-index">01 / SERVICE PROGRESS</div>
-          <h2 class="section-title">真實案件<br>處理進度</h2>
-          <p class="section-desc">統計直接來自舊社里正式案件資料庫，只顯示彙總數字，不公開姓名、電話或陳情內容。</p>
-          <div class="sync-state loading" id="syncState"><span class="sync-dot"></span><span id="syncText">正在同步正式資料</span></div>
-          <div class="empty-note" id="emptyNote">新系統已於 2026 年 8 月上線，目前尚無新案件。第一筆正式通報建立後，這裡會自動顯示處理進度。</div>
+          <h2 class="section-title">案件處理概況</h2>
+          <p class="section-desc">查看目前案件受理與處理情形。</p>
+          <div class="sync-state loading sr-only" id="syncState" aria-live="polite"><span class="sync-dot"></span><span id="syncText">案件資料載入中</span></div>
+          <div class="empty-note" id="emptyNote">目前尚無案件。</div>
         </div>
 
         <div class="reveal">
@@ -474,7 +444,7 @@ img{display:block;max-width:100%}
               <div class="rate-ring">
                 <div class="rate-copy"><span class="rate-value" id="completionRate">—</span><span class="rate-unit" id="rateUnit"></span><span class="rate-label">整體結案率</span></div>
               </div>
-              <div class="rate-caption">已結案件數 ÷ 全部案件</div>
+              <div class="rate-caption">目前結案率</div>
             </div>
             <div class="metrics-detail">
               <div class="metric-grid">
@@ -484,12 +454,11 @@ img{display:block;max-width:100%}
                 <div class="metric"><div class="metric-name">本月新增</div><div class="metric-value"><span id="monthCases">—</span><span class="metric-unit">件</span></div></div>
               </div>
               <div class="progress-meta">
-                <div class="progress-copy"><span>案件完成度</span><span id="progressLabel">等待資料</span></div>
+                <div class="progress-copy"><span>案件進度</span><span id="progressLabel">載入中</span></div>
                 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
               </div>
             </div>
           </div>
-          <p class="stats-note">統計口徑：結案率以「已結案 ÷ 全部案件」計算；追蹤中包含新案件、處理中及已轉交案件。不受理案件不計為結案，仍保留在全部案件中。資料更新時間：<span id="updatedAt">同步中</span>。</p>
         </div>
       </div>
     </section>
@@ -497,26 +466,26 @@ img{display:block;max-width:100%}
     <section class="services" id="services">
       <div class="shell">
         <div class="services-head reveal">
-          <div><div class="section-index">02 / PUBLIC SERVICES</div><h2>需要什麼，<br>直接開始。</h2></div>
-          <p class="services-intro">常用服務不用繞路。從通報、追蹤到公告與諮詢，每一項都連到舊社里自己的正式系統。</p>
+          <div><h2>便民服務</h2></div>
+          <p class="services-intro">請選擇要辦理的項目。</p>
         </div>
         <div class="service-list reveal">
-          <a class="service-row" href="./report.html"><span class="service-name">案件通報</span><span class="service-desc">拍照說明問題，送出後取得案件編號。</span><span class="service-arrow" aria-hidden="true">→</span></a>
-          <a class="service-row" href="./openlist.html"><span class="service-name">公開案件</span><span class="service-desc">查看已公開案件與目前處理狀態。</span><span class="service-arrow" aria-hidden="true">→</span></a>
-          <a class="service-row" href="./bulletin.html"><span class="service-name">最新公告</span><span class="service-desc">里內消息、活動與重要通知集中查看。</span><span class="service-arrow" aria-hidden="true">→</span></a>
-          <a class="service-row" href="./storeopenlist.html"><span class="service-name">舊社商圈</span><span class="service-desc">瀏覽合作店家、在地優惠與商店資訊。</span><span class="service-arrow" aria-hidden="true">→</span></a>
-          <a class="service-row" href="./consult.html"><span class="service-name">里民諮詢</span><span class="service-desc">預約法律諮詢、清寒協助或其他服務。</span><span class="service-arrow" aria-hidden="true">→</span></a>
+          <a class="service-row" href="./report.html"><span class="service-name">案件通報</span><span class="service-desc">回報道路、環境或其他里內問題。</span><span class="service-arrow" aria-hidden="true">→</span></a>
+          <a class="service-row" href="./openlist.html"><span class="service-name">案件查詢</span><span class="service-desc">查看公開案件與處理狀態。</span><span class="service-arrow" aria-hidden="true">→</span></a>
+          <a class="service-row" href="./bulletin.html"><span class="service-name">最新公告</span><span class="service-desc">查看里內消息、活動與重要通知。</span><span class="service-arrow" aria-hidden="true">→</span></a>
+          <a class="service-row" href="./storeopenlist.html"><span class="service-name">舊社商圈</span><span class="service-desc">查看在地商家與優惠。</span><span class="service-arrow" aria-hidden="true">→</span></a>
+          <a class="service-row" href="./consult.html"><span class="service-name">里民諮詢</span><span class="service-desc">預約法律諮詢與其他服務。</span><span class="service-arrow" aria-hidden="true">→</span></a>
         </div>
       </div>
     </section>
 
     <section class="how">
       <div class="shell how-grid">
-        <div class="reveal"><div class="section-index">03 / HOW IT WORKS</div><h2>一筆通報，<br>三段可追蹤流程。</h2></div>
+        <div class="reveal"><h2>案件通報流程</h2></div>
         <div class="process reveal">
-          <div class="process-step"><div class="process-num">01</div><div><h3>送出案件</h3><p>填寫問題、地點與照片，系統產生案件編號並保存正式受理時間。</p></div></div>
-          <div class="process-step"><div class="process-num">02</div><div><h3>里辦追蹤</h3><p>案件依實際狀態更新為新案件、處理中或已轉交相關單位。</p></div></div>
-          <div class="process-step"><div class="process-num">03</div><div><h3>完成結案</h3><p>處理完成才計入結案數與結案率；首頁統計會隨正式資料同步更新。</p></div></div>
+          <div class="process-step"><div class="process-num">01</div><div><h3>填寫通報</h3><p>填寫問題地點、內容並上傳照片。</p></div></div>
+          <div class="process-step"><div class="process-num">02</div><div><h3>查看進度</h3><p>送出後可依案件編號查看處理狀態。</p></div></div>
+          <div class="process-step"><div class="process-num">03</div><div><h3>完成處理</h3><p>案件完成後，公開頁面會更新處理結果。</p></div></div>
         </div>
       </div>
     </section>
@@ -525,7 +494,7 @@ img{display:block;max-width:100%}
   <footer class="footer">
     <div class="shell footer-inner">
       <div><strong>舊社里 里民小幫手</strong><br>北屯舊社里數位服務整合入口</div>
-      <div class="footer-meta">Official LINE · @900rucza<br>系統建置 ITOKO RABBIT</div>
+      <div class="footer-meta">LINE 官方帳號：@900rucza<br>舊社里辦公處</div>
     </div>
   </footer>
 
@@ -544,7 +513,6 @@ img{display:block;max-width:100%}
   var rateUnit=document.getElementById('rateUnit');
   var progressFill=document.getElementById('progressFill');
   var progressLabel=document.getElementById('progressLabel');
-  var updatedAt=document.getElementById('updatedAt');
   var emptyNote=document.getElementById('emptyNote');
 
   function animateNumber(el,value){
@@ -571,6 +539,7 @@ img{display:block;max-width:100%}
       ids.rate.textContent='—';
       rateUnit.textContent='';
       progressLabel.textContent='尚無案件';
+      emptyNote.textContent='目前尚無案件。';
       emptyNote.classList.add('show');
     }else{
       animateNumber(ids.rate,rate);
@@ -583,8 +552,7 @@ img{display:block;max-width:100%}
     progressFill.style.width=safeRate+'%';
 
     syncState.classList.remove('loading','error');
-    syncText.textContent='正式資料已同步';
-    updatedAt.textContent=stats.latestUpdate||stats.generatedAt||'本次載入時間';
+    syncText.textContent='案件資料已更新';
   }
 
   function renderError(){
@@ -592,9 +560,10 @@ img{display:block;max-width:100%}
     rateUnit.textContent='';
     syncState.classList.remove('loading');
     syncState.classList.add('error');
-    syncText.textContent='目前無法取得正式統計';
+    syncText.textContent='目前無法載入案件資料';
     progressLabel.textContent='同步失敗';
-    updatedAt.textContent='無法同步';
+    emptyNote.textContent='目前無法載入案件資料，請稍後再試。';
+    emptyNote.classList.add('show');
   }
 
   async function loadStats(){
