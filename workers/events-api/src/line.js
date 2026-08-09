@@ -1285,7 +1285,7 @@ async function handleLineMenuEvent(env, userId, replyToken, event) {
   }
   if (pb.menu === "news" || pb.menu === "course") {
     const label = pb.menu === "news" ? "最新消息" : "教育課程";
-    const cates = pb.menu === "news" ? ["最新消息", "里民活動"] : ["教育課程"];
+    const cates = pb.menu === "news" ? NEWS_CATEGORIES : COURSE_CATEGORIES;
     const bulletins = await fetchBulletinsByCategories(env, cates);
     if (!bulletins.length) {
       await lineReply(env, replyToken, [{ type: "text", text: `目前尚無「${label}」內容，敬請期待！` }]);
@@ -1314,7 +1314,7 @@ async function handleLineKeywordEvent(env, replyToken, event) {
   // 治安通報／留言給我）。切換 Webhook 後選單圖片可能還沒換、里民也可能記得舊說法，
   // 所以這些詞一律導到我們對應的新功能，讓切換對里民無感。
   if (/^(舊社里公佈欄|公佈欄|公布欄)$/.test(msg)) {
-    const bulletins = await fetchBulletinsByCategories(env, ["最新消息", "里民活動"]);
+    const bulletins = await fetchBulletinsByCategories(env, NEWS_CATEGORIES);
     if (!bulletins.length) {
       await lineReply(env, replyToken, [{ type: "text", text: "目前尚無最新消息，敬請期待！" }]);
       return true;
@@ -1426,7 +1426,12 @@ async function fetchBulletinsByCategories(env, cates) {
   try {
     const placeholders = cates.map(() => "?").join(",");
     const rows = await env.DB.prepare(
-      `SELECT payload_json FROM bulletins WHERE status = '已發布' AND category IN (${placeholders}) ORDER BY sort_order ASC, created_at DESC LIMIT 12`
+      // 緊急通告一律排最前面，否則會被舊的里民活動壓在後面，失去「緊急」的意義
+      `SELECT payload_json FROM bulletins
+         WHERE status = '已發布' AND category IN (${placeholders})
+         ORDER BY CASE WHEN category = '緊急通告' THEN 0 ELSE 1 END,
+                  sort_order ASC, created_at DESC
+         LIMIT 12`
     ).bind(...cates).all();
     return rows.results.map((r) => parseJson(r.payload_json));
   } catch (err) {
@@ -1451,6 +1456,12 @@ const BULLETIN_TAG_COLOR = {
   緊急通告: "#B91C1C",
   政策宣導: "#1D4ED8",
 };
+
+// 後台公告共 5 個分類。「最新消息」選單收除了教育課程以外的全部——
+// 先前只收「最新消息／里民活動」，導致里長發的緊急通告與政策宣導在 LINE 完全看不到。
+// 緊急通告會被排到最前面（見 fetchBulletinsByCategories 的排序）。
+const NEWS_CATEGORIES = ["緊急通告", "最新消息", "政策宣導", "里民活動"];
+const COURSE_CATEGORIES = ["教育課程"];
 
 function buildBulletinBubble(b) {
   const firstImage = String(b.imageUrl || "").split(/\r?\n|,/).map((s) => s.trim()).filter(Boolean)[0];
@@ -1485,7 +1496,7 @@ function buildBulletinBubble(b) {
           type: "box", layout: "vertical", paddingAll: "16px", spacing: "sm",
           contents: [
             { type: "text", text: b.title || "(未命名)", weight: "bold", size: "md", wrap: true, maxLines: 2 },
-            { type: "text", text: truncateText(stripHtmlTags(b.content), 80), size: "sm", color: "#5A7090", wrap: true, maxLines: 4 },
+            { type: "text", text: truncateText(stripHtmlTags(b.content), 90), size: "sm", color: "#5A7090", wrap: true, maxLines: 5 },
           ],
         },
       ],
@@ -1497,8 +1508,24 @@ function buildBulletinBubble(b) {
   };
 }
 
+// 後台公告是 HTML（段落、換行），LINE 卡片只吃純文字。
+// 直接把標籤全刪會讓所有段落黏成一整段，所以先把換行語意的標籤轉成 \n 再清掉其餘標籤。
+// 空行會被壓成單一換行——卡片預覽行數有限，留空行等於浪費可見範圍。
 function stripHtmlTags(html) {
-  return String(html || "").replace(/<[^>]*>/g, "").trim();
+  return String(html || "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6]|tr)>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "・")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0?39;/gi, "'")
+    .replace(/&amp;/gi, "&")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n\s*\n+/g, "\n")
+    .trim();
 }
 
 function truncateText(str, max) {
