@@ -341,6 +341,10 @@ img{display:block;max-width:100%}
 .how h2{margin-top:16px;font-size:clamp(34px,4vw,54px);line-height:1.15;letter-spacing:-.045em}
 .process{border-top:1px solid #aec8bd}
 .process-step{display:grid;grid-template-columns:72px 1fr;gap:18px;padding:27px 0;border-bottom:1px solid #aec8bd}
+.process-step-link{color:inherit;text-decoration:none;transition:color .2s ease,background-color .2s ease,padding-inline .2s ease}
+.process-step-link h3::after{content:" ↗";color:#2d7258;font-size:.8em}
+.process-step-link:hover{color:#1d634b;background:rgba(45,114,88,.05);padding-inline:10px}
+.process-step-link:focus-visible{outline:2px solid #2d7258;outline-offset:4px}
 .process-num{color:#2d7258;font:700 12px/1 'DM Sans',sans-serif;letter-spacing:.12em;padding-top:7px}
 .process-step h3{font-size:19px}
 .process-step p{margin-top:8px;color:#5a7168;font-size:13px;line-height:1.75}
@@ -430,13 +434,13 @@ img{display:block;max-width:100%}
         <div class="hero-copy">
           <div class="kicker">舊社里便民服務</div>
           <h1><span class="village">舊社里</span><span class="helper">里民小幫手</span></h1>
-          <p class="hero-lead">案件通報、進度查詢、最新公告、在地商家與里民諮詢，都可以在這裡辦理。</p>
+          <p class="hero-lead">案件通報、最新公告、在地商家與里民諮詢，都可以在這裡辦理。</p>
           <div class="hero-actions">
             <a class="button button-primary" href="./report.html">
               我要通報
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
-            <a class="button button-secondary" href="./openlist.html">查看案件</a>
+            <a class="button button-secondary" href="https://line.me/R/oaMessage/%40900rucza/?%E6%82%A8%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E8%A9%A2%E5%95%8F%E6%A1%88%E4%BB%B6%E9%80%B2%E5%BA%A6" target="_blank" rel="noopener">查看進度</a>
           </div>
         </div>
 
@@ -492,6 +496,7 @@ img{display:block;max-width:100%}
         </div>
         <div class="service-list reveal">
           <a class="service-row" href="./report.html"><span class="service-name">案件通報</span><span class="service-desc">回報道路、環境或其他里內問題。</span><span class="service-arrow" aria-hidden="true">→</span></a>
+          <a class="service-row" href="https://line.me/R/oaMessage/%40900rucza/?%E6%82%A8%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E8%A9%A2%E5%95%8F%E6%A1%88%E4%BB%B6%E9%80%B2%E5%BA%A6" target="_blank" rel="noopener"><span class="service-name">案件查詢</span><span class="service-desc">透過官方 LINE 洽詢，由里長親自回覆。</span><span class="service-arrow" aria-hidden="true">↗</span></a>
           <a class="service-row" href="./bulletin.html"><span class="service-name">最新公告</span><span class="service-desc">查看里內消息、活動與重要通知。</span><span class="service-arrow" aria-hidden="true">→</span></a>
           <a class="service-row" href="./storeopenlist.html"><span class="service-name">舊社商圈</span><span class="service-desc">查看在地商家與優惠。</span><span class="service-arrow" aria-hidden="true">→</span></a>
           <a class="service-row" href="./consult.html"><span class="service-name">里民諮詢</span><span class="service-desc">預約法律諮詢與其他服務。</span><span class="service-arrow" aria-hidden="true">→</span></a>
@@ -504,8 +509,8 @@ img{display:block;max-width:100%}
         <div class="reveal"><h2>案件通報流程</h2></div>
         <div class="process reveal">
           <div class="process-step"><div class="process-num">01</div><div><h3>填寫通報</h3><p>填寫問題地點、內容並上傳照片。</p></div></div>
-          <div class="process-step"><div class="process-num">02</div><div><h3>查看進度</h3><p>送出後可依案件編號查看處理狀態。</p></div></div>
-          <div class="process-step"><div class="process-num">03</div><div><h3>完成處理</h3><p>案件完成後，公開頁面會更新處理結果。</p></div></div>
+          <a class="process-step process-step-link" href="https://line.me/R/oaMessage/%40900rucza/?%E6%82%A8%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E8%A9%A2%E5%95%8F%E6%A1%88%E4%BB%B6%E9%80%B2%E5%BA%A6" target="_blank" rel="noopener"><div class="process-num">02</div><div><h3>查看進度</h3><p>透過官方 LINE 洽詢，由里長親自協助。</p></div></a>
+          <div class="process-step"><div class="process-num">03</div><div><h3>完成處理</h3><p>案件處理完成後，由里辦向您說明結果。</p></div></div>
         </div>
       </div>
     </section>

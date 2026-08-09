@@ -10,8 +10,6 @@ const ACTIONS = new Set([
   "reorderCases",
   "deleteCase",
   "batchUpdateCases",
-  "getPublicCases",
-  "getPublicCase",
   "getPublicStats",
   "getViewStats",
   "recordCardView",
@@ -22,8 +20,6 @@ const ACTIONS = new Set([
 ]);
 
 const PUBLIC_ACTIONS = new Set([
-  "getPublicCases",
-  "getPublicCase",
   "getPublicStats",
   "submitReport",
   "getViewStats",
@@ -84,8 +80,6 @@ export default {
       }
 
       if (PUBLIC_ACTIONS.has(action)) {
-        if (action === "getPublicCases")    return corsJson(env, await getPublicCases(env));
-        if (action === "getPublicCase")     return corsJson(env, await getPublicCase(env, data));
         if (action === "getPublicStats")    return corsJson(env, await getPublicStats(env));
         if (action === "submitReport")      return corsJson(env, await submitReport(env, ctx, data));
         if (action === "getViewStats")      return corsJson(env, await getViewStats(env));
@@ -161,24 +155,6 @@ async function getCase(env, data) {
 }
 
 // ─── Public reads ─────────────────────────────────────────
-
-async function getPublicCases(env) {
-  const rows = await env.DB.prepare(
-    `SELECT payload_json FROM cases
-     WHERE public_flag = 1
-     ORDER BY sort_order ASC, pin_order DESC, report_time DESC`,
-  ).all();
-  return { success: true, cases: rows.results.map((r) => sanitizePublic(parseJson(r.payload_json))) };
-}
-
-async function getPublicCase(env, data) {
-  const caseId = requireId(data.caseId, "Missing caseId");
-  const row = await env.DB.prepare(
-    "SELECT payload_json FROM cases WHERE case_id = ? AND public_flag = 1",
-  ).bind(caseId).first();
-  if (!row) return { success: false, error: "找不到案件" };
-  return { success: true, case: sanitizePublic(parseJson(row.payload_json)) };
-}
 
 async function getPublicStats(env) {
   const currentMonth = nowTW().slice(0, 7);
@@ -578,11 +554,6 @@ function applyReplyFields(existing, data, now) {
     publicSummary:ps            !== undefined ? text(ps)             : existing.publicSummary,
     replyUrl:     data.replyUrl !== undefined ? text(data.replyUrl)  : existing.replyUrl,
   };
-}
-
-function sanitizePublic(c) {
-  const { name, phone, lineId, note, handler, ...rest } = c;
-  return rest;
 }
 
 async function syncCaseFromGas(env, caseId) {

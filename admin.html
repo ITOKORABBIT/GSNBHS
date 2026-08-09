@@ -633,10 +633,9 @@ tbody tr:last-child td{border-bottom:none}
         <div class="panel-head">
           <div>
             <div class="panel-title">里民案件清單</div>
-            <div class="panel-sub">快速查看案件狀態，進入案件完整頁面後可直接回覆與設定公開資訊。</div>
+            <div class="panel-sub">快速查看案件狀態與處理內容。</div>
           </div>
           <div class="panel-actions">
-            <a class="action-btn" href="openlist.html" target="_blank" rel="noopener">里民公開清單</a>
             <a class="action-btn" href="consultlist.html">諮詢預約管理</a>
             <a class="action-btn primary" href="list.html">進入案件管理頁</a>
           </div>
@@ -1221,7 +1220,6 @@ function renderCases() {
     '<td>' + escapeHtml(fmtDate(item.reportTime)) + '</td>' +
     '<td><div class="inline-actions">' +
     '<a class="inline-link" href="detail.html?id=' + encodeURIComponent(item.caseId) + '">編輯</a>' +
-    '<a class="inline-link" href="opendetail.html?id=' + encodeURIComponent(item.caseId) + '&back=' + encodeURIComponent('openlist.html') + '" target="_blank" rel="noopener">公開頁</a>' +
     '</div></td>' +
     '</tr>'
   )).join('');

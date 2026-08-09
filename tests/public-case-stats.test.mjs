@@ -66,3 +66,17 @@ test("empty database reports no completion rate instead of a fake zero percent",
   assert.equal(body.stats.completed, 0);
   assert.equal(body.stats.completionRate, null);
 });
+
+test("public case list and detail actions are disabled", async () => {
+  for (const action of ["getPublicCases", "getPublicCase"]) {
+    const response = await worker.fetch(new Request("https://gsnbhs-cases-api.example", {
+      method: "POST",
+      body: JSON.stringify({ action, caseId: "GS-001" }),
+    }), {});
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.equal(body.success, false);
+    assert.equal(body.error, "Unsupported action");
+  }
+});
