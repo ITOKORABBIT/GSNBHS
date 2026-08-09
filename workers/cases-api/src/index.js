@@ -12,6 +12,7 @@ const ACTIONS = new Set([
   "batchUpdateCases",
   "getPublicCases",
   "getPublicCase",
+  "getPublicStats",
   "getViewStats",
   "recordCardView",
   "bulkAddCardViews",
@@ -23,6 +24,7 @@ const ACTIONS = new Set([
 const PUBLIC_ACTIONS = new Set([
   "getPublicCases",
   "getPublicCase",
+  "getPublicStats",
   "submitReport",
   "getViewStats",
   "recordCardView",
@@ -84,6 +86,7 @@ export default {
       if (PUBLIC_ACTIONS.has(action)) {
         if (action === "getPublicCases")    return corsJson(env, await getPublicCases(env));
         if (action === "getPublicCase")     return corsJson(env, await getPublicCase(env, data));
+        if (action === "getPublicStats")    return corsJson(env, await getPublicStats(env));
         if (action === "submitReport")      return corsJson(env, await submitReport(env, ctx, data));
         if (action === "getViewStats")      return corsJson(env, await getViewStats(env));
         if (action === "recordCardView")    return corsJson(env, await recordCardView(env, data));
@@ -175,6 +178,38 @@ async function getPublicCase(env, data) {
   ).bind(caseId).first();
   if (!row) return { success: false, error: "找不到案件" };
   return { success: true, case: sanitizePublic(parseJson(row.payload_json)) };
+}
+
+async function getPublicStats(env) {
+  const currentMonth = nowTW().slice(0, 7);
+  const row = await env.DB.prepare(
+    `SELECT
+       COUNT(*) AS total,
+       SUM(CASE WHEN status LIKE '%新案件%' THEN 1 ELSE 0 END) AS new_count,
+       SUM(CASE WHEN status LIKE '%處理中%' OR status LIKE '%轉交%' THEN 1 ELSE 0 END) AS active_count,
+       SUM(CASE WHEN status LIKE '%結案%' THEN 1 ELSE 0 END) AS completed_count,
+       SUM(CASE WHEN status LIKE '%不受理%' THEN 1 ELSE 0 END) AS not_accepted_count,
+       SUM(CASE WHEN report_time LIKE ? OR report_time LIKE ? THEN 1 ELSE 0 END) AS this_month_count,
+       MAX(COALESCE(NULLIF(last_update, ''), report_time)) AS latest_update
+     FROM cases`,
+  ).bind(`${currentMonth}%`, `${currentMonth.replace('/', '-')}%`).first();
+
+  const total = Number(row?.total || 0);
+  const completed = Number(row?.completed_count || 0);
+  return {
+    success: true,
+    stats: {
+      total,
+      new: Number(row?.new_count || 0),
+      active: Number(row?.active_count || 0),
+      completed,
+      notAccepted: Number(row?.not_accepted_count || 0),
+      thisMonth: Number(row?.this_month_count || 0),
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : null,
+      latestUpdate: text(row?.latest_update),
+      generatedAt: nowTW(),
+    },
+  };
 }
 
 // ─── View stats (public) ─────────────────────────────────
