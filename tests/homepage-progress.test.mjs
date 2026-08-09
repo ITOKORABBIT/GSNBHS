@@ -49,6 +49,7 @@ test("case lookup uses the official LINE while other homepage services stay loca
     assert.match(page, new RegExp(`href="\\./${path}"`));
   }
   assert.equal(page.split(`href="${lineCaseUrl}"`).length - 1, 3);
+  assert.match(page, /<a class="process-step process-step-link" href="\.\/report\.html">[\s\S]*?<h3>填寫通報<\/h3>/);
   assert.match(page, /<span class="service-name">案件查詢<\/span>/);
   assert.match(page, />查看進度<\/a>/);
   assert.match(page, /由里長親自回覆/);
