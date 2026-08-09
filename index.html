@@ -97,6 +97,25 @@ img{display:block;max-width:100%}
   font:600 12px/1 'DM Sans','Noto Sans TC',sans-serif;
 }
 .live-dot,.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(38,115,90,.1)}
+.demo-badge{
+  display:none;
+  position:fixed;
+  z-index:20;
+  top:88px;
+  right:18px;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  color:#fff;
+  background:#202522;
+  box-shadow:0 10px 28px rgba(25,31,28,.18);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.06em;
+}
+.demo-mode .demo-badge{display:inline-flex}
+.demo-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:#8ed4b6}
 
 .hero-grid{
   min-height:calc(100svh - 76px);
@@ -357,6 +376,7 @@ img{display:block;max-width:100%}
   .topbar{height:66px}
   .brand-copy strong{font-size:13px}
   .line-id{padding:8px 10px;font-size:11px}
+  .demo-badge{top:76px;right:14px;padding:9px 12px;font-size:11px}
   .hero-grid{min-height:calc(100svh - 66px);padding-top:54px}
   .hero h1{font-size:clamp(48px,16vw,68px)}
   .hero h1 .helper{margin-top:9px}
@@ -391,6 +411,7 @@ img{display:block;max-width:100%}
 </style>
 </head>
 <body>
+  <div class="demo-badge" id="demoBadge">DEMO 示意資料</div>
   <header class="hero" id="top">
     <div class="shell">
       <nav class="topbar" aria-label="主要導覽">
@@ -433,7 +454,7 @@ img{display:block;max-width:100%}
       <div class="shell performance-inner">
         <div class="performance-head reveal">
           <h2 class="section-title">案件處理概況</h2>
-          <p class="section-desc">查看目前案件受理與處理情形。</p>
+          <p class="section-desc" id="performanceDesc">查看目前案件受理與處理情形。</p>
           <div class="sync-state loading sr-only" id="syncState" aria-live="polite"><span class="sync-dot"></span><span id="syncText">案件資料載入中</span></div>
           <div class="empty-note" id="emptyNote">目前尚無案件。</div>
         </div>
@@ -514,6 +535,19 @@ img{display:block;max-width:100%}
   var progressFill=document.getElementById('progressFill');
   var progressLabel=document.getElementById('progressLabel');
   var emptyNote=document.getElementById('emptyNote');
+  var performanceDesc=document.getElementById('performanceDesc');
+  var isDemo=new URLSearchParams(window.location.search).get('demo')==='1';
+  var demoStats={
+    total:68,
+    new:6,
+    active:13,
+    completed:46,
+    notAccepted:3,
+    thisMonth:12,
+    completionRate:68,
+    latestUpdate:'',
+    generatedAt:''
+  };
 
   function animateNumber(el,value){
     var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -552,7 +586,7 @@ img{display:block;max-width:100%}
     progressFill.style.width=safeRate+'%';
 
     syncState.classList.remove('loading','error');
-    syncText.textContent='案件資料已更新';
+    syncText.textContent=isDemo?'DEMO 示意資料':'案件資料已更新';
   }
 
   function renderError(){
@@ -584,7 +618,13 @@ img{display:block;max-width:100%}
     finally{clearTimeout(timer)}
   }
 
-  loadStats();
+  if(isDemo){
+    document.documentElement.classList.add('demo-mode');
+    performanceDesc.textContent='以下為示意數字，供畫面預覽。';
+    renderStats(demoStats);
+  }else{
+    loadStats();
+  }
 })();
 </script>
 </body>

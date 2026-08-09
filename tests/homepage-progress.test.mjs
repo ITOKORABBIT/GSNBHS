@@ -18,6 +18,15 @@ test("homepage uses the GSNBHS logo instead of the HPNBHS dove", () => {
   assert.doesNotMatch(page, /HP_logo\.png/);
 });
 
+test("demo mode uses labeled sample progress without changing the default data path", () => {
+  assert.match(page, /new URLSearchParams\(window\.location\.search\)\.get\('demo'\)==='1'/);
+  assert.match(page, /DEMO 示意資料/);
+  assert.match(page, /total:68/);
+  assert.match(page, /completed:46/);
+  assert.match(page, /completionRate:68/);
+  assert.match(page, /if\(isDemo\)[\s\S]*renderStats\(demoStats\)[\s\S]*else[\s\S]*loadStats\(\)/);
+});
+
 test("homepage service links stay inside the GSNBHS site", () => {
   for (const path of ["report.html", "openlist.html", "bulletin.html", "storeopenlist.html", "consult.html"]) {
     assert.match(page, new RegExp(`href="\\./${path}"`));
