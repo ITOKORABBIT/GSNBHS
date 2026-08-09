@@ -4002,8 +4002,8 @@ var RICH_MENU_SETUP_ = {
     size: { width: 2500, height: 1686 },
     imageFileId: "1L3M-MtCiB2h-7x28Sbi3cog-YzQYQMps",
     areas: [
-      { bounds: { x: 0, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "活動報名", data: "action=menu&menu=apply_event" } },
-      { bounds: { x: 1250, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "課程報名", data: "action=menu&menu=apply_course" } },
+      { bounds: { x: 0, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "活動報名", data: "action=menu&menu=apply_event", displayText: "活動報名" } },
+      { bounds: { x: 1250, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "課程報名", data: "action=menu&menu=apply_course", displayText: "課程報名" } },
       { bounds: { x: 0, y: 1500, width: 2500, height: 186 }, action: { type: "richmenuswitch", label: "返回主選單", richMenuAliasId: "richmenu-alias-main", data: "action=menu&menu=backmain" } },
     ],
   },
