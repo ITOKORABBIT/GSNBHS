@@ -21,3 +21,14 @@ test("every rich-menu postback shows immediate display text", () => {
     assert.match(definition, new RegExp(`displayText: "${displayText}"`));
   }
 });
+
+test("main rich-menu logo opens the public performance section", () => {
+  const definition = source
+    .split(/\r?\n/)
+    .find((line) => line.includes('label: "舊社里政績"'));
+
+  assert.ok(definition, "missing rich-menu logo tap area");
+  assert.match(definition, /bounds: \{ x: 0, y: 0, width: 2500, height: LOGO_BAND_H_ \}/);
+  assert.match(definition, /type: "uri"/);
+  assert.match(definition, /uri: "https:\/\/gsnbhs\.pages\.dev\/#performance"/);
+});

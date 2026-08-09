@@ -3965,8 +3965,8 @@ var RICH_MENU_SETUP_ = {
     chatBarText: "選單",
     size: { width: 2500, height: 1686 },
     imageFileId: "1HHoLUnzjXJ43YvsfJv_gK4ODsC7HQtyn",
-    // 圖片最上面約 250px 是 Logo 橫幅（非按鈕區），下方 1436px 才是 2x3
-    // 按鈕格，平分成兩排各 718px。如果實測點擊還是偏移，把 LOGO_BAND_H_
+    // 圖片最上面約 250px 是 Logo 橫幅，點擊後開啟官網政績區；下方 1436px 才是
+    // 2x3 按鈕格，平分成兩排各 718px。如果實測點擊還是偏移，把 LOGO_BAND_H_
     // 改成實際 Logo 橫幅的像素高度重新算一次就好。
     areas: (function () {
       var LOGO_BAND_H_ = 250;
@@ -3974,6 +3974,7 @@ var RICH_MENU_SETUP_ = {
       var row1Y = LOGO_BAND_H_;
       var row2Y = LOGO_BAND_H_ + ROW_H_;
       return [
+        { bounds: { x: 0, y: 0, width: 2500, height: LOGO_BAND_H_ }, action: { type: "uri", label: "舊社里政績", uri: "https://gsnbhs.pages.dev/#performance" } },
         { bounds: { x: 0, y: row1Y, width: 833, height: ROW_H_ }, action: { type: "postback", label: "最新消息", data: "action=menu&menu=news", displayText: "最新消息" } },
         { bounds: { x: 833, y: row1Y, width: 834, height: ROW_H_ }, action: { type: "postback", label: "教育課程", data: "action=menu&menu=course", displayText: "教育課程" } },
         { bounds: { x: 1667, y: row1Y, width: 833, height: ROW_H_ }, action: { type: "richmenuswitch", label: "活動報名", richMenuAliasId: "richmenu-alias-apply", data: "action=menu&menu=apply" } },
