@@ -95,7 +95,11 @@ img{display:block;max-width:100%}
   border-radius:999px;
   color:#35413c;
   font:600 12px/1 'DM Sans','Noto Sans TC',sans-serif;
+  text-decoration:none;
+  transition:color .18s ease,border-color .18s ease,background-color .18s ease;
 }
+.line-id:hover{color:var(--signal);border-color:rgba(38,115,90,.45);background:rgba(38,115,90,.06)}
+.line-id:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
 .live-dot,.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(38,115,90,.1)}
 .demo-badge{
   display:none;
@@ -364,7 +368,7 @@ img{display:block;max-width:100%}
 
 @media(max-width:920px){
   .shell{width:min(100% - 32px,760px)}
-  .top-links>a{display:none}
+  .top-links>a:not(.line-id){display:none}
   .hero-grid{grid-template-columns:1fr;padding:72px 0 34px;gap:0}
   .hero-copy{z-index:3}
   .hero h1{font-size:clamp(52px,12vw,82px)}
@@ -426,7 +430,7 @@ img{display:block;max-width:100%}
         <div class="top-links">
           <a href="#performance">案件概況</a>
           <a href="#services">便民服務</a>
-          <span class="line-id"><span class="live-dot"></span>LINE @900rucza</span>
+          <a class="line-id" href="https://line.me/R/oaMessage/%40900rucza" target="_blank" rel="noopener" aria-label="開啟舊社里官方 LINE"><span class="live-dot"></span>LINE @900rucza</a>
         </div>
       </nav>
 

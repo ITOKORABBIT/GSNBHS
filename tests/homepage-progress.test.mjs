@@ -6,6 +6,7 @@ const page = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const adminPage = readFileSync(new URL("../admin.html", import.meta.url), "utf8");
 const redirects = readFileSync(new URL("../_redirects", import.meta.url), "utf8");
 const lineCaseUrl = "https://line.me/R/oaMessage/%40900rucza/?%E6%82%A8%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E8%A9%A2%E5%95%8F%E6%A1%88%E4%BB%B6%E9%80%B2%E5%BA%A6";
+const officialLineUrl = "https://line.me/R/oaMessage/%40900rucza";
 
 test("homepage uses the official aggregate case stats without synthetic growth", () => {
   assert.match(page, /action:'getPublicStats'/);
@@ -41,6 +42,12 @@ test("case lookup uses the official LINE while other homepage services stay loca
   assert.match(page, /由里長親自協助/);
   assert.doesNotMatch(page, /HPNBHS/);
   assert.doesNotMatch(page, /href="\.\/openlist\.html"|公開頁面會更新/);
+});
+
+test("header LINE ID opens the official account and stays visible on mobile", () => {
+  assert.ok(page.includes(`<a class="line-id" href="${officialLineUrl}"`));
+  assert.match(page, /aria-label="開啟舊社里官方 LINE"/);
+  assert.match(page, /\.top-links>a:not\(\.line-id\)\{display:none\}/);
 });
 
 test("public case pages are retired and admin no longer links to them", () => {
