@@ -64,7 +64,8 @@ test("header LINE ID opens the official account and stays visible on mobile", ()
 });
 
 test("homepage footer includes the ITOKO RABBIT copyright", () => {
-  assert.match(page, /<div class="footer-copyright">網頁版權 © ITOKO RABBIT<\/div>/);
+  assert.match(page, /<div class="footer-copyright">© ITOKO RABBIT<\/div>/);
+  assert.doesNotMatch(page, /網頁版權/);
 });
 
 test("public case pages are retired and admin no longer links to them", () => {
