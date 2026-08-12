@@ -1541,7 +1541,7 @@ async function fetchStoresByCategory(env, cate) {
     ).all();
     const all = rows.results.map((r) => parseJson(r.public_payload_json));
     const stores = all.filter((s) => s.pubCate === cate);
-    return shuffleStores(stores).slice(0, 12);
+    return shuffleStores(stores).slice(0, 30);
   } catch (err) {
     console.error(JSON.stringify({ fn: "fetchStoresByCategory", cate, error: err.message }));
     return [];
@@ -2180,12 +2180,12 @@ async function buildEmergencyContactFlex(env) {
   };
 }
 
-function buildStoreCarousel(category, stores) {
+export function buildStoreCarousel(category, stores) {
   const info = LINE_CATEGORY_INFO[category] || { title: category, emoji: "🏪", subtitle: "", color: "#3B82F6" };
   const bubbles = [];
   for (let i = 0; i < stores.length; i += 3) {
     bubbles.push(buildStoreBubble(info, stores.slice(i, i + 3)));
-    if (bubbles.length >= 4) break;
+    if (bubbles.length >= 10) break;
   }
   return {
     type: "flex",

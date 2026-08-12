@@ -22,14 +22,7 @@ test("every rich-menu postback shows immediate display text", () => {
   }
 });
 
-test("main rich-menu logo opens the homepage from the top", () => {
-  const definition = source
-    .split(/\r?\n/)
-    .find((line) => line.includes('label: "舊社里首頁"'));
-
-  assert.ok(definition, "missing rich-menu logo tap area");
-  assert.match(definition, /bounds: \{ x: 0, y: 0, width: 2500, height: LOGO_BAND_H_ \}/);
-  assert.match(definition, /type: "uri"/);
-  assert.match(definition, /uri: "https:\/\/gsnbhs\.pages\.dev\/"/);
-  assert.doesNotMatch(definition, /#performance/);
+test("main rich-menu logo has no tap action", () => {
+  assert.doesNotMatch(source, /label: "舊社里首頁"/);
+  assert.doesNotMatch(source, /bounds: \{ x: 0, y: 0, width: 2500, height: LOGO_BAND_H_ \}/);
 });

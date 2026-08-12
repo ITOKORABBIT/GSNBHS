@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildEvtListCarousel, buildEvtReminderBubble, buildStoreBubble, buildStoreItem } from "./line.js";
+import { buildEvtListCarousel, buildEvtReminderBubble, buildStoreBubble, buildStoreCarousel, buildStoreItem } from "./line.js";
 
 test("LINE store item keeps square media and a separate offer action row", () => {
   const item = buildStoreItem({
@@ -33,6 +33,20 @@ test("LINE store bubble keeps store rows compact", () => {
   assert.equal(bubble.body.spacing, "sm");
   assert.equal(bubble.body.contents[1].type, "separator");
   assert.equal(bubble.body.contents[1].margin, "md");
+});
+
+test("LINE store carousel shows up to ten cards with three stores each", () => {
+  const stores = Array.from({ length: 35 }, (_, index) => ({
+    storeId: `STORE-${index + 1}`,
+    pubName: `商家 ${index + 1}`,
+  }));
+  const carousel = buildStoreCarousel("美食地圖", stores);
+
+  assert.equal(carousel.contents.contents.length, 10);
+  for (const bubble of carousel.contents.contents) {
+    const storeRows = bubble.body.contents.filter((item) => item.type === "box");
+    assert.equal(storeRows.length, 3);
+  }
 });
 
 test("LINE event reminder uses the friendly next-day message", () => {
