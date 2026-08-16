@@ -3963,6 +3963,7 @@ var RICH_MENU_SETUP_ = {
     aliasId: "richmenu-alias-main",
     name: "舊社里小幫手主選單",
     chatBarText: "選單",
+    selected: true,
     size: { width: 2500, height: 1686 },
     imageFileId: "1HHoLUnzjXJ43YvsfJv_gK4ODsC7HQtyn",
     // 圖片最上面約 250px 是不設點擊區的 Logo 橫幅；下方 1436px 才是
@@ -4019,7 +4020,7 @@ function createRichMenu_(def) {
     headers: richMenuAuthHeader_(),
     payload: JSON.stringify({
       size: def.size,
-      selected: false,
+      selected: def.selected === true,
       name: def.name,
       chatBarText: def.chatBarText,
       areas: def.areas,

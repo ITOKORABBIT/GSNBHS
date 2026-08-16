@@ -26,3 +26,13 @@ test("main rich-menu logo has no tap action", () => {
   assert.doesNotMatch(source, /label: "舊社里首頁"/);
   assert.doesNotMatch(source, /bounds: \{ x: 0, y: 0, width: 2500, height: LOGO_BAND_H_ \}/);
 });
+
+test("main rich menu opens automatically when the chat is entered", () => {
+  const mainStart = source.indexOf("main: {");
+  const findChiefStart = source.indexOf("findchief: {", mainStart);
+  const mainDefinition = source.slice(mainStart, findChiefStart);
+
+  assert.ok(mainStart >= 0 && findChiefStart > mainStart, "missing main rich-menu definition");
+  assert.match(mainDefinition, /selected: true/);
+  assert.match(source, /selected: def\.selected === true/);
+});
