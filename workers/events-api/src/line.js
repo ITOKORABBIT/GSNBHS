@@ -17,7 +17,7 @@ const STORE_DETAIL_URL = "https://gsnbhs.pages.dev/storeopendetail.html?id=";
 const STORE_LIST_URL = "https://gsnbhs.pages.dev/storeopenlist.html";
 const STORE_APPLY_URL = "https://gsnbhs.pages.dev/store";
 const STORE_IMG_FALLBACK = "https://lh3.googleusercontent.com/d/1GAb13SxqDBjTnnwZZjNubyJEWxqibs-Z";
-const EVENT_IMG_FALLBACK = "https://gsnbhs.pages.dev/HP_logo.png";
+const EVENT_IMG_FALLBACK = "https://lh3.googleusercontent.com/d/1GAb13SxqDBjTnnwZZjNubyJEWxqibs-Z";
 const KV_SESSION_TTL = 6 * 60 * 60; // seconds
 
 const EVT_START_RE = /^(我要報名|活動報名|報名活動|報名|活動查詢)$/;
