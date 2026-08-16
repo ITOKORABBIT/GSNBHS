@@ -13,7 +13,7 @@ import {
 import { uploadEventImage, uploadPublicPhoto } from "./upload.js";
 import { getEmergencyContacts, addEmergencyContact, updateEmergencyContact, deleteEmergencyContact } from "./contacts.js";
 import { getChatThreads, getChatMessages } from "./chat.js";
-import { verifyGoogleIdToken, requireAdmin, requireImporter, corsJson, corsResponse } from "./auth.js";
+import { loginAdmin, requireAdmin, requireImporter, corsJson, corsResponse } from "./auth.js";
 import { text } from "./utils.js";
 import { normalizeEvent, upsertEventStatement, upsertRegistrationStatement, upsertSurveyStatement } from "./db.js";
 
@@ -141,23 +141,7 @@ export default {
       }
 
       if (action === "login") {
-        const idToken = text(data.id_token);
-        const payload = await verifyGoogleIdToken(env, idToken);
-        if (!payload) return corsJson(env, { success: false, error: "未授權的帳號" }, 401);
-        if (env.GAS_SCRIPT_URL) {
-          try {
-            const gasRes = await fetch(env.GAS_SCRIPT_URL, {
-              method: "POST",
-              headers: { "Content-Type": "text/plain;charset=utf-8" },
-              body: JSON.stringify({ action: "login", id_token: idToken }),
-            });
-            const gasJson = await gasRes.json();
-            if (gasJson.success && gasJson.sessionToken) {
-              return corsJson(env, { success: true, email: payload.email, name: payload.name, role: gasJson.role || "admin", sessionToken: gasJson.sessionToken });
-            }
-          } catch {}
-        }
-        return corsJson(env, { success: true, email: payload.email, name: payload.name, role: "admin", sessionToken: idToken });
+        return corsJson(env, await loginAdmin(env, text(data.id_token)));
       }
 
       if (action === "importBundle") {

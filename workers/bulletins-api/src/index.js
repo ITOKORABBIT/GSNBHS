@@ -30,11 +30,6 @@ const MAX_BULLETIN_IMAGE_BYTES = 5 * 1024 * 1024;
 let driveTokenCache = null;
 let driveTokenExpiry = 0;
 
-// Google JWKS cache
-let jwksCache = null;
-let jwksCacheAt = 0;
-const JWKS_TTL = 3_600_000;
-
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return corsResponse(env, null, 204);
@@ -99,37 +94,21 @@ export default {
 
 async function handleLogin(env, data) {
   const idToken = text(data.id_token);
-  const payload = await verifyGoogleIdToken(env, idToken);
-  if (!payload) return { success: false, error: "未授權的帳號", code: 401 };
-
-  // Get GAS UUID session token so admin.html and other GAS-backed pages can share it.
-  if (env.GAS_SCRIPT_URL) {
-    try {
-      const gasRes = await fetch(env.GAS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "login", id_token: idToken }),
-      });
-      const gasJson = await gasRes.json();
-      if (gasJson.success && gasJson.sessionToken) {
-        return {
-          success: true,
-          email: payload.email,
-          name: payload.name,
-          role: gasJson.role || "admin",
-          sessionToken: gasJson.sessionToken,
-          id_token: idToken,
-        };
-      }
-    } catch {}
-  }
-
+  if (!idToken) throw httpError(401, "未授權的帳號");
+  if (!env.GAS_SCRIPT_URL) throw httpError(503, "登入服務未設定");
+  const response = await fetch(env.GAS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "login", id_token: idToken }),
+  });
+  const json = await response.json();
+  if (!json.success || !json.sessionToken) throw httpError(401, "未授權的帳號");
   return {
     success: true,
-    email: payload.email,
-    name: payload.name,
-    role: "admin",
-    sessionToken: idToken,
+    sessionToken: text(json.sessionToken),
+    email: text(json.email),
+    name: text(json.name),
+    role: text(json.role) || "管理員",
     id_token: idToken,
   };
 }
@@ -342,12 +321,6 @@ function upsertStatement(env, b) {
 // ─── Auth ─────────────────────────────────────────────────
 
 async function requireAdmin(env, data) {
-  const idToken = text(data.id_token);
-  if (idToken) {
-    const payload = await verifyGoogleIdToken(env, idToken);
-    if (payload) return;
-  }
-
   const token = text(data.sessionToken);
   if (!token || !env.GAS_SCRIPT_URL) throw httpError(401, "Unauthorized");
 
@@ -374,53 +347,6 @@ async function requireAdmin(env, data) {
 async function requireImporter(env, data) {
   if (env.IMPORT_TOKEN && text(data.importToken) === env.IMPORT_TOKEN) return;
   throw httpError(401, "Unauthorized");
-}
-
-async function getGoogleJwks() {
-  if (jwksCache && Date.now() - jwksCacheAt < JWKS_TTL) return jwksCache;
-  const resp = await fetch("https://www.googleapis.com/oauth2/v3/certs");
-  const { keys } = await resp.json();
-  jwksCache = keys;
-  jwksCacheAt = Date.now();
-  return keys;
-}
-
-function b64urlToBytes(str) {
-  return Uint8Array.from(atob(str.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-}
-
-async function verifyGoogleIdToken(env, idToken) {
-  if (!idToken || !env.GOOGLE_CLIENT_ID) return null;
-  try {
-    const parts = idToken.split(".");
-    if (parts.length !== 3) return null;
-    const dec = new TextDecoder();
-    const header  = JSON.parse(dec.decode(b64urlToBytes(parts[0])));
-    const payload = JSON.parse(dec.decode(b64urlToBytes(parts[1])));
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now) return null;
-    if (!["accounts.google.com", "https://accounts.google.com"].includes(payload.iss)) return null;
-    if (payload.aud !== env.GOOGLE_CLIENT_ID) return null;
-    const keys = await getGoogleJwks();
-    const jwk = keys.find((k) => k.kid === header.kid);
-    if (!jwk) return null;
-    const cryptoKey = await crypto.subtle.importKey(
-      "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"],
-    );
-    const valid = await crypto.subtle.verify(
-      "RSASSA-PKCS1-v1_5", cryptoKey,
-      b64urlToBytes(parts[2]),
-      new TextEncoder().encode(`${parts[0]}.${parts[1]}`),
-    );
-    if (!valid) return null;
-    if (env.ADMIN_EMAILS) {
-      const whitelist = env.ADMIN_EMAILS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-      if (whitelist.length > 0 && !whitelist.includes((payload.email || "").toLowerCase())) return null;
-    }
-    return payload;
-  } catch {
-    return null;
-  }
 }
 
 // ─── CORS / response helpers ──────────────────────────────

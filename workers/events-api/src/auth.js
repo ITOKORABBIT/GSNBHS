@@ -5,67 +5,29 @@ import { text, httpError } from "./utils.js";
 const sessionCache = new Map();
 const SESSION_CACHE_TTL = 5 * 60 * 1000;
 
-// Google JWKS cache: public keys used to verify ID tokens directly (no GAS call).
-let jwksCache = null;
-let jwksCacheAt = 0;
-const JWKS_TTL = 3_600_000; // 1 hour
+export async function loginAdmin(env, idToken) {
+  if (!idToken) throw httpError(401, "未授權的帳號");
+  if (!env.GAS_SCRIPT_URL) throw httpError(503, "登入服務未設定");
 
-export async function getGoogleJwks() {
-  if (jwksCache && Date.now() - jwksCacheAt < JWKS_TTL) return jwksCache;
-  const resp = await fetch("https://www.googleapis.com/oauth2/v3/certs");
-  const { keys } = await resp.json();
-  jwksCache = keys;
-  jwksCacheAt = Date.now();
-  return keys;
-}
-
-export function b64urlToBytes(str) {
-  return Uint8Array.from(atob(str.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-}
-
-export async function verifyGoogleIdToken(env, idToken) {
-  if (!idToken || !env.GOOGLE_CLIENT_ID) return null;
-  try {
-    const parts = idToken.split(".");
-    if (parts.length !== 3) return null;
-    const dec = new TextDecoder();
-    const header = JSON.parse(dec.decode(b64urlToBytes(parts[0])));
-    const payload = JSON.parse(dec.decode(b64urlToBytes(parts[1])));
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now) return null;
-    if (!["accounts.google.com", "https://accounts.google.com"].includes(payload.iss)) return null;
-    if (payload.aud !== env.GOOGLE_CLIENT_ID) return null;
-    const keys = await getGoogleJwks();
-    const jwk = keys.find((k) => k.kid === header.kid);
-    if (!jwk) return null;
-    const cryptoKey = await crypto.subtle.importKey(
-      "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"],
-    );
-    const valid = await crypto.subtle.verify(
-      "RSASSA-PKCS1-v1_5", cryptoKey,
-      b64urlToBytes(parts[2]),
-      new TextEncoder().encode(`${parts[0]}.${parts[1]}`),
-    );
-    if (!valid) return null;
-    if (env.ADMIN_EMAILS) {
-      const whitelist = env.ADMIN_EMAILS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-      if (whitelist.length > 0 && !whitelist.includes((payload.email || "").toLowerCase())) return null;
-    }
-    return payload;
-  } catch {
-    return null;
+  const response = await fetch(env.GAS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "login", id_token: idToken }),
+  });
+  const json = await response.json();
+  if (!json.success || !json.sessionToken) {
+    throw httpError(Number(json.code || 401), "未授權的帳號");
   }
+  return {
+    success: true,
+    sessionToken: text(json.sessionToken),
+    email: text(json.email),
+    name: text(json.name),
+    role: text(json.role) || "管理員",
+  };
 }
 
 export async function requireAdmin(env, data) {
-  // Fast path: validate Google ID token locally — no GAS call.
-  const idToken = text(data.id_token);
-  if (idToken) {
-    const payload = await verifyGoogleIdToken(env, idToken);
-    if (payload) return;
-  }
-
-  // Fallback: validate session token via GAS (with in-memory cache).
   const token = text(data.sessionToken);
   if (!token || !env.GAS_SCRIPT_URL) throw httpError(401, "Unauthorized");
 

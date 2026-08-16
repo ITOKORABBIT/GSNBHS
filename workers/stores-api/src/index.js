@@ -42,6 +42,8 @@ export const BRAND_TAG_COLORS = ["gold", "mint", "blue", "rose", "violet", "ston
 
 let driveTokenCache = null;
 let driveTokenExpiry = 0;
+const sessionCache = new Map();
+const SESSION_CACHE_TTL = 5 * 60 * 1000;
 
 export default {
   async fetch(request, env, ctx) {
@@ -67,25 +69,8 @@ export default {
       switch (action) {
         case "health":
           return corsJson(env, { success: true, service: "stores-api" });
-        case "login": {
-          const idToken = text(data.id_token);
-          const payload = await verifyGoogleIdToken(env, idToken);
-          if (!payload) return corsJson(env, { success: false, error: "未授權的帳號" }, 401);
-          if (env.GAS_SCRIPT_URL) {
-            try {
-              const gasRes = await fetch(env.GAS_SCRIPT_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({ action: "login", id_token: idToken }),
-              });
-              const gasJson = await gasRes.json();
-              if (gasJson.success && gasJson.sessionToken) {
-                return corsJson(env, { success: true, email: payload.email, name: payload.name, role: gasJson.role || "admin", sessionToken: gasJson.sessionToken });
-              }
-            } catch {}
-          }
-          return corsJson(env, { success: true, email: payload.email, name: payload.name, role: "admin", sessionToken: idToken });
-        }
+        case "login":
+          return corsJson(env, await loginAdmin(env, data));
         case "getPublicStores":
           return corsJson(env, await getPublicStores(env));
         case "getPublicStore":
@@ -713,15 +698,35 @@ async function nextStoreId(env) {
   return "STOR" + datePart + String(Number(row.value)).padStart(3, "0");
 }
 
-async function requireAdmin(request, env, data) {
+async function loginAdmin(env, data) {
   const idToken = text(data.id_token);
-  if (idToken) {
-    const payload = await verifyGoogleIdToken(env, idToken);
-    if (payload) return;
-  }
+  if (!idToken) throw httpError(401, "未授權的帳號");
+  if (!env.GAS_SCRIPT_URL) throw httpError(503, "登入服務未設定");
+
+  const response = await fetch(env.GAS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "login", id_token: idToken }),
+  });
+  const json = await response.json();
+  if (!json.success || !json.sessionToken) throw httpError(401, "未授權的帳號");
+  return {
+    success: true,
+    sessionToken: text(json.sessionToken),
+    email: text(json.email),
+    name: text(json.name),
+    role: text(json.role) || "管理員",
+  };
+}
+
+async function requireAdmin(request, env, data) {
   if (!env.GAS_SCRIPT_URL) throw httpError(401, "Unauthorized");
   const token = text(data.sessionToken);
   if (!token) throw httpError(401, "Unauthorized");
+
+  const cached = sessionCache.get(token);
+  if (cached && Date.now() < cached.expiresAt) return;
+
   const res = await fetch(env.GAS_SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -729,56 +734,13 @@ async function requireAdmin(request, env, data) {
   });
   const json = await res.json();
   if (!json.success) throw httpError(401, "Unauthorized");
-}
 
-let cachedJwks = null;
-let jwksExpiry = 0;
-async function getGoogleJwks() {
-  if (cachedJwks && Date.now() < jwksExpiry) return cachedJwks;
-  const res = await fetch("https://www.googleapis.com/oauth2/v3/certs");
-  const json = await res.json();
-  cachedJwks = json.keys || [];
-  jwksExpiry = Date.now() + 3600 * 1000;
-  return cachedJwks;
-}
-
-function b64urlToBytes(b64) {
-  const b64Std = b64.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = b64Std + "=".repeat((4 - (b64Std.length % 4)) % 4);
-  return Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
-}
-
-async function verifyGoogleIdToken(env, idToken) {
-  if (!idToken || !env.GOOGLE_CLIENT_ID) return null;
-  try {
-    const parts = idToken.split(".");
-    if (parts.length !== 3) return null;
-    const dec = new TextDecoder();
-    const header = JSON.parse(dec.decode(b64urlToBytes(parts[0])));
-    const payload = JSON.parse(dec.decode(b64urlToBytes(parts[1])));
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now) return null;
-    if (!["accounts.google.com", "https://accounts.google.com"].includes(payload.iss)) return null;
-    if (payload.aud !== env.GOOGLE_CLIENT_ID) return null;
-    const keys = await getGoogleJwks();
-    const jwk = keys.find((k) => k.kid === header.kid);
-    if (!jwk) return null;
-    const cryptoKey = await crypto.subtle.importKey(
-      "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"],
-    );
-    const valid = await crypto.subtle.verify(
-      "RSASSA-PKCS1-v1_5", cryptoKey,
-      b64urlToBytes(parts[2]),
-      new TextEncoder().encode(`${parts[0]}.${parts[1]}`),
-    );
-    if (!valid) return null;
-    if (env.ADMIN_EMAILS) {
-      const whitelist = env.ADMIN_EMAILS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-      if (whitelist.length > 0 && !whitelist.includes((payload.email || "").toLowerCase())) return null;
+  sessionCache.set(token, { expiresAt: Date.now() + SESSION_CACHE_TTL });
+  if (sessionCache.size > 50) {
+    const now = Date.now();
+    for (const [key, value] of sessionCache) {
+      if (now >= value.expiresAt) sessionCache.delete(key);
     }
-    return payload;
-  } catch {
-    return null;
   }
 }
 

@@ -10,8 +10,6 @@
   "vars": {
     "ALLOWED_ORIGIN": "https://gsnbhs.pages.dev",
     "GAS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzzp0iFCBkJmlxHuR2j8Ae8xpVPc9gzmvbqBBGNUt0Whm9QpJIrUC0dIs7ZnUjacuuS/exec",
-    "GOOGLE_CLIENT_ID": "998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com",
-    "ADMIN_EMAILS": "ulch0709@gmail.com,peaceli236@gmail.com,chinchinya0828@gmail.com",
     "NOTIFY_HUB_URL": "https://village-notify-hub.ulch0709.workers.dev/notify",
     "NOTIFY_HUB_VILLAGE_CODE": "GSNBHS",
     "COMMUNITY_INVITE_URL": "https://line.me/ti/g2/7qgTAHjPmJOMSpz5FnYxCaimZuGUazMJxRuUOA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"

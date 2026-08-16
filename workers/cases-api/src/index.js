@@ -35,11 +35,6 @@ const PUBLIC_SUBMIT_COOLDOWN_SEC = 300;
 const sessionCache = new Map();
 const SESSION_CACHE_TTL = 5 * 60 * 1000;
 
-// Google JWKS cache
-let jwksCache = null;
-let jwksCacheAt = 0;
-const JWKS_TTL = 3_600_000;
-
 let driveTokenCache = null;
 let driveTokenExpiry = 0;
 
@@ -790,12 +785,6 @@ function logSyncError(action, id) {
 // ─── Auth ─────────────────────────────────────────────────
 
 async function requireAdmin(env, data) {
-  const idToken = text(data.id_token);
-  if (idToken) {
-    const payload = await verifyGoogleIdToken(env, idToken);
-    if (payload) return;
-  }
-
   const token = text(data.sessionToken);
   if (!token || !env.GAS_SCRIPT_URL) throw httpError(401, "Unauthorized");
 
@@ -822,53 +811,6 @@ async function requireAdmin(env, data) {
 async function requireImporter(env, data) {
   if (env.IMPORT_TOKEN && text(data.importToken) === env.IMPORT_TOKEN) return;
   throw httpError(401, "Unauthorized");
-}
-
-async function getGoogleJwks() {
-  if (jwksCache && Date.now() - jwksCacheAt < JWKS_TTL) return jwksCache;
-  const resp = await fetch("https://www.googleapis.com/oauth2/v3/certs");
-  const { keys } = await resp.json();
-  jwksCache = keys;
-  jwksCacheAt = Date.now();
-  return keys;
-}
-
-function b64urlToBytes(str) {
-  return Uint8Array.from(atob(str.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-}
-
-async function verifyGoogleIdToken(env, idToken) {
-  if (!idToken || !env.GOOGLE_CLIENT_ID) return null;
-  try {
-    const parts = idToken.split(".");
-    if (parts.length !== 3) return null;
-    const dec = new TextDecoder();
-    const header = JSON.parse(dec.decode(b64urlToBytes(parts[0])));
-    const payload = JSON.parse(dec.decode(b64urlToBytes(parts[1])));
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now) return null;
-    if (!["accounts.google.com", "https://accounts.google.com"].includes(payload.iss)) return null;
-    if (payload.aud !== env.GOOGLE_CLIENT_ID) return null;
-    const keys = await getGoogleJwks();
-    const jwk = keys.find((k) => k.kid === header.kid);
-    if (!jwk) return null;
-    const cryptoKey = await crypto.subtle.importKey(
-      "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"],
-    );
-    const valid = await crypto.subtle.verify(
-      "RSASSA-PKCS1-v1_5", cryptoKey,
-      b64urlToBytes(parts[2]),
-      new TextEncoder().encode(`${parts[0]}.${parts[1]}`),
-    );
-    if (!valid) return null;
-    if (env.ADMIN_EMAILS) {
-      const whitelist = env.ADMIN_EMAILS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-      if (whitelist.length > 0 && !whitelist.includes((payload.email || "").toLowerCase())) return null;
-    }
-    return payload;
-  } catch {
-    return null;
-  }
 }
 
 // ─── GAS proxy ────────────────────────────────────────────
