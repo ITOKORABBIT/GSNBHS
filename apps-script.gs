@@ -4128,3 +4128,28 @@ function setupRichMenuPages() {
   setDefaultRichMenu_(ids.main);
   console.log("[richmenu] 設定完成，預設選單：main");
 }
+
+// 手動執行入口：只重建「找里長聊聊」子選單並把 alias 指過去。
+// 用途是換「案件通報」那顆按鈕，不動 main／apply，也不刪任何舊選單，
+// 舊的 findchief 選單會留著當回復點（印在 log 裡）。
+function rebuildFindchiefMenu() {
+  var def = RICH_MENU_SETUP_.findchief;
+  if (!def.imageFileId || def.imageFileId.indexOf("PUT_") === 0) {
+    throw new Error("請先在 RICH_MENU_SETUP_.findchief.imageFileId 填入 Drive 圖片檔案 ID");
+  }
+
+  var listRes = UrlFetchApp.fetch(RICH_MENU_LINE_API_BASE_ + "/list", {
+    method: "get",
+    headers: richMenuAuthHeader_(),
+    muteHttpExceptions: true,
+  });
+  var before = (JSON.parse(listRes.getContentText() || "{}").richmenus || [])
+    .filter(function (m) { return m.name === def.name; })
+    .map(function (m) { return m.richMenuId; });
+  console.log("[richmenu] 舊的 findchief 選單（保留作回復點）：" + (before.join(", ") || "無"));
+
+  var richMenuId = createRichMenu_(def);
+  uploadRichMenuImage_(richMenuId, def.imageFileId);
+  createRichMenuAlias_(def.aliasId, richMenuId);
+  console.log("[richmenu] findchief 已重建：" + richMenuId + "（alias " + def.aliasId + " 已指過去）");
+}
