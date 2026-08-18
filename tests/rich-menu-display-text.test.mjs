@@ -37,3 +37,21 @@ test("main rich menu opens automatically when the chat is entered", () => {
   assert.match(mainDefinition, /selected: true/);
   assert.match(source, /selected: def\.selected === true/);
 });
+
+test("圖文選單的憑證不會連帶喚醒共用腳本裡的伯瑞里回訊息流程", () => {
+  // replyLine_ 仍然只看 LINE_CHANNEL_ACCESS_TOKEN_；沒設就維持沉睡，
+  // 否則舊社里的里民打「通報」會同時收到兩套機器人的回覆。
+  assert.match(source, /function replyLine_\(replyToken, messages\) \{\s*\n\s*var token = LINE_CHANNEL_ACCESS_TOKEN_;/);
+
+  // 圖文選單改走自己的 token，來源是 Channel ID／Secret
+  assert.match(source, /function richMenuAuthHeader_\(\) \{\s*\n\s*return \{ Authorization: "Bearer " \+ richMenuAccessToken_\(\) \};/);
+  assert.match(source, /grant_type: "client_credentials"/);
+  assert.doesNotMatch(source, /SCRIPT_PROPS_\.setProperty\("LINE_CHANNEL_ACCESS_TOKEN"/);
+});
+
+test("找里長選單重建在讀不到現有選單時直接失敗，不會假裝有回復點", () => {
+  const start = source.indexOf("function rebuildFindchiefMenu()");
+  const body = source.slice(start, source.indexOf("\n}", start));
+  assert.ok(start > 0, "missing rebuildFindchiefMenu");
+  assert.match(body, /讀取現有圖文選單失敗/);
+});

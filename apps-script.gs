@@ -4011,8 +4011,57 @@ var RICH_MENU_SETUP_ = {
   },
 };
 
+// 圖文選單專用的 access token。
+//
+// 刻意「不」寫回 LINE_CHANNEL_ACCESS_TOKEN_：那個變數一旦有值，本腳本裡
+// 共用的伯瑞里通報對話流程（replyLine_）就會在本里的官方帳號上醒過來，
+// 里民打「通報」「報案」會同時收到兩套機器人的回覆。圖文選單只是拿 token
+// 打 LINE 的 richmenu API，不需要、也不應該連帶開啟回訊息能力。
+//
+// 需要的指令碼屬性：LINE_CHANNEL_ID、LINE_CHANNEL_SECRET
+//（LINE Official Account Manager → 設定 → Messaging API 就看得到）
+function richMenuAccessToken_() {
+  if (LINE_CHANNEL_ACCESS_TOKEN_) return LINE_CHANNEL_ACCESS_TOKEN_;
+
+  var cached = SCRIPT_CACHE_.get("RICH_MENU_ACCESS_TOKEN");
+  if (cached) return cached;
+
+  var channelId = scriptProp_("LINE_CHANNEL_ID");
+  var channelSecret = scriptProp_("LINE_CHANNEL_SECRET");
+  if (!channelId || !channelSecret) {
+    throw new Error(
+      "圖文選單需要 LINE 憑證：請到 GAS 專案設定 → 指令碼屬性，加上 " +
+        "LINE_CHANNEL_ID 與 LINE_CHANNEL_SECRET" +
+        "（值在 LINE Official Account Manager → 設定 → Messaging API）",
+    );
+  }
+
+  var res = UrlFetchApp.fetch("https://api.line.me/v2/oauth/accessToken", {
+    method: "post",
+    contentType: "application/x-www-form-urlencoded",
+    payload: {
+      grant_type: "client_credentials",
+      client_id: channelId,
+      client_secret: channelSecret,
+    },
+    muteHttpExceptions: true,
+  });
+  var code = res.getResponseCode();
+  if (code < 200 || code >= 300) {
+    throw new Error("取得 LINE access token 失敗：HTTP " + code + " " + res.getContentText());
+  }
+
+  var body = JSON.parse(res.getContentText() || "{}");
+  var token = body.access_token || "";
+  if (!token) throw new Error("LINE 沒有回傳 access token：" + res.getContentText());
+
+  // 效期通常 30 天，這裡只快取 6 小時，避免長期存放
+  SCRIPT_CACHE_.put("RICH_MENU_ACCESS_TOKEN", token, 21600);
+  return token;
+}
+
 function richMenuAuthHeader_() {
-  return { Authorization: "Bearer " + LINE_CHANNEL_ACCESS_TOKEN_ };
+  return { Authorization: "Bearer " + richMenuAccessToken_() };
 }
 
 function createRichMenu_(def) {
@@ -4143,6 +4192,12 @@ function rebuildFindchiefMenu() {
     headers: richMenuAuthHeader_(),
     muteHttpExceptions: true,
   });
+  // 這一步失敗要當場停下來：查不到現有選單就等於沒有回復點，
+  // 不能讓它靜靜印出「無」然後照樣建新選單。
+  var listCode = listRes.getResponseCode();
+  if (listCode < 200 || listCode >= 300) {
+    throw new Error("讀取現有圖文選單失敗：HTTP " + listCode + " " + listRes.getContentText());
+  }
   var before = (JSON.parse(listRes.getContentText() || "{}").richmenus || [])
     .filter(function (m) { return m.name === def.name; })
     .map(function (m) { return m.richMenuId; });
