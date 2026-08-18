@@ -778,41 +778,16 @@ body.loading-submit { overflow: hidden; }
 var FORM_STARTED_AT = Date.now();
 
 // ── 通報人的 LINE 身分 ──
-// 從 LINE 圖文選單（LIFF）進來時自動取得，讓里長知道是誰通報的；填表者看不到這兩個值。
-// 用瀏覽器直接開這一頁時取不到，維持空字串，表單照常可以送出。
+// 從 LINE 圖文選單點「案件通報」時，機器人會把身分帶在連結上傳進來，
+// 讓里長知道是誰通報的；填表者看不到這兩個值。
+// 用瀏覽器或書籤直接開這一頁時沒有這些參數，維持空字串，表單照常可以送出。
 var LINE_USER_ID = '', LINE_DISPLAY_NAME = '';
-var LINE_IDENTITY_READY = (function () {
-  // 機器人若改用「帶參數的連結」把身分傳進來，這裡一樣接得住
+(function () {
   try {
     var q = new URLSearchParams(location.search);
     LINE_USER_ID = q.get('lineUserId') || '';
     LINE_DISPLAY_NAME = q.get('displayName') || '';
   } catch (e) {}
-
-  var liffId = (window.CONFIG && CONFIG.LIFF_ID_REPORT) || '';
-  if (!liffId) return Promise.resolve();
-
-  // 沒設定 LIFF ID 就完全不載入 LINE 的 SDK，不讓通報表單多背一支外部程式
-  return new Promise(function (resolve, reject) {
-    var s = document.createElement('script');
-    s.src = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
-    s.onload = resolve;
-    s.onerror = function () { reject(new Error('LIFF SDK 載入失敗')); };
-    document.head.appendChild(s);
-  })
-    .then(function () { return liff.init({ liffId: liffId }); })
-    .then(function () {
-      // 只在 LINE 內建瀏覽器裡自動取用；外部瀏覽器不強迫登入，避免把里民導走
-      if (!liff.isInClient() || !liff.isLoggedIn()) return;
-      return liff.getProfile().then(function (p) {
-        LINE_USER_ID = (p && p.userId) || LINE_USER_ID;
-        LINE_DISPLAY_NAME = (p && p.displayName) || LINE_DISPLAY_NAME;
-      });
-    })
-    .catch(function (err) {
-      // 取不到身分不影響通報，靜靜略過就好
-      console.warn('[liff] 取得 LINE 身分失敗：', err && err.message);
-    });
 })();
 
 var _toastTimer;
@@ -1140,9 +1115,6 @@ document.getElementById('reportForm').addEventListener('submit', async function(
   openSubmitProgress('正在整理案件資料…', 10, '若有照片，系統會先逐張上傳再送出');
 
   try {
-    // 0. 確保 LINE 身分已取得（填得快的人可能比 LIFF 初始化還早按送出）
-    await LINE_IDENTITY_READY;
-
     // 1. 逐張上傳照片，取回 Drive URL
     var photoUrls = await uploadAllReportPhotos(btn);
 

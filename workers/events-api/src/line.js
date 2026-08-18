@@ -16,6 +16,7 @@ const BULLETIN_URL = "https://gsnbhs.pages.dev/bulletin.html";
 const STORE_DETAIL_URL = "https://gsnbhs.pages.dev/storeopendetail.html?id=";
 const STORE_LIST_URL = "https://gsnbhs.pages.dev/storeopenlist.html";
 const STORE_APPLY_URL = "https://gsnbhs.pages.dev/store";
+const REPORT_URL = "https://gsnbhs.pages.dev/report";
 const STORE_IMG_FALLBACK = "https://lh3.googleusercontent.com/d/1GAb13SxqDBjTnnwZZjNubyJEWxqibs-Z";
 const EVENT_IMG_FALLBACK = "https://lh3.googleusercontent.com/d/1GAb13SxqDBjTnnwZZjNubyJEWxqibs-Z";
 const KV_SESSION_TTL = 6 * 60 * 60; // seconds
@@ -1274,6 +1275,12 @@ async function handleLineMenuEvent(env, userId, replyToken, event) {
     await startChatFlow(env, userId, replyToken);
     return true;
   }
+  if (pb.menu === "case_report") {
+    await lineReply(env, replyToken, [
+      buildReportInviteBubble(await buildReportUrl(env, userId)),
+    ]);
+    return true;
+  }
   if (pb.menu === "community") {
     await startCommunityFlow(env, userId, replyToken);
     return true;
@@ -1607,6 +1614,69 @@ async function startCommunityFlow(env, userId, replyToken) {
 
 function communityInviteUrl(env) {
   return text(env.COMMUNITY_INVITE_URL);
+}
+
+// 案件通報表單網址。作法與商家申請相同：帶上 userId／displayName，
+// 讓里長看得出是哪個 LINE 帳號通報的，可以直接私訊回覆（填表者看不到這兩個值）。
+export async function buildReportUrl(env, userId) {
+  if (!userId) return REPORT_URL;
+  const profile = await getLineProfile(env, userId);
+  const displayName = profile?.displayName || "";
+  return REPORT_URL +
+    "?lineUserId=" + encodeURIComponent(userId) +
+    (displayName ? "&displayName=" + encodeURIComponent(displayName) : "");
+}
+
+// 點「案件通報」後回的卡片。多這一步是為了拿到通報人的 LINE 身分，
+// 直接用 uri 按鈕開表單的話 LINE 不會告訴我們是誰按的。
+export function buildReportInviteBubble(reportUrl) {
+  return {
+    type: "flex",
+    altText: "案件通報",
+    contents: {
+      type: "bubble",
+      header: {
+        type: "box",
+        layout: "vertical",
+        backgroundColor: "#3A6B52",
+        paddingAll: "14px",
+        contents: [
+          { type: "text", text: "案件通報", color: "#FFFFFF", weight: "bold", size: "lg" },
+        ],
+      },
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "sm",
+        contents: [
+          {
+            type: "text",
+            text: "路面坑洞、路燈不亮、環境髒亂⋯⋯都可以在這裡告訴里長。",
+            size: "sm",
+            color: "#555555",
+            wrap: true,
+          },
+          {
+            type: "text",
+            text: "填好送出後會直接通知里辦公處，處理進度可以隨時回來問。",
+            size: "sm",
+            color: "#555555",
+            wrap: true,
+          },
+        ],
+      },
+      footer: {
+        type: "box",
+        layout: "vertical",
+        contents: [{
+          type: "button",
+          style: "primary",
+          color: "#3A6B52",
+          action: { type: "uri", label: "開始填寫通報", uri: reportUrl },
+        }],
+      },
+    },
+  };
 }
 
 // 商家申請表單網址。從 LINE 進來時帶上 userId／displayName，

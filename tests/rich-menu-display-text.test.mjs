@@ -11,6 +11,7 @@ test("every rich-menu postback shows immediate display text", () => {
     ["action=menu&menu=store", "商圈優惠"],
     ["action=menu&menu=emergency", "緊急聯絡"],
     ["action=menu&menu=chat_start", "只想聊聊"],
+    ["action=menu&menu=case_report", "案件通報"],
     ["action=menu&menu=apply_event", "活動報名"],
     ["action=menu&menu=apply_course", "課程報名"],
   ]);

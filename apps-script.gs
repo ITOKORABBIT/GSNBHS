@@ -3990,7 +3990,9 @@ var RICH_MENU_SETUP_ = {
     size: { width: 2500, height: 1686 },
     imageFileId: "1GCVJ2rP7xj8awt_VwQBZMBA0cO2ZupIZ",
     areas: [
-      { bounds: { x: 0, y: 0, width: 1250, height: 1500 }, action: { type: "uri", label: "案件通報", uri: "https://gsnbhs.pages.dev/report" } },
+      // 用 postback 而不是 uri：LINE 只有在 postback 才會告訴我們是誰按的，
+      // 機器人才拿得到通報人的 LINE 名稱。收到後會回一張帶通報連結的卡片。
+      { bounds: { x: 0, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "案件通報", data: "action=menu&menu=case_report", displayText: "案件通報" } },
       { bounds: { x: 1250, y: 0, width: 1250, height: 1500 }, action: { type: "postback", label: "只想聊聊", data: "action=menu&menu=chat_start", displayText: "只想聊聊" } },
       { bounds: { x: 0, y: 1500, width: 2500, height: 186 }, action: { type: "richmenuswitch", label: "返回主選單", richMenuAliasId: "richmenu-alias-main", data: "action=menu&menu=backmain" } },
     ],
