@@ -13,4 +13,8 @@ const CONFIG = {
   BASE_URL: 'https://gsnbhs.pages.dev',
   GOOGLE_CLIENT_ID: '998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com',
   LINE_BOT_ID: '@900rucza',
+
+  // 案件通報表單的 LIFF ID（LINE Developers → 與 @900rucza 同一個 Provider 底下的
+  // LINE Login 頻道 → LIFF）。留空時通報表單照常運作，只是不會記錄通報人的 LINE 名稱。
+  LIFF_ID_REPORT: '',
 };

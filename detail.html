@@ -878,6 +878,8 @@ function renderContactCard() {
   html += row('姓名', v(d.name));
   html += row('電話', d.phone ? '<a href="tel:' + esc(d.phone) + '">' + esc(d.phone) + '</a>' : '<span class="empty">—</span>');
   if (d.lineId) html += row('LINE ID', esc(d.lineId));
+  // 從 LINE 進來通報才會有；瀏覽器直接開表單的案件沒有這一列
+  if (d.lineDisplayName) html += row('LINE 名稱', esc(d.lineDisplayName));
   html += '</div>';
   html += '</div>';
   el.innerHTML = html;

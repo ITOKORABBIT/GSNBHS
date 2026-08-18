@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS cases (
   name         TEXT,
   phone        TEXT,
   line_id      TEXT,
+  line_user_id      TEXT NOT NULL DEFAULT '',
+  line_display_name TEXT NOT NULL DEFAULT '',
   title        TEXT,
   description  TEXT,
   addr         TEXT,

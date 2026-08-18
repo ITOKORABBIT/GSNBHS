@@ -500,6 +500,8 @@ function buildCaseFromSubmit(data, caseId, now) {
     name: text(data.name),
     phone: text(data.phone),
     lineId: text(data.lineId),
+    lineUserId: text(data.lineUserId),
+    lineDisplayName: text(data.lineDisplayName),
     title: text(data.title),
     description: text(data.description || data.desc),
     addr: text(data.addr),
@@ -557,7 +559,22 @@ async function syncCaseFromGas(env, caseId) {
   const gasResult = await forwardToGasResult(env, { action: "getCase", caseId });
   const c = gasResult.caseData || gasResult.case;
   if (!gasResult.success || !c) return;
-  await upsertCaseStatement(env, c).run();
+  await upsertCaseStatement(env, await withLineIdentity(env, caseId, c)).run();
+}
+
+// 通報人的 LINE 身分只存在 D1，Google Sheet 沒有這兩欄。
+// 從 GAS 回填時要把既有的值補回去，否則會被空字串蓋掉。
+async function withLineIdentity(env, caseId, c) {
+  if (text(c.lineUserId) || text(c.lineDisplayName)) return c;
+  const row = await env.DB.prepare(
+    "SELECT line_user_id, line_display_name FROM cases WHERE case_id = ?",
+  ).bind(caseId).first();
+  if (!row) return c;
+  return {
+    ...c,
+    lineUserId: text(row.line_user_id),
+    lineDisplayName: text(row.line_display_name),
+  };
 }
 
 function upsertCaseStatement(env, c) {
@@ -565,6 +582,7 @@ function upsertCaseStatement(env, c) {
   return env.DB.prepare(
     `INSERT INTO cases (
        case_id, report_time, status, category, name, phone, line_id,
+       line_user_id, line_display_name,
        title, description, addr, map_url, case1999,
        photo1, photo2, photo3, photo4, photo5,
        reply_time, last_update, reply_content,
@@ -574,6 +592,7 @@ function upsertCaseStatement(env, c) {
        public_summary, reply_url, pin_order, sort_order, payload_json
      ) VALUES (
        ?, ?, ?, ?, ?, ?, ?,
+       ?, ?,
        ?, ?, ?, ?, ?,
        ?, ?, ?, ?, ?,
        ?, ?, ?,
@@ -586,6 +605,8 @@ function upsertCaseStatement(env, c) {
        report_time=excluded.report_time, status=excluded.status,
        category=excluded.category, name=excluded.name,
        phone=excluded.phone, line_id=excluded.line_id,
+       line_user_id=excluded.line_user_id,
+       line_display_name=excluded.line_display_name,
        title=excluded.title, description=excluded.description,
        addr=excluded.addr, map_url=excluded.map_url, case1999=excluded.case1999,
        photo1=excluded.photo1, photo2=excluded.photo2,
@@ -611,6 +632,8 @@ function upsertCaseStatement(env, c) {
     text(c.name),
     text(c.phone),
     text(c.lineId),
+    text(c.lineUserId),
+    text(c.lineDisplayName),
     text(c.title),
     text(c.description || c.desc),
     text(c.addr),
@@ -726,6 +749,9 @@ function buildCaseNotification(c) {
     flexRow("通報人", text(c.name) + (text(c.phone) ? `（${text(c.phone)}）` : "")),
     flexRow("通報時間", c.reportTime),
   ];
+  if (text(c.lineDisplayName)) {
+    rows.splice(rows.length - 1, 0, flexRow("LINE 名稱", c.lineDisplayName));
+  }
   if (detail) rows.splice(3, 0, flexRow("內容", detail.length > 120 ? detail.slice(0, 120) + "…" : detail));
 
   const bubble = {
