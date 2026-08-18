@@ -26,5 +26,15 @@
       "database_id": "3fb4a75a-7f61-480a-9ad2-dc4421519ad5",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "unsafe": {
+    "bindings": [
+      {
+        "name": "PUBLIC_RATE_LIMITER",
+        "type": "ratelimit",
+        "namespace_id": "3003",
+        "simple": { "limit": 40, "period": 60 }
+      }
+    ]
+  }
 }

@@ -151,10 +151,30 @@ export default {
 
       if (PUBLIC_ACTIONS.has(action)) {
         if (action === "getSurveyPublic") return corsJson(env, await getSurveyPublic(env, data));
-        if (action === "submitSurveyResponse") return corsJson(env, await submitSurveyResponse(env, ctx, data));
-        if (action === "submitRegistration") return corsJson(env, await submitRegistration(env, ctx, data));
-        if (action === "uploadPublicPhoto") return corsJson(env, await uploadPublicPhoto(env, data, request));
-        if (action === "submitConsult") return corsJson(env, await submitConsult(env, ctx, data, request));
+        if (action === "submitSurveyResponse") {
+          if (!(await checkRateLimit(env, request))) {
+            return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
+          }
+          return corsJson(env, await submitSurveyResponse(env, ctx, data));
+        }
+        if (action === "submitRegistration") {
+          if (!(await checkRateLimit(env, request))) {
+            return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
+          }
+          return corsJson(env, await submitRegistration(env, ctx, data));
+        }
+        if (action === "uploadPublicPhoto") {
+          if (!(await checkRateLimit(env, request))) {
+            return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
+          }
+          return corsJson(env, await uploadPublicPhoto(env, data, request));
+        }
+        if (action === "submitConsult") {
+          if (!(await checkRateLimit(env, request))) {
+            return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
+          }
+          return corsJson(env, await submitConsult(env, ctx, data, request));
+        }
       }
 
       // For read-only bundle requests, run auth + D1 reads in parallel so
@@ -302,4 +322,11 @@ async function importBundle(env, bundle) {
       surveys: surveys.length,
     },
   };
+}
+
+async function checkRateLimit(env, request) {
+  if (!env.PUBLIC_RATE_LIMITER) return true;
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const { success } = await env.PUBLIC_RATE_LIMITER.limit({ key: ip });
+  return success;
 }

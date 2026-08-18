@@ -76,10 +76,20 @@ export default {
 
       if (PUBLIC_ACTIONS.has(action)) {
         if (action === "getPublicStats")    return corsJson(env, await getPublicStats(env));
-        if (action === "submitReport")      return corsJson(env, await submitReport(env, ctx, data));
+        if (action === "submitReport") {
+          if (!(await checkRateLimit(env, request))) {
+            return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
+          }
+          return corsJson(env, await submitReport(env, ctx, data));
+        }
         if (action === "getViewStats")      return corsJson(env, await getViewStats(env));
         if (action === "recordCardView")    return corsJson(env, await recordCardView(env, data));
-        if (action === "uploadPublicPhoto") return corsJson(env, await uploadCasePhoto(env, data));
+        if (action === "uploadPublicPhoto") {
+          if (!(await checkRateLimit(env, request))) {
+            return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
+          }
+          return corsJson(env, await uploadCasePhoto(env, data));
+        }
       }
 
       if (action === "bulkAddCardViews" || action === "resetViewStats") {
@@ -980,7 +990,40 @@ async function uploadCasePhoto(env, data) {
   if (b64.length * 0.75 > 2 * 1024 * 1024) return { success: false, error: "圖片過大，請壓縮至 2MB 以下" };
   if (!env.GOOGLE_OAUTH_CLIENT_ID || !env.GOOGLE_DRIVE_FOLDER_ID) return { success: false, error: "Drive 未設定" };
   const mimeType = text(data.mimeType) || "image/jpeg";
+  const imageError = validateImagePayload(b64, mimeType);
+  if (imageError) return { success: false, error: imageError };
   const ext = mimeType.split("/")[1] || "jpg";
   const url = await uploadToDrive(env, b64, mimeType, `case_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`);
   return { success: true, url };
+}
+
+// ─── Public upload guard ──────────────────────────────────
+// The public photo endpoint needs no auth, so verify the payload really is an
+// image (declared mime + magic bytes) before it reaches Drive. Without this,
+// any file type can be parked on the village Drive account as world-readable.
+const IMAGE_MIME_WHITELIST = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+
+function validateImagePayload(b64, mimeType) {
+  if (!IMAGE_MIME_WHITELIST.has(mimeType)) return "不支援的圖片格式";
+  let head;
+  try {
+    head = Uint8Array.from(atob(b64.slice(0, 32)), (c) => c.charCodeAt(0));
+  } catch {
+    return "圖片資料格式錯誤";
+  }
+  const is = (...sig) => sig.every((b, i) => head[i] === b);
+  const ok =
+    is(0xff, 0xd8, 0xff) ||                                       // JPEG
+    is(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a) ||         // PNG
+    is(0x47, 0x49, 0x46, 0x38) ||                                 // GIF
+    (is(0x52, 0x49, 0x46, 0x46) &&                                // WEBP (RIFF....WEBP)
+      head[8] === 0x57 && head[9] === 0x45 && head[10] === 0x42 && head[11] === 0x50);
+  return ok ? "" : "檔案不是有效的圖片";
+}
+
+async function checkRateLimit(env, request) {
+  if (!env.PUBLIC_RATE_LIMITER) return true;
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const { success } = await env.PUBLIC_RATE_LIMITER.limit({ key: ip });
+  return success;
 }
