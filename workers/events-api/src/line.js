@@ -42,16 +42,16 @@ const COM_QUESTIONS = [
 ];
 const COM_INTRO_TEXT =
   "為了讓家長能更方便取得［教育相關資訊］，並在求學過程中［遇到事情即時通報反應］，" +
-  "里長建立了「里想生活｜國中小家長共學版」。\n\n" +
+  "我特地建立了「里想生活｜國中小家長共學版」。\n\n" +
   "除了家長之間資訊交流與經驗分享，也讓孩子在不同學習階段都能有更好的支持與資源。\n\n" +
   "📌 社群交流原則\n" +
   "✔ 分享資訊盡量附來源\n" +
   "✔ 尊重不同家長的經驗\n" +
   "✔ 不傳播未經證實消息\n" +
   "✔ 不進行攻擊或謾罵\n\n" +
-  "為維護學生權益與安全，本版為半實名制，加入需先與里長登記，" +
+  "為維護學生權益與安全，本版為半實名制，加入前需要先跟我登記，" +
   "目前僅開放幼稚園以上學童家長參加。\n\n" +
-  "接下來會請您回答 3 個問題，送出後由里長審核，通過就會把社群連結傳給您 😊";
+  "接下來想請您回答 3 個問題，送出後我會親自確認，通過就把社群連結傳給您 😊";
 // 公告的「原始連結」欄位填這些關鍵字時，卡片按鈕改成觸發 LINE 內的流程。
 const BULLETIN_ACTIONS = {
   "action:community": { label: "加入共學群", data: "action=menu&menu=community" },
@@ -70,14 +70,16 @@ const CHAT_EXIT_RE = /^(結束聊天|不聊了|掰掰|再見|返回主選單|我
 const CHAT_MODEL = "claude-haiku-4-5";
 const CHAT_MAX_HISTORY = 16; // 最多保留最近 16 則訊息（user+assistant）
 const CHAT_SYSTEM_PROMPT =
-  "你是「舊社里小幫手」LINE官方帳號裡的留言蒐集小助手，使用台灣繁體中文，個性親切、簡潔、口語化。" +
-  "你的任務只有一件事：幫里長蒐集里民想說的話，完全不負責回答任何問題、不提供任何建議或資訊、不發表意見。" +
+  "你就是舊社里里長本人，正在用里辦公處的 LINE 官方帳號跟里民對話，使用台灣繁體中文，語氣親切、簡潔、口語化。" +
+  "你只做一件事：把里民想說的話聽清楚、確認收到，完全不回答任何問題、不提供建議或資訊、不發表意見。" +
   "規則：" +
-  "1. 不論里民問什麼問題（包括時間、地點、政策、活動、辦公處資訊等），都不要回答，只能親切地回應「已經幫您記錄下來了，會轉達給里長」，並視需要追問細節（例如地點、聯絡方式）讓留言更完整。" +
+  "1. 不論里民問什麼問題（包括時間、地點、政策、活動、辦公處資訊等），都不要回答，只能親切地回應「您的訊息我收到了，會盡快回覆您」，並視需要追問細節（例如地點、聯絡方式）讓內容更完整。" +
   "2. 絕對不要提供任何答案、知識、建議、評論或猜測，即使你知道答案也不能說。" +
-  "3. 每次回覆都要簡短（1-2句話），只做「確認收到」與「追問細節」這兩件事。" +
-  "4. 如果里民詢問緊急狀況（火警、意外、急病等），請提醒他直接撥打119/110，這是唯一的例外。" +
-  "5. 不要說「我不知道」或長篇解釋你的限制，只要持續扮演「正在記錄留言的小幫手」即可。";
+  "3. 絕對不要承諾任何具體處理時程、結果或金額，只說會盡快看、盡快回覆。" +
+  "4. 每次回覆都要簡短（1-2句話），只做「確認收到」與「追問細節」這兩件事。" +
+  "5. 如果里民詢問緊急狀況（火警、意外、急病等），請提醒他直接撥打119/110，這是唯一的例外。" +
+  "6. 絕對不要自稱助理、小幫手、AI、機器人或系統，也不要說「我會轉達給里長」這類把自己當第三方的話；你就是里長本人。" +
+  "7. 不要說「我不知道」或長篇解釋你的限制，只要以里長本人的口吻確認收到即可。";
 
 const LINE_CATEGORY_MAP = {
   美食地圖: ["美食地圖","美食","餐廳","吃的","飲食","早餐","午餐","晚餐","宵夜","點心"],
@@ -588,7 +590,7 @@ async function handleEvtCheckinLocation(env, userId, replyToken, state, message)
   const distanceMeters = Math.round(distanceMetersBetween(lat, lng, center.lat, center.lng));
   if (distanceMeters > CHECKIN_RADIUS_METERS) {
     await clearEvtSession(env, userId);
-    return lineReply(env, replyToken, [{ type: "text", text: "需在活動場地範圍內才能簽到，如有問題請找里長手動簽到。" }]);
+    return lineReply(env, replyToken, [{ type: "text", text: "需在活動場地範圍內才能簽到，如有問題請到現場找我，我幫您手動簽到。" }]);
   }
   await completeLineCheckin(env, eventId, userId, uncheckedRows, { lat, lng, distanceMeters });
   await clearEvtSession(env, userId);
@@ -1164,7 +1166,7 @@ async function startChatFlow(env, userId, replyToken) {
     displayName: profile?.displayName || "",
   });
   await lineReply(env, replyToken, [
-    { type: "text", text: "您好，這裡是舊社里小幫手留言區 📝 有任何想跟里長說的話都可以直接打字，我會幫您記錄下來轉達給里長。（輸入「返回主選單」可以隨時離開）" },
+    { type: "text", text: "您好 📝 有任何想跟我說的話都可以直接在這裡打字，我看到就會回覆您。（輸入「返回主選單」可以隨時離開）" },
   ]);
 }
 
@@ -1192,7 +1194,7 @@ async function handleLineChatEvent(env, userId, replyToken, event) {
   await insertChatMessage(env, { lineUserId: userId, displayName: state.displayName, role: "user", content: msg });
 
   if (!env.ANTHROPIC_API_KEY) {
-    await lineReply(env, replyToken, [{ type: "text", text: "已經幫您記錄下來了，會轉達給里長。" }]);
+    await lineReply(env, replyToken, [{ type: "text", text: "您的訊息我收到了，會盡快回覆您。" }]);
     return true;
   }
 
@@ -1204,7 +1206,7 @@ async function handleLineChatEvent(env, userId, replyToken, event) {
     replyText = await callClaudeChat(env, history);
   } catch (err) {
     console.error(JSON.stringify({ fn: "callClaudeChat", error: err.message }));
-    replyText = "已經幫您記錄下來了，會轉達給里長。";
+    replyText = "您的訊息我收到了，會盡快回覆您。";
   }
 
   history.push({ role: "assistant", content: replyText });
@@ -1238,7 +1240,7 @@ async function callClaudeChat(env, messages) {
   }
   const data = await res.json();
   if (data.stop_reason === "refusal" || !data.content?.length) {
-    return "這個問題我不方便回答，建議直接使用「我要通報」或聯絡里辦公處。";
+    return "這個問題我在這邊不方便直接回覆，建議您用「我要通報」告訴我，或到里辦公處找我 🙏";
   }
   const textBlock = data.content.find((b) => b.type === "text");
   return textBlock?.text || "嗯嗯，我在聽，可以再說清楚一點嗎？";
@@ -1341,7 +1343,7 @@ async function handleLineKeywordEvent(env, replyToken, event) {
   if (/^(治安通報|線上陳情|我要陳情)$/.test(msg)) {
     await lineReply(env, replyToken, [{
       type: "text",
-      text: "請點此填寫通報表單，里長會盡快處理：\nhttps://gsnbhs.pages.dev/report",
+      text: "請點此填寫通報表單，我會盡快處理：\nhttps://gsnbhs.pages.dev/report",
     }]);
     return true;
   }
@@ -1589,18 +1591,18 @@ async function startCommunityFlow(env, userId, replyToken) {
   if (pending?.status === "approved") {
     await lineReply(env, replyToken, [{
       type: "text",
-      text: "您先前的申請已通過審核 😊\n\n社群連結：\n" + communityInviteUrl(env) + "\n\n" + COM_JOINED_NOTE,
+      text: "您先前的申請我已經確認通過了 😊\n\n社群連結：\n" + communityInviteUrl(env) + "\n\n" + COM_JOINED_NOTE,
     }]);
     return;
   }
   if (pending?.status === "pending") {
-    await lineReply(env, replyToken, [{ type: "text", text: "您已經送出申請囉，里長審核後會主動把社群連結傳給您，請耐心等候 🙏" }]);
+    await lineReply(env, replyToken, [{ type: "text", text: "您的申請我收到囉，確認之後會主動把社群連結傳給您，請耐心等候 🙏" }]);
     return;
   }
   if (["approved_pending_delivery", "rejected_pending_delivery", "approved_delivering", "rejected_delivering"].includes(pending?.status)) {
     await lineReply(env, replyToken, [{
       type: "text",
-      text: "里長已完成審核，系統正在重新傳送結果，請稍候。",
+      text: "我已經確認過您的申請了，結果正在傳送中，請稍候。",
     }]);
     return;
   }
@@ -1651,14 +1653,14 @@ export function buildReportInviteBubble(reportUrl) {
         contents: [
           {
             type: "text",
-            text: "路面坑洞、路燈不亮、環境髒亂⋯⋯都可以在這裡告訴里長。",
+            text: "路面坑洞、路燈不亮、環境髒亂⋯⋯都可以在這裡告訴我。",
             size: "sm",
             color: "#555555",
             wrap: true,
           },
           {
             type: "text",
-            text: "填好送出後會直接通知里辦公處，處理進度可以隨時回來問。",
+            text: "填好送出後我會馬上收到，處理進度隨時可以回來問我。",
             size: "sm",
             color: "#555555",
             wrap: true,
@@ -1762,7 +1764,7 @@ async function submitCommunityApplication(env, userId, replyToken, answers) {
       `・目前就讀：${text(answers.current_school)}\n` +
       `・預計就讀：${text(answers.target_school)}\n` +
       `・居住地名：${text(answers.residence)}\n\n` +
-      "里長審核通過後，會直接把社群連結傳給您，請稍候 🙏",
+      "我確認過之後，會直接把社群連結傳給您，請稍候 🙏",
   }]);
 }
 
@@ -1883,8 +1885,8 @@ export async function handleHubCallback(request, env) {
   const sent = await linePush(env, app.line_user_id, [{
     type: "text",
     text: approved
-      ? "🎉 您的共學社群申請已通過審核！\n\n請點以下連結加入「里想生活｜國中小家長共學版」：\n" + inviteUrl + "\n\n" + COM_JOINED_NOTE
-      : "感謝您申請加入共學社群。\n\n經里長確認，您的申請目前未能通過（本社群僅開放幼稚園以上學童家長參加）。\n如有疑問歡迎直接留言詢問里長 🙏",
+      ? "🎉 您的共學社群申請我已經確認通過了！\n\n請點以下連結加入「里想生活｜國中小家長共學版」：\n" + inviteUrl + "\n\n" + COM_JOINED_NOTE
+      : "感謝您申請加入共學社群。\n\n我看過了，您的申請目前未能通過（本社群僅開放幼稚園以上學童家長參加）。\n如有疑問歡迎直接留言問我 🙏",
   }]);
 
   if (!sent) {
@@ -1976,7 +1978,7 @@ async function handleLineReportEvent(env, userId, replyToken, event) {
     if (state.stage === "input_location") {
       await lineReply(env, replyToken, [{
         type: "text",
-        text: "📸 照片稍後還可以附上！\n\n現在請先分享問題的位置給里長參考，讓里長能快速找到現場。",
+        text: "📸 照片稍後還可以附上！\n\n現在請先分享問題的位置給我，我才能快速找到現場。",
         quickReply: {
           items: [
             { type: "action", action: { type: "location", label: "傳送位置" } },
@@ -2023,7 +2025,7 @@ async function handleLineReportEvent(env, userId, replyToken, event) {
       await saveRptSession(env, userId, { stage: "input_location", type });
       await lineReply(env, replyToken, [{
         type: "text",
-        text: `✅ 類別：${type}\n\n請傳送問題發生的位置，讓里長能快速前往現場。`,
+        text: `✅ 類別：${type}\n\n請傳送問題發生的位置，讓我能快速前往現場。`,
         quickReply: {
           items: [
             { type: "action", action: { type: "location", label: "傳送位置" } },
