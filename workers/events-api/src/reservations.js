@@ -7,8 +7,11 @@ export const RESERVATION_EXPIRED_MESSAGE = "您的報名保留時間已超過 10
 export async function getActiveReservationCount(env, eventId, nowIso = new Date().toISOString()) {
   if (!env.DB || !eventId) return 0;
   const row = await env.DB.prepare(
-    `SELECT COUNT(*) AS count FROM event_reservations
-      WHERE event_id = ? AND status = 'active' AND expires_at > ?`,
+    `SELECT COUNT(*) AS count
+       FROM event_reservations
+      WHERE event_id = ?
+        AND status = 'active'
+        AND expires_at > ?`,
   ).bind(eventId, nowIso).first();
   return Number(row?.count || 0);
 }
@@ -22,6 +25,7 @@ export async function reserveRegistrationSlot(env, { eventId, userId }) {
       WHERE event_id = ? AND user_id = ? AND status = 'active' AND expires_at > ?`,
   ).bind(eventId, userId, nowIso).first();
   if (existing) return { success: true, reservationId: text(existing.reservation_id), expiresAt: text(existing.expires_at) };
+
   const eventRow = await env.DB.prepare("SELECT payload_json FROM events WHERE event_id = ?").bind(eventId).first();
   if (!eventRow) return { success: false, error: "找不到活動" };
   const quota = parseInt(text(parseJson(eventRow.payload_json).quota), 10) || 0;
