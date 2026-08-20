@@ -352,3 +352,4 @@ export function normalizeResidentNote(note) {
     updatedAt: text(note.updatedAt) || new Date().toISOString(),
   };
 }
+

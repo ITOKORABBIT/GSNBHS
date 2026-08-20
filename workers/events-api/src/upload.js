@@ -136,3 +136,4 @@ function validateImagePayload(b64, mimeType) {
       head[8] === 0x57 && head[9] === 0x45 && head[10] === 0x42 && head[11] === 0x50);
   return ok ? "" : "檔案不是有效的圖片";
 }
+

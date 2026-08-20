@@ -238,7 +238,7 @@ async function resolveMapUrlLatLng(mapUrl) {
       const resp = await fetch(nextUrl, {
         method: "GET",
         redirect: "manual",
-        headers: { "User-Agent": "Mozilla/5.0 hpnbhs-events-api" },
+        headers: { "User-Agent": "Mozilla/5.0 village-platform-events-api" },
       });
       const fromUrl = parseLatLngFromText(resp.url || nextUrl);
       if (fromUrl) return fromUrl;
@@ -283,3 +283,4 @@ function parseLatLngFromText(value) {
   }
   return null;
 }
+
