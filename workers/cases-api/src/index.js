@@ -98,22 +98,23 @@ export default {
         return corsJson(env, await resetViewStats(env, data));
       }
 
-      // All remaining actions require admin auth
-      const [, result] = await Promise.all([
-        requireAdmin(env, data),
-        (async () => {
-          if (action === "getCases")           return getCases(env);
-          if (action === "getCase")            return getCase(env, data);
-          if (action === "submitAdminReport")  return submitAdminReport(env, ctx, data);
-          if (action === "updateReply")        return updateReply(env, ctx, data);
-          if (action === "pinCase")            return pinCase(env, ctx, data);
-          if (action === "reorderCases")       return reorderCases(env, ctx, data);
-          if (action === "deleteCase")         return deleteCase(env, ctx, data);
-          if (action === "batchUpdateCases")   return batchUpdateCases(env, ctx, data);
-          if (action === "uploadCasePhoto")    return uploadCasePhoto(env, data);
-          throw httpError(400, "Unsupported action");
-        })(),
-      ]);
+      // All remaining actions require admin auth.
+      // 權限先過再動作：原本用 Promise.all 讓兩者並行，requireAdmin 拒絕時
+      // 動作已經在跑，寫入照樣落地（回應是 401 但案件已被改）。加上回覆通知後
+      // 這等於未登入也能觸發 LINE 推播給里民，所以改成循序執行。
+      await requireAdmin(env, data);
+      const result = await (async () => {
+        if (action === "getCases")           return getCases(env);
+        if (action === "getCase")            return getCase(env, data);
+        if (action === "submitAdminReport")  return submitAdminReport(env, ctx, data);
+        if (action === "updateReply")        return updateReply(env, ctx, data);
+        if (action === "pinCase")            return pinCase(env, ctx, data);
+        if (action === "reorderCases")       return reorderCases(env, ctx, data);
+        if (action === "deleteCase")         return deleteCase(env, ctx, data);
+        if (action === "batchUpdateCases")   return batchUpdateCases(env, ctx, data);
+        if (action === "uploadCasePhoto")    return uploadCasePhoto(env, data);
+        throw httpError(400, "Unsupported action");
+      })();
       return corsJson(env, result);
     } catch (error) {
       const status = Number(error.status || 500);
@@ -391,6 +392,9 @@ async function updateReply(env, ctx, data) {
     const updated = applyReplyFields(existing, data, now);
     await upsertCaseStatement(env, updated).run();
     ctx.waitUntil(forwardToGas(env, data).catch(logSyncError("updateReply", caseId)));
+    ctx.waitUntil(
+      notifyReporterOfReply(env, updated, data).catch(logSyncError("updateReply/notifyReporter", caseId)),
+    );
     return { success: true, case: updated };
   }
 
@@ -570,6 +574,67 @@ async function syncCaseFromGas(env, caseId) {
   const c = gasResult.caseData || gasResult.case;
   if (!gasResult.success || !c) return;
   await upsertCaseStatement(env, await withLineIdentity(env, caseId, c)).run();
+}
+
+// ─── 回覆通知通報人 ────────────────────────────────────────
+//
+// 里長在後台回覆案件後，直接用 LINE 通知通報人本人。
+// 只有從 LINE 圖文選單通報的案件有 lineUserId；瀏覽器通報的沒有，靜靜跳過。
+// 訊息一律用里長第一人稱（見 events-api/src/line.js 的同一慣例）。
+async function notifyReporterOfReply(env, c, data) {
+  if (!parseBoolean(data.notifyReporter)) return;
+
+  const to = text(c.lineUserId);
+  const replyContent = text(c.replyContent);
+  const result = { at: nowTW(), status: "", error: "" };
+
+  if (!to) {
+    result.status = "skipped";
+    result.error = "此案件沒有通報人的 LINE 身分";
+  } else if (!replyContent) {
+    result.status = "skipped";
+    result.error = "回覆內容是空的，沒有東西可以通知";
+  } else if (!env.EVENTS_API || !text(env.INTERNAL_PUSH_TOKEN)) {
+    result.status = "failed";
+    result.error = "推播管道未設定";
+  } else {
+    try {
+      const resp = await env.EVENTS_API.fetch("https://events-api/internal/line-push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Token": env.INTERNAL_PUSH_TOKEN,
+        },
+        body: JSON.stringify({ to, messages: [buildReplyNoticeMessage(c)] }),
+      });
+      const body = parseJson(await resp.text());
+      if (resp.ok && body.success) {
+        result.status = "sent";
+      } else {
+        result.status = "failed";
+        result.error = text(body.error) || `HTTP ${resp.status}`;
+      }
+    } catch (err) {
+      result.status = "failed";
+      result.error = err.message;
+    }
+  }
+
+  await upsertCaseStatement(env, { ...c, replyNotify: result }).run();
+}
+
+function buildReplyNoticeMessage(c) {
+  // 狀態在後台是「3.已轉交相關單位」這種帶編號的寫法，給里民看要拿掉編號
+  const status = text(c.status).replace(/^\d+\.\s*/, "");
+  const lines = [
+    "您通報的案件有新進度了 🙏",
+    "",
+    `案件編號：${text(c.caseId)}`,
+  ];
+  if (text(c.title)) lines.push(`通報內容：${text(c.title)}`);
+  if (status) lines.push(`目前狀態：${status}`);
+  lines.push("", "我的回覆：", text(c.replyContent), "", "還有問題的話，直接在這裡跟我說。");
+  return { type: "text", text: lines.join("\n") };
 }
 
 // 通報人的 LINE 身分只存在 D1，Google Sheet 沒有這兩欄。

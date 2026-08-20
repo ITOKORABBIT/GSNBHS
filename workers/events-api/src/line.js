@@ -1049,6 +1049,33 @@ async function lineReply(env, replyToken, messages) {
   console.log(JSON.stringify({ fn: "lineReply", ok: resp.ok, status: resp.status, durationMs: Date.now() - startedAt, messageCount: messages.length }));
 }
 
+// 本月主動推播用量。免費方案每月有上限，案件回覆通知會吃這個額度，
+// 所以要看得到還剩多少，不能等推爆了才發現。
+export async function getLineQuota(env) {
+  const accessToken = await getAccessToken(env);
+  if (!accessToken) return { success: false, error: "no access token" };
+  const headers = { Authorization: "Bearer " + accessToken };
+  try {
+    const [quotaResp, usedResp] = await Promise.all([
+      fetch("https://api.line.me/v2/bot/message/quota", { headers }),
+      fetch("https://api.line.me/v2/bot/message/quota/consumption", { headers }),
+    ]);
+    if (!quotaResp.ok || !usedResp.ok) {
+      return { success: false, error: `HTTP ${quotaResp.status}/${usedResp.status}` };
+    }
+    const quota = await quotaResp.json();
+    const used = await usedResp.json();
+    return {
+      success: true,
+      type: quota.type,
+      limit: quota.value ?? null,
+      used: used.totalUsage ?? null,
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function linePush(env, to, messages) {
   const accessToken = await getAccessToken(env);
   if (!accessToken || !to) return false;

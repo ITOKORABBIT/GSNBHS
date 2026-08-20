@@ -1,5 +1,5 @@
 // ── Router entry point ────────────────────────────────────────────────────────
-import { handleLineWebhook, handleHubCallback } from "./line.js";
+import { handleLineWebhook, handleHubCallback, linePush, getLineQuota } from "./line.js";
 import { getConsultRequests, retryConsultNotification, submitConsult, updateConsultStatus } from "./consult.js";
 import { closeEndedEvents, sendEventReminders, sendPostEventSurveys, resetReminderSent, resetSurveySentAt } from "./scheduled.js";
 import { getEvents, getEvent, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
@@ -83,6 +83,31 @@ export default {
 
     if (request.method === "POST" && new URL(request.url).pathname === "/hub-callback") {
       return handleHubCallback(request, env);
+    }
+
+    // 給 cases-api 用的內部推播入口。里民的 LINE userId 屬於本頻道的命名空間，
+    // 只有這支 Worker 手上的 token 推得動，所以案件回覆通知要繞到這裡來。
+    // 走 service binding 呼叫（同帳號 Worker 用公開網址互打會被擋，見 line.js）。
+    if (request.method === "POST" && new URL(request.url).pathname === "/internal/line-push") {
+      if (!isInternalPushAuthorized(request, env)) {
+        return jsonResponse({ success: false, error: "Unauthorized" }, 401);
+      }
+      let payload;
+      try {
+        payload = JSON.parse((await request.text()) || "{}");
+      } catch {
+        return jsonResponse({ success: false, error: "Invalid JSON" }, 400);
+      }
+      if (text(payload.action) === "quota") {
+        return jsonResponse(await getLineQuota(env));
+      }
+      const to = text(payload.to);
+      const messages = Array.isArray(payload.messages) ? payload.messages : [];
+      if (!to || !messages.length) {
+        return jsonResponse({ success: false, error: "to and messages are required" }, 400);
+      }
+      const pushed = await linePush(env, to, messages);
+      return jsonResponse({ success: pushed }, pushed ? 200 : 502);
     }
 
     if (request.method === "POST" && new URL(request.url).pathname === "/scheduled") {
@@ -264,6 +289,12 @@ async function runScheduledJobs(env, source) {
   await sendEventReminders(env);
   await sendPostEventSurveys(env);
   return { success: true, source };
+}
+
+function isInternalPushAuthorized(request, env) {
+  const token = text(env.INTERNAL_PUSH_TOKEN);
+  if (!token) return false;
+  return text(request.headers.get("X-Internal-Token")) === token;
 }
 
 function isSchedulerAuthorized(request, env) {

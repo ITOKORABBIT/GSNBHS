@@ -847,6 +847,13 @@ function renderCase(){
     html += row('回覆內容', '<span class="desc">' + esc(d.replyContent) + '</span>');
     if (d.note) html += row('備註', esc(d.note));
     html += row('承辦人',   v(d.handler));
+    if (d.replyNotify && d.replyNotify.status) {
+      var n = d.replyNotify;
+      var notifyText = n.status === 'sent'
+        ? '已用 LINE 通知 ' + esc(d.lineDisplayName || '通報人') + '（' + esc(n.at || '') + '）'
+        : (n.status === 'skipped' ? '未通知：' : '通知失敗：') + esc(n.error || '原因不明');
+      html += row('通知通報人', notifyText);
+    }
     var pubLbl = (d.publicFlag === true || d.publicFlag === 'TRUE' || d.publicFlag === '是') ? '是' : '否';
     html += row('公開顯示', pubLbl);
     if (d.publicTitle)   html += row('公開主旨', esc(d.publicTitle));
@@ -998,6 +1005,18 @@ function openModal(){
   html += handlerHint;
   html += '</div>';
 
+  // 通知通報人（只有從 LINE 通報的案件才推得動，沒有身分就不顯示這一格）
+  if (d.lineUserId) {
+    html += '<div class="field">';
+    html += '<div class="field-label">通知通報人</div>';
+    html += '<div class="toggle-field on" id="notifyToggle" onclick="toggleNotify()">';
+    html += '<div class="toggle-track"></div>';
+    html += '<input type="checkbox" id="m_notify" checked style="display:none">';
+    html += '<span class="toggle-text">用 LINE 通知 ' + esc(d.lineDisplayName || '通報人') + '</span>';
+    html += '</div>';
+    html += '</div>';
+  }
+
   // 公開顯示
   html += '<div class="field">';
   html += '<div class="field-label">公開設定</div>';
@@ -1035,6 +1054,11 @@ function openModal(){
 function closeModal(){
   document.getElementById('replyModal').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+function toggleNotify(){
+  var wrap = document.getElementById('notifyToggle');
+  document.getElementById('m_notify').checked = wrap.classList.toggle('on');
 }
 
 function togglePub(){
@@ -1308,10 +1332,12 @@ async function submitReply(){
   btn.innerHTML = '<span class="spinner"></span> 送出中…';
 
   var isPublic = document.getElementById('m_public').checked;
+  var notifyEl = document.getElementById('m_notify');
   var payload = {
     caseId:          caseId,
     status:          status,
     reply_content:   content,
+    notifyReporter:  !!(notifyEl && notifyEl.checked),
     handler:         handler,
     PS:              (document.getElementById('m_note').value || '').trim(),
     public:          isPublic,

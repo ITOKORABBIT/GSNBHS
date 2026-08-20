@@ -17,6 +17,10 @@
     {
       "binding": "NOTIFY_HUB",
       "service": "village-notify-hub"
+    },
+    {
+      "binding": "EVENTS_API",
+      "service": "gsnbhs-events-api"
     }
   ],
   "d1_databases": [
