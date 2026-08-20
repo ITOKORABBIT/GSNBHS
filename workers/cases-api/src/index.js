@@ -11,6 +11,8 @@ const ACTIONS = new Set([
   "deleteCase",
   "batchUpdateCases",
   "getPublicStats",
+  "getPublicCases",
+  "getPublicCase",
   "getViewStats",
   "recordCardView",
   "bulkAddCardViews",
@@ -21,6 +23,8 @@ const ACTIONS = new Set([
 
 const PUBLIC_ACTIONS = new Set([
   "getPublicStats",
+  "getPublicCases",
+  "getPublicCase",
   "submitReport",
   "getViewStats",
   "recordCardView",
@@ -76,6 +80,8 @@ export default {
 
       if (PUBLIC_ACTIONS.has(action)) {
         if (action === "getPublicStats")    return corsJson(env, await getPublicStats(env));
+        if (action === "getPublicCases")    return corsJson(env, await getPublicCases(env));
+        if (action === "getPublicCase")     return corsJson(env, await getPublicCase(env, data));
         if (action === "submitReport") {
           if (!(await checkRateLimit(env, request))) {
             return corsJson(env, { success: false, error: "操作過於頻繁，請稍後再試" }, 429);
@@ -192,6 +198,24 @@ async function getPublicStats(env) {
       generatedAt: nowTW(),
     },
   };
+}
+
+async function getPublicCases(env) {
+  const rows = await env.DB.prepare(
+    `SELECT payload_json FROM cases
+     WHERE public_flag = 1
+     ORDER BY sort_order ASC, pin_order DESC, report_time DESC`,
+  ).all();
+  return { success: true, cases: rows.results.map((row) => sanitizePublic(parseJson(row.payload_json))) };
+}
+
+async function getPublicCase(env, data) {
+  const caseId = requireId(data.caseId, "Missing caseId");
+  const row = await env.DB.prepare(
+    "SELECT payload_json FROM cases WHERE case_id = ? AND public_flag = 1",
+  ).bind(caseId).first();
+  if (!row) return { success: false, error: "找不到案件" };
+  return { success: true, case: sanitizePublic(parseJson(row.payload_json)) };
 }
 
 // ─── View stats (public) ─────────────────────────────────
@@ -567,6 +591,11 @@ function applyReplyFields(existing, data, now) {
     publicSummary:ps            !== undefined ? text(ps)             : existing.publicSummary,
     replyUrl:     data.replyUrl !== undefined ? text(data.replyUrl)  : existing.replyUrl,
   };
+}
+
+function sanitizePublic(caseData) {
+  const { name, phone, lineId, lineUserId, lineDisplayName, note, handler, replyNotify, ...publicData } = caseData;
+  return publicData;
 }
 
 async function syncCaseFromGas(env, caseId) {

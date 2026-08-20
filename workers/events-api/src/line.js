@@ -1,9 +1,18 @@
 // ── LINE Webhook Handler, chatbot state machine, message builders ─────────────
 import { text, parseJson, parseBoolean, parseTaiwanIsoToMs, taiwanIsoNow, isWithinRegWindow, CHECKIN_RADIUS_METERS } from "./utils.js";
 import { forwardToGas } from "./auth.js";
-import { getEventPayload, upsertRegistrationStatement, syncEventRegisteredCount } from "./db.js";
+import { getEventPayload, upsertRegistrationStatement, syncEventRegisteredCount, totalHeadcount } from "./db.js";
 import { getEmergencyContactsForLine } from "./contacts.js";
 import { insertChatMessage } from "./chat.js";
+import {
+  REGISTRATION_FULL_MESSAGE,
+  RESERVATION_EXPIRED_MESSAGE,
+  consumeRegistrationSlot,
+  getActiveReservationCount,
+  isReservationExpired,
+  releaseRegistrationSlot,
+  reserveRegistrationSlot,
+} from "./reservations.js";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -201,6 +210,11 @@ async function processLineEvent(env, ctx, event) {
 async function handleLineRegEvent(env, ctx, userId, replyToken, event) {
   const state = await getEvtSession(env, userId);
   const hasSess = !!state.stage;
+  if (hasSess && isReservationExpired(state)) {
+    await clearEvtSession(env, userId);
+    await lineReply(env, replyToken, [{ type: "text", text: RESERVATION_EXPIRED_MESSAGE }]);
+    return true;
+  }
 
   if (event.type === "postback") {
     const pb = parsePostbackData(event.postback?.data || "");
@@ -261,6 +275,10 @@ async function handleEvtWalkInQR(env, userId, replyToken, eventId) {
   }
   const requireConsent = parseBoolean(event.requireConsent);
   const questions = Array.isArray(event.questions) ? event.questions : [];
+  const reservation = await reserveRegistrationSlot(env, { eventId, userId });
+  if (!reservation.success) {
+    return lineReply(env, replyToken, [{ type: "text", text: reservation.error || REGISTRATION_FULL_MESSAGE }]);
+  }
   const sessionData = {
     stage: requireConsent ? "consent" : "answering",
     eventId,
@@ -270,10 +288,12 @@ async function handleEvtWalkInQR(env, userId, replyToken, eventId) {
     questions,
     qIdx: 0, answers: [], multiBuffer: [],
     consentGiven: false,
+    reservationId: reservation.reservationId,
+    reservationExpiresAt: reservation.expiresAt,
     walkIn: true,
   };
   await saveEvtSession(env, userId, sessionData);
-  const greeting = { type: "text", text: `歡迎參加「${text(event.eventName)}」！\n接下來請填寫報名資料 👇` };
+  const greeting = { type: "text", text: `歡迎參加「${text(event.eventName)}」！\n已先為您保留名額 10 分鐘，請在時間內完成報名。若要取消，請輸入「取消」；逾時未完成會自動釋出名額。\n接下來請填寫報名資料 👇` };
   if (requireConsent) {
     return lineReply(env, replyToken, [greeting, buildEvtConsentBubble()]);
   }
@@ -374,7 +394,7 @@ async function handleEvtPostback(env, ctx, userId, replyToken, state, pb) {
     const events = await getActiveEventsForLine(env);
     const ev = events.find((e) => e.eventId === pb.eventId);
     if (!ev) return lineReply(env, replyToken, [{ type: "text", text: "找不到此活動，請重新輸入「我要報名」。" }]);
-    if (ev.isFull) return lineReply(env, replyToken, [{ type: "text", text: `「${ev.eventName}」名額已滿，無法報名。` }]);
+    if (ev.isFull) return lineReply(env, replyToken, [{ type: "text", text: REGISTRATION_FULL_MESSAGE }]);
     const eventData = await getEventPayload(env, pb.eventId);
     if (!eventData) return lineReply(env, replyToken, [{ type: "text", text: "找不到此活動，請重新輸入「我要報名」。" }]);
     await saveEvtSession(env, userId, {
@@ -395,15 +415,25 @@ async function handleEvtPostback(env, ctx, userId, replyToken, state, pb) {
   if (action === "evt:confirm_yes") {
     if (!state.stage) return lineReply(env, replyToken, [{ type: "text", text: "操作逾時，請重新輸入「我要報名」。" }]);
     if (state.stage !== "confirm_event") return; // duplicate postback, already past this step
+    if (!state.reservationId) {
+      const reservation = await reserveRegistrationSlot(env, { eventId: state.eventId, userId });
+      if (!reservation.success) {
+        await clearEvtSession(env, userId);
+        return lineReply(env, replyToken, [{ type: "text", text: reservation.error || REGISTRATION_FULL_MESSAGE }]);
+      }
+      state.reservationId = reservation.reservationId;
+      state.reservationExpiresAt = reservation.expiresAt;
+    }
+    const holdNotice = { type: "text", text: "已先為您保留名額 10 分鐘，請在時間內完成報名。若要取消，請輸入「取消」；逾時未完成會自動釋出名額。" };
     if (state.requireConsent) {
       state.stage = "consent";
       await saveEvtSession(env, userId, state);
-      return lineReply(env, replyToken, [buildEvtConsentBubble()]);
+      return lineReply(env, replyToken, [holdNotice, buildEvtConsentBubble()]);
     }
     state.stage = "answering";
     await saveEvtSession(env, userId, state);
     if (!(state.questions || []).length) return advanceAfterAnswering(env, userId, replyToken, state);
-    return lineReply(env, replyToken, buildEvtQuestionMsgs(state.questions[0], 0, state.questions.length));
+    return lineReply(env, replyToken, [holdNotice, ...buildEvtQuestionMsgs(state.questions[0], 0, state.questions.length)]);
   }
 
   if (action === "evt:confirm_no") {
@@ -685,17 +715,18 @@ async function sendEvtSummary(env, userId, replyToken, state) {
 
 async function submitRegistrationFromLine(env, ctx, userId, state) {
   try {
+    if (isReservationExpired(state)) return { success: false, error: RESERVATION_EXPIRED_MESSAGE };
     const event = await getEventPayload(env, state.eventId);
     if (!event) return { success: false, error: "找不到活動" };
     if (text(event.status) !== "報名中") return { success: false, error: "此活動報名已截止" };
     if (!isWithinRegWindow(event)) return { success: false, error: "此活動目前不在開放報名期間" };
 
-    const countRow = await env.DB.prepare(
-      "SELECT COUNT(*) as cnt FROM event_registrations WHERE event_id = ?",
-    ).bind(state.eventId).first();
-    const regCount = Number(countRow?.cnt || 0);
-    const quota = parseInt(text(event.quota)) || 0;
-    if (quota > 0 && regCount >= quota) return { success: false, error: "此活動名額已滿" };
+    if (!state.reservationId) {
+      const reservation = await reserveRegistrationSlot(env, { eventId: state.eventId, userId });
+      if (!reservation.success) return { success: false, error: reservation.error || REGISTRATION_FULL_MESSAGE };
+      state.reservationId = reservation.reservationId;
+      state.reservationExpiresAt = reservation.expiresAt;
+    }
 
     const profile = await getLineProfile(env, userId);
     const displayName = text(profile?.displayName);
@@ -718,6 +749,7 @@ async function submitRegistrationFromLine(env, ctx, userId, state) {
       ...answerMap,
     };
     await upsertRegistrationStatement(env, state.eventId, reg).run();
+    await consumeRegistrationSlot(env, state.reservationId);
     await syncEventRegisteredCount(env, state.eventId);
 
     ctx.waitUntil(
@@ -812,6 +844,8 @@ async function saveEvtSession(env, userId, state) {
 }
 
 async function clearEvtSession(env, userId) {
+  const state = await getLineSession(env, "evt", userId);
+  if (state?.reservationId) await releaseRegistrationSlot(env, state.reservationId);
   return clearLineSession(env, "evt", userId);
 }
 
@@ -956,19 +990,22 @@ async function getActiveEventsForLine(env) {
      ORDER BY CASE WHEN sort_order > 0 THEN sort_order ELSE 999999 END ASC,
               event_start ASC, event_id ASC LIMIT 12`,
   ).bind(now, now).all();
-  return rows.results.map((row) => {
+  return Promise.all(rows.results.map(async (row) => {
     const ev = parseJson(row.payload_json);
     const quota = parseInt(text(ev.quota)) || 0;
-    const regCount = Number(ev.registeredCount || 0);
-    const remaining = quota > 0 ? Math.max(0, quota - regCount) : -1;
+    const regCount = quota > 0 ? await totalHeadcount(env, ev.eventId) : Number(ev.registeredCount || 0);
+    const reservedCount = quota > 0 ? await getActiveReservationCount(env, ev.eventId) : 0;
+    const occupiedCount = regCount + reservedCount;
+    const remaining = quota > 0 ? Math.max(0, quota - occupiedCount) : -1;
     return {
       ...ev,
       eventDate: fmtEventDateRange(text(ev.eventStart), text(ev.eventEnd)),
-      quota, remaining,
-      isFull: quota > 0 && regCount >= quota,
+      quota, remaining, reservedCount,
+      registeredCount: regCount,
+      isFull: quota > 0 && occupiedCount >= quota,
       isAlmostFull: quota > 0 && remaining > 0 && remaining < 10,
     };
-  });
+  }));
 }
 
 // ── LINE API ──────────────────────────────────────────────────────────────────

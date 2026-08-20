@@ -8,7 +8,7 @@
 <meta property="og:title" content="舊社里 里民憑證">
 <meta property="og:description" content="舊社里里民憑證頁面">
 <meta property="og:url" content="https://gsnbhs.pages.dev/voucher">
-<meta property="og:image" content="https://gsnbhs.pages.dev/%E5%9C%96%E5%BA%AB/S__27246628_0.jpg?v=20260816">
+<meta property="og:image" content="https://gsnbhs.pages.dev/圖庫/S__27246628_0.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="484">
 <meta property="og:image:height" content="163">
@@ -255,22 +255,7 @@ body::after  { width: 220px; height: 220px; bottom: -60px; left: -60px; backgrou
 
 <div class="footer">舊社里里長辦公室</div>
 
-<script>
-function pad2(n) { return n < 10 ? '0' + n : '' + n; }
-function tickTime() {
-  var t = new Date();
-  var s = t.getFullYear() + '/' + pad2(t.getMonth() + 1) + '/' + pad2(t.getDate())
-        + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ':' + pad2(t.getSeconds());
-  var el = document.getElementById('timeText');
-  if (el) el.textContent = s;
-}
-tickTime();
-setInterval(tickTime, 1000);
-
-function goStores() {
-  window.location.href = 'storeopenlist.html';
-}
-</script>
+<script src="./shared/voucher.js"></script>
 
 </body>
 </html>

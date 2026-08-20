@@ -44,18 +44,17 @@ test("demo mode uses labeled sample progress without changing the default data p
   assert.match(page, /if\(isDemo\)[\s\S]*renderStats\(demoStats\)[\s\S]*else[\s\S]*loadStats\(\)/);
 });
 
-test("case lookup uses the official LINE while other homepage services stay local", () => {
+test("public cases stay local while personal case lookup remains available through LINE", () => {
   for (const path of ["report.html", "bulletin.html", "storeopenlist.html", "consult.html"]) {
     assert.match(page, new RegExp(`href="\\./${path}"`));
   }
-  assert.equal(page.split(`href="${lineCaseUrl}"`).length - 1, 3);
+  assert.equal(page.split(`href="${lineCaseUrl}"`).length - 1, 2);
   assert.match(page, /<a class="process-step process-step-link" href="\.\/report\.html">[\s\S]*?<h3>填寫通報<\/h3>/);
-  assert.match(page, /<span class="service-name">案件查詢<\/span>/);
+  assert.match(page, /href="\.\/openlist\.html"[\s\S]*<span class="service-name">公開案件<\/span>/);
   assert.match(page, />查看進度<\/a>/);
-  assert.match(page, /由里長親自回覆/);
   assert.match(page, /由里長親自協助/);
   assert.doesNotMatch(page, /HPNBHS/);
-  assert.doesNotMatch(page, /href="\.\/openlist\.html"|公開頁面會更新/);
+  assert.doesNotMatch(page, /公開頁面會更新/);
 });
 
 test("header LINE ID opens the official account and stays visible on mobile", () => {
@@ -69,10 +68,8 @@ test("homepage footer includes the ITOKO RABBIT copyright", () => {
   assert.doesNotMatch(page, /網頁版權/);
 });
 
-test("public case pages are retired and admin no longer links to them", () => {
-  const redirectLines = new Set(redirects.trim().split(/\r?\n/));
-  for (const path of ["/openlist", "/openlist.html", "/opendetail", "/opendetail.html"]) {
-    assert.ok(redirectLines.has(`${path} ${lineCaseUrl} 302`));
-  }
-  assert.doesNotMatch(adminPage, /href="openlist\.html"|href="opendetail\.html/);
+test("public case pages are enabled without LINE redirects", () => {
+  assert.equal(redirects.trim(), "");
+  assert.match(page, /href="\.\/openlist\.html"/);
+  assert.match(page, />公開案件</);
 });

@@ -6,18 +6,21 @@ import {
   syncEventRegisteredCount,
   isSystemRegistrationColumn,
 } from "./db.js";
+import { getActiveReservationCount } from "./reservations.js";
 
 export async function getRegistrations(env, data) {
   const eventId = requireId(data.eventId, "Missing eventId");
-  const [eventRow, { registrations, totalHeadcount }] = await Promise.all([
+  const [eventRow, { registrations, totalHeadcount }, reservedCount] = await Promise.all([
     env.DB.prepare("SELECT json_extract(payload_json,'$.registrationSheet') AS rs FROM events WHERE event_id = ?")
       .bind(eventId).first(),
     getRegistrationRows(env, eventId),
+    getActiveReservationCount(env, eventId),
   ]);
   return {
     success: true,
     registrations,
     totalHeadcount,
+    reservedCount,
     registrationSheet: text(eventRow?.rs),
   };
 }
@@ -50,10 +53,14 @@ export async function getEventStats(env, data) {
   if (!eventRow) return { success: false, error: "找不到活動" };
   const event = parseJson(eventRow.payload_json);
   const questions = Array.isArray(event.questions) ? event.questions : [];
-  const { registrations, totalHeadcount } = await getRegistrationRows(env, eventId);
+  const [{ registrations, totalHeadcount }, reservedCount] = await Promise.all([
+    getRegistrationRows(env, eventId),
+    getActiveReservationCount(env, eventId),
+  ]);
   const stats = {
     total: totalHeadcount,
     totalRegistrations: registrations.length,
+    reservedCount,
     consentRate: 0,
     answers: {},
   };
@@ -156,6 +163,37 @@ export async function updateRegistration(env, ctx, data) {
   }));
 
   return { success: true, registeredCount, registration: reg };
+}
+
+export async function copyRegistration(env, ctx, data) {
+  const eventId = requireId(data.eventId, "Missing eventId");
+  const sourceRegId = requireId(data.regId, "Missing regId");
+  const [sourceRow, eventRow] = await Promise.all([
+    env.DB.prepare("SELECT payload_json FROM event_registrations WHERE event_id=? AND reg_id=?").bind(eventId, sourceRegId).first(),
+    env.DB.prepare("SELECT json_extract(payload_json,'$.quota') AS quota FROM events WHERE event_id=?").bind(eventId).first(),
+  ]);
+  if (!sourceRow) return { success: false, error: "找不到原始報名資料" };
+  const now = new Date();
+  const regId = `REG_${now.toISOString().slice(0, 10).replace(/-/g, "")}_${crypto.randomUUID()}`;
+  const reg = { ...parseJson(sourceRow.payload_json), regId, eventId, lineUserId: "", checkedIn: "FALSE", submittedAt: now.toISOString() };
+  delete reg.residentNote;
+  const quota = parseInt(text(eventRow?.quota), 10) || 0;
+  if (quota <= 0) {
+    await upsertRegistrationStatement(env, eventId, reg).run();
+  } else {
+    const result = await env.DB.prepare(
+      `INSERT INTO event_registrations
+         (event_id, reg_id, line_user_id, display_name, checked_in, submitted_at, headcount, payload_json)
+       SELECT ?, ?, '', ?, 'FALSE', ?, 1, ?
+       WHERE (SELECT COALESCE(SUM(headcount),0) FROM event_registrations WHERE event_id=?) < ?`,
+    ).bind(eventId, regId, text(reg.displayName), now.toISOString(), JSON.stringify(reg), eventId, quota).run();
+    if (!result.meta.changes) return { success: false, error: "此活動名額已滿" };
+  }
+  const registeredCount = await syncEventRegisteredCount(env, eventId);
+  ctx.waitUntil(forwardToGas(env, data).catch((error) => {
+    console.error(JSON.stringify({ action: "copyRegistration", eventId, sourceRegId, syncTarget: "gas", error: error.message }));
+  }));
+  return { success: true, regId, registeredCount, registration: reg };
 }
 
 export async function deleteRegistration(env, ctx, data) {

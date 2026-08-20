@@ -67,16 +67,29 @@ test("empty database reports no completion rate instead of a fake zero percent",
   assert.equal(body.stats.completionRate, null);
 });
 
-test("public case list and detail actions are disabled", async () => {
-  for (const action of ["getPublicCases", "getPublicCase"]) {
+test("public case list and detail expose only approved fields", async () => {
+  const stored = JSON.stringify({
+    caseId: "GS-001", publicFlag: true, publicTitle: "路燈修復", publicSummary: "已處理",
+    name: "居民姓名", phone: "0912345678", lineUserId: "U-secret", lineDisplayName: "秘密名稱", note: "內部備註",
+  });
+  const env = {
+    ALLOWED_ORIGIN: "https://gsnbhs.pages.dev",
+    DB: { prepare(sql) { return {
+      bind() { return { first: async () => ({ payload_json: stored }) }; },
+      all: async () => ({ results: [{ payload_json: stored }] }),
+    }; } },
+  };
+  for (const [action, key] of [["getPublicCases", "cases"], ["getPublicCase", "case"]]) {
     const response = await worker.fetch(new Request("https://gsnbhs-cases-api.example", {
-      method: "POST",
-      body: JSON.stringify({ action, caseId: "GS-001" }),
-    }), {});
+      method: "POST", body: JSON.stringify({ action, caseId: "GS-001" }),
+    }), env, {});
     const body = await response.json();
-
-    assert.equal(response.status, 400);
-    assert.equal(body.success, false);
-    assert.equal(body.error, "Unsupported action");
+    assert.equal(response.status, 200);
+    const item = key === "cases" ? body.cases[0] : body.case;
+    assert.equal(item.publicTitle, "路燈修復");
+    assert.equal(item.name, undefined);
+    assert.equal(item.phone, undefined);
+    assert.equal(item.lineUserId, undefined);
+    assert.equal(item.note, undefined);
   }
 });

@@ -2,6 +2,7 @@
 import { text, requireId, httpError, parseJson, parseBoolean, CHECKIN_RADIUS_METERS } from "./utils.js";
 import { forwardToGas } from "./auth.js";
 import { normalizeEvent, eventUpdatePayload, upsertEventStatement, countRegistrations } from "./db.js";
+import { getActiveReservationCount } from "./reservations.js";
 
 export async function reorderEvents(env, data) {
   const orders = Array.isArray(data.orders) ? data.orders : [];
@@ -26,7 +27,12 @@ export async function getEvents(env) {
      ORDER BY CASE WHEN sort_order > 0 THEN sort_order ELSE 999999 END ASC,
               updated_at DESC, event_id DESC`,
   ).all();
-  return { success: true, events: rows.results.map((row) => parseJson(row.payload_json)) };
+  const events = await Promise.all(rows.results.map(async (row) => {
+    const event = parseJson(row.payload_json);
+    event.reservedCount = await getActiveReservationCount(env, event.eventId);
+    return event;
+  }));
+  return { success: true, events };
 }
 
 export async function getEvent(env, data) {
@@ -35,7 +41,9 @@ export async function getEvent(env, data) {
     .bind(eventId)
     .first();
   if (!row) return { success: false, error: "找不到活動" };
-  return { success: true, event: parseJson(row.payload_json) };
+  const event = parseJson(row.payload_json);
+  event.reservedCount = await getActiveReservationCount(env, eventId);
+  return { success: true, event };
 }
 
 export async function createEvent(env, data) {

@@ -1,4 +1,8 @@
-var SESSION_KEY = 'hpnbhs_admin';
+var SESSION_KEY = (function(){
+  // 各里自動用自己的 slug 當登入標籤，避免同源時互相踢登入（原本硬寫 'hpnbhs_admin' 是複製走樣）
+  try { return new URL(CONFIG.BASE_URL).hostname.split('.')[0] + '_admin'; }
+  catch (e) { return 'village_admin'; }
+})();
 var SESSION_TTL = 2 * 3600 * 1000;
 
 function esc(s) {

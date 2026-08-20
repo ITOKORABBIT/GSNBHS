@@ -29,13 +29,19 @@ const STORE_ACTIONS = new Set([
   "uploadAdminPhoto",
 ]);
 
+const PUB_OPTIONAL_FIELDS = [
+  "pubPhone", "pubAddr", "pubMapUrl", "pubDesc", "pubOffer", "pubHours", "pubStoreNum",
+];
+
 export const DEFAULT_STORE_CATEGORIES = [
-  "美食地圖",
-  "飲料冰品",
-  "健康醫療",
-  "生活便利",
-  "住宅相關",
-  "寵物專區",
+  "里內日常小吃",
+  "家庭好友聚餐",
+  "大坑名產貴賓招待",
+  "衣",
+  "住",
+  "行",
+  "育",
+  "樂",
   "其他",
 ];
 export const BRAND_TAG_COLORS = ["gold", "mint", "blue", "rose", "violet", "stone"];
@@ -303,13 +309,7 @@ async function updateStore(env, data) {
     "reviewer",
     "pubName",
     "pubCate",
-    "pubPhone",
-    "pubAddr",
-    "pubMapUrl",
-    "pubDesc",
-    "pubOffer",
-    "pubHours",
-    "pubStoreNum",
+    ...PUB_OPTIONAL_FIELDS,
     "planType",
     "pinOrder",
     "sortOrder",
@@ -319,6 +319,9 @@ async function updateStore(env, data) {
   ];
   for (const field of directFields) {
     if (Object.prototype.hasOwnProperty.call(data, field)) store[field] = data[field];
+  }
+  if (PUB_OPTIONAL_FIELDS.some((field) => Object.prototype.hasOwnProperty.call(data, field))) {
+    store.pubEdited = true;
   }
   store.brandTags = normalizeBrandTags(store.brandTags || store.brandTag);
   store.brandTag = store.brandTags[0] || "";
@@ -445,17 +448,18 @@ function normalizeImportedStore(store) {
 }
 
 function toPublicStore(store) {
+  const pub = (pubValue, original) => text(store.pubEdited ? pubValue : pubValue || original);
   const publicStore = {
     storeId: text(store.storeId),
     pubName: text(store.pubName || store.storeName),
     pubCate: normalizeStoreCategory(store.pubCate || store.category),
-    pubPhone: text(store.pubPhone || store.storePhone),
-    pubAddr: text(store.pubAddr || store.addr),
-    pubMapUrl: text(store.pubMapUrl || store.mapUrl),
-    pubDesc: text(store.pubDesc || store.desc),
-    pubOffer: text(store.pubOffer || store.offer),
-    pubHours: text(store.pubHours || store.hours),
-    pubStoreNum: text(store.pubStoreNum || store.storeNum),
+    pubPhone: pub(store.pubPhone, store.storePhone),
+    pubAddr: pub(store.pubAddr, store.addr),
+    pubMapUrl: pub(store.pubMapUrl, store.mapUrl),
+    pubDesc: pub(store.pubDesc, store.desc),
+    pubOffer: pub(store.pubOffer, store.offer),
+    pubHours: pub(store.pubHours, store.hours),
+    pubStoreNum: pub(store.pubStoreNum, store.storeNum),
     planType: text(store.planType || "免費"),
     pinOrder: Number(store.pinOrder || 0),
     sortOrder: Number(store.sortOrder || 0),

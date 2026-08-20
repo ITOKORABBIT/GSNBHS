@@ -3,7 +3,7 @@ import { handleLineWebhook, handleHubCallback, linePush, getLineQuota } from "./
 import { getConsultRequests, retryConsultNotification, submitConsult, updateConsultStatus } from "./consult.js";
 import { closeEndedEvents, sendEventReminders, sendPostEventSurveys, resetReminderSent, resetSurveySentAt } from "./scheduled.js";
 import { getEvents, getEvent, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
-import { getRegistrations, getEventStats, checkInRegistration, updateRegistration, deleteRegistration } from "./registrations.js";
+import { getRegistrations, getEventStats, checkInRegistration, updateRegistration, deleteRegistration, copyRegistration } from "./registrations.js";
 import {
   getSurveys, getSurvey, createSurvey, updateSurvey, deleteSurvey,
   getSurveyPublic, submitSurveyResponse, submitRegistration,
@@ -34,6 +34,7 @@ const ACTIONS = new Set([
   "checkInRegistration",
   "updateRegistration",
   "deleteRegistration",
+  "copyRegistration",
   "getSurveys",
   "getSurvey",
   "getSurveyPublic",
@@ -254,6 +255,7 @@ export default {
       if (action === "checkInRegistration") return corsJson(env, await checkInRegistration(env, ctx, data));
       if (action === "updateRegistration") return corsJson(env, await updateRegistration(env, ctx, data));
       if (action === "deleteRegistration") return corsJson(env, await deleteRegistration(env, ctx, data));
+      if (action === "copyRegistration") return corsJson(env, await copyRegistration(env, ctx, data));
       if (action === "getSurveys") return corsJson(env, await getSurveys(env));
       if (action === "getSurvey") return corsJson(env, await getSurvey(env, data));
       if (action === "createSurvey") return corsJson(env, await createSurvey(env, ctx, data));

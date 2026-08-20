@@ -8,7 +8,7 @@ const lineWorker = readFileSync(new URL("../workers/events-api/src/line.js", imp
 test("event list link preview uses the GSNBHS logo", () => {
   assert.match(
     page,
-    /<meta property="og:image" content="https:\/\/gsnbhs\.pages\.dev\/%E5%9C%96%E5%BA%AB\/S__27246628_0\.jpg\?v=20260816">/,
+    /<meta property="og:image" content="https:\/\/gsnbhs\.pages\.dev\/圖庫\/S__27246628_0\.jpg">/,
   );
   assert.match(page, /<link rel="apple-touch-icon" href="\.\/圖庫\/S__27246628_0\.jpg\?v=20260816">/);
   assert.doesNotMatch(page, /HP_logo\.png/);

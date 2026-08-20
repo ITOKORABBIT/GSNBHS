@@ -3,7 +3,10 @@ import fs from "node:fs";
 import test from "node:test";
 
 function page(name) {
-  return fs.readFileSync(new URL("../" + name, import.meta.url), "utf8");
+  const html = fs.readFileSync(new URL("../" + name, import.meta.url), "utf8");
+  const scripts = [...html.matchAll(/<script\s+src=["'](\.\/shared\/[^"']+)["'][^>]*><\/script>/g)]
+    .map((match) => fs.readFileSync(new URL("../" + match[1], import.meta.url), "utf8"));
+  return [html, ...scripts].join("\n");
 }
 
 test("store admin list exposes taxonomy manager controls", () => {
