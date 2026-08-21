@@ -141,6 +141,24 @@ a{text-decoration:none;color:inherit}
 .btn.ghost{
   background:#fbf7f2;
 }
+.btn.primary.needs-save{
+  box-shadow:0 0 0 4px rgba(214,138,42,.28);
+  animation:needsSavePulse 1.6s ease-in-out infinite;
+}
+@keyframes needsSavePulse{
+  0%,100%{box-shadow:0 0 0 4px rgba(214,138,42,.28)}
+  50%{box-shadow:0 0 0 9px rgba(214,138,42,.10)}
+}
+.save-hint{
+  flex-basis:100%;
+  margin-top:-2px;
+  color:#b06a12;
+  font-weight:700;
+  font-size:14px;
+}
+@media (prefers-reduced-motion:reduce){
+  .btn.primary.needs-save{animation:none}
+}
 
 .layout{
   display:grid;
@@ -627,6 +645,7 @@ a{text-decoration:none;color:inherit}
         <button class="btn primary" id="saveBtn" onclick="saveBulletin()">儲存公告</button>
         <button class="btn" onclick="resetEditor()">清空編輯器</button>
         <button class="btn" id="deleteBtn" onclick="removeBulletin()" style="display:none">刪除此公告</button>
+        <div class="save-hint" id="saveHint" style="display:none">⚠️ 圖片還沒存進公告，請按上方「儲存公告」。</div>
       </div>
     </section>
   </div>

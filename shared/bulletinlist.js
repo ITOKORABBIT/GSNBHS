@@ -16,6 +16,8 @@ let allBulletins = [];
 let filterStatus = 'all';
 let editingBulletinId = null;
 let uploadingBulletinImage = false;
+// 圖片上傳／轉存只放進表單，要按「儲存公告」才會寫進資料庫，這裡標記出未儲存狀態。
+let unsavedBulletinImages = false;
 var sortableInstances = [];
 var CATE_SORT_OFFSET = { '緊急通告': 0, '政策宣導': 10000, '最新消息': 20000, '教育課程': 30000, '里民活動': 40000 };
 var CATE_ORDER = ['緊急通告', '政策宣導', '最新消息', '教育課程', '里民活動'];
@@ -158,6 +160,8 @@ function applyDraftSnapshot(snapshot) {
   document.getElementById('pinnedInput').checked = !!snapshot.pinned;
   updateImageMeta(getImageUrls());
   refreshPreview();
+  // 還原草稿代表這些圖片尚未寫進資料庫
+  markImagesUnsaved(getImageUrls().length > 0);
 }
 
 function restoreDraftCache(scope) {
@@ -308,6 +312,7 @@ function createBulletin() {
   hideMessage();
   updateImageMeta([]);
   refreshPreview();
+  markImagesUnsaved(false);
   restoreDraftCache('__new__');
 }
 
@@ -335,7 +340,16 @@ function fillEditor(item) {
   hideMessage();
   updateImageMeta(splitImageUrls(item.imageUrl || ''));
   refreshPreview();
+  markImagesUnsaved(false);
   restoreDraftCache(item.bulletinId);
+}
+
+function markImagesUnsaved(flag) {
+  unsavedBulletinImages = !!flag;
+  const btn = document.getElementById('saveBtn');
+  if (btn) btn.classList.toggle('needs-save', unsavedBulletinImages);
+  const hint = document.getElementById('saveHint');
+  if (hint) hint.style.display = unsavedBulletinImages ? 'block' : 'none';
 }
 
 function updateImageMeta(urls) {
@@ -385,7 +399,8 @@ async function addImageUrlFromInput() {
     input.value = '';
     refreshPreview();
     persistCurrentDraftCache();
-    showMessage('Facebook 圖片已轉存到 Drive。', true);
+    markImagesUnsaved(true);
+    showMessage('圖片已轉存到 Drive，記得按「儲存公告」才會生效。', true);
   } catch (error) {
     showMessage(error.message || 'Facebook 圖片匯入失敗，請稍後再試。', false);
   } finally {
@@ -402,6 +417,7 @@ function removeBulletinImage(index) {
   updateImageMeta(urls);
   refreshPreview();
   persistCurrentDraftCache();
+  markImagesUnsaved(true);
 }
 
 function clearBulletinImage() {
@@ -410,6 +426,7 @@ function clearBulletinImage() {
   updateImageMeta([]);
   refreshPreview();
   persistCurrentDraftCache();
+  markImagesUnsaved(true);
 }
 
 async function uploadBulletinImages(fileList) {
@@ -447,8 +464,9 @@ async function uploadBulletinImages(fileList) {
       updateImageMeta(existing);
       refreshPreview(dataUrl, json.url);
       persistCurrentDraftCache();
+      markImagesUnsaved(true);
     }
-    showMessage('圖片已上傳。', true);
+    showMessage('圖片已上傳，記得按「儲存公告」才會生效。', true);
   } catch (error) {
     showMessage(error.message || '圖片上傳失敗，請稍後再試。', false);
   } finally {
@@ -691,6 +709,7 @@ function saveBulletin() {
       showMessage(json.error || '儲存失敗', false);
       return;
     }
+    markImagesUnsaved(false);
     showMessage(editingBulletinId ? '公告已更新。' : '公告已新增。', true);
     const previousScope = getDraftScope();
     if (!editingBulletinId && json.bulletinId) editingBulletinId = json.bulletinId;
