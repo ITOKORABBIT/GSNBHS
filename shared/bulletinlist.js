@@ -362,7 +362,7 @@ async function addImageUrlFromInput() {
   const url = input.value.trim();
   if (!url) return;
   if (!/^https?:\/\//i.test(url)) {
-    showMessage('圖片網址需以 http:// 或 https:// 開頭。', false);
+    showMessage('網址需以 http:// 或 https:// 開頭。', false);
     return;
   }
   if (uploadingBulletinImage) return;

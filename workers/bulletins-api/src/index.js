@@ -476,40 +476,67 @@ async function uploadBulletinImage(env, data) {
   return { success: true, url };
 }
 
+// lookaside 只認臉書爬蟲 UA，其他 UA 會被導回登入頁。
+const FB_CRAWLER_UA = "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)";
+const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36";
+const FB_PAGE_HOSTS = ["facebook.com", "fb.watch", "fb.com"];
+const FB_POST_HELP =
+  "這是貼文網址，抓不到裡面的圖片。請先點開貼文中的照片，等網址列出現 fbid= 之後再複製整段網址貼上；或在電腦上對照片按右鍵選「複製圖片網址」。";
+
+function hostMatches(host, base) {
+  return host === base || host.endsWith("." + base);
+}
+
+// 從臉書相片網址取出照片 ID：?fbid=123、/photo/123、/photos/xxx/123/ 都吃。
+function extractFacebookPhotoId(parsed) {
+  const fromQuery = parsed.searchParams.get("fbid") || parsed.searchParams.get("photo_id");
+  if (fromQuery && /^\d+$/.test(fromQuery)) return fromQuery;
+  const fromPath = parsed.pathname.match(/\/(?:photo|photos)\/(?:[^/]+\/)?(\d{6,})/);
+  if (fromPath) return fromPath[1];
+  return null;
+}
+
 async function importBulletinImageUrl(env, data) {
-  const imageUrl = text(data.imageUrl);
-  if (!imageUrl) return { success: false, error: "請貼上 Facebook 圖片網址" };
+  const inputUrl = text(data.imageUrl);
+  if (!inputUrl) return { success: false, error: "請貼上 Facebook 圖片網址或相片網址" };
 
   let parsed;
   try {
-    parsed = new URL(imageUrl);
+    parsed = new URL(inputUrl);
   } catch {
-    return { success: false, error: "圖片網址格式不正確" };
+    return { success: false, error: "網址格式不正確" };
   }
-  if (parsed.protocol !== "https:") return { success: false, error: "圖片網址必須使用 https://" };
+  if (parsed.protocol !== "https:") return { success: false, error: "網址必須使用 https://" };
 
-  const host = parsed.hostname.toLowerCase();
-  if (host === "facebook.com" || host.endsWith(".facebook.com")) {
-    return { success: false, error: "這是 Facebook 貼文／相片頁網址。請在照片上按右鍵，選擇「複製圖片網址」後再貼上。" };
-  }
-  if (!host.endsWith(".fbcdn.net")) {
-    return { success: false, error: "目前自動匯入僅支援 Facebook 的 fbcdn 圖片網址" };
+  let host = parsed.hostname.toLowerCase();
+  let target = parsed.toString();
+
+  if (FB_PAGE_HOSTS.some((base) => hostMatches(host, base))) {
+    const photoId = extractFacebookPhotoId(parsed);
+    if (!photoId) return { success: false, error: FB_POST_HELP };
+    target = `https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=${photoId}`;
+    host = "lookaside.fbsbx.com";
   }
 
-  const imageRes = await fetch(parsed.toString(), {
+  const isLookaside = hostMatches(host, "fbsbx.com");
+  if (!host.endsWith(".fbcdn.net") && !isLookaside) {
+    return { success: false, error: "目前自動匯入僅支援 Facebook 的圖片網址或相片網址" };
+  }
+
+  const imageRes = await fetch(target, {
     redirect: "follow",
     headers: {
       Accept: "image/webp,image/png,image/jpeg,image/gif,*/*;q=0.8",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36",
+      "User-Agent": isLookaside ? FB_CRAWLER_UA : BROWSER_UA,
     },
   });
   if (!imageRes.ok) {
-    return { success: false, error: `Facebook 圖片網址已失效（HTTP ${imageRes.status}），請重新複製圖片網址` };
+    return { success: false, error: `Facebook 圖片網址已失效（HTTP ${imageRes.status}），請重新複製網址` };
   }
 
   const mimeType = text(imageRes.headers.get("content-type")).split(";")[0].toLowerCase();
   if (!/^image\/(jpeg|png|gif|webp)$/.test(mimeType)) {
-    return { success: false, error: "這個網址不是可匯入的 JPG、PNG、GIF 或 WEBP 圖片" };
+    return { success: false, error: isLookaside ? FB_POST_HELP : "這個網址不是可匯入的 JPG、PNG、GIF 或 WEBP 圖片" };
   }
 
   const declaredSize = Number(imageRes.headers.get("content-length") || 0);

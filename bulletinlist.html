@@ -598,9 +598,9 @@ a{text-decoration:none;color:inherit}
         <div class="upload-actions">
           <button class="btn" type="button" id="removeImageBtn" onclick="clearBulletinImage()" style="display:none">移除圖片</button>
         </div>
-        <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。Facebook 圖片網址會立即轉存到 Drive，不會保存容易失效的原始網址。</div>
+        <div class="upload-note">圖片會自動上傳到指定雲端資料夾，可一次上傳多張，支援 JPG、PNG、GIF、WEBP，單檔上限 5MB。可貼 Facebook 圖片網址（電腦：對照片按右鍵→複製圖片網址），或點開照片後網址列上含 fbid= 的相片網址。系統會立即把圖片轉存到 Drive，不保存容易失效的原始網址。貼文網址（share/p/…）抓不到圖。</div>
         <div class="upload-row" style="margin-top:10px">
-          <input class="input" id="imageUrlInput" type="url" placeholder="貼上 Facebook 圖片網址（不是貼文網址）" style="flex:1">
+          <input class="input" id="imageUrlInput" type="url" placeholder="貼上 Facebook 圖片網址或相片網址（非貼文網址）" style="flex:1">
           <button class="btn" type="button" onclick="addImageUrlFromInput()">匯入並轉存</button>
         </div>
       </div>
