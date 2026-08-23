@@ -196,14 +196,6 @@ function updateCachedRegistration(eventId, regId, updates){
   saveRegistrationsCache(eventId, cache);
 }
 
-function removeCachedRegistration(eventId, regId){
-  const cache = getCachedRegistrations(eventId);
-  if(!cache) return;
-  cache.registrations = cache.registrations.filter(r => String(r.regId || '') !== String(regId || ''));
-  cache.totalHeadcount = cache.registrations.length;
-  saveRegistrationsCache(eventId, cache);
-}
-
 function registrationOverrideKey(eventId, regId){
   return String(eventId || '') + '::' + String(regId || '');
 }
@@ -551,6 +543,8 @@ function copyRegistrationRow(eventId, regId, btn){
       if(!d.success){showToast('複製失敗：'+(d.error||''));return;}
       if(ev) ev.registeredCount=d.registeredCount;
       currentRegs.push(d.registration);
+      saveRegistrationsCache(eventId, {registrations: currentRegs, totalHeadcount: currentRegs.length});
+      saveEventsCache(allEvents);
       const wrap=document.querySelector('.reg-table-wrap');
       if(wrap) wrap.innerHTML=buildRegTableHTML(eventId,currentRegs);
       showToast('已複製一筆報名');
@@ -761,12 +755,12 @@ function saveRegistrationEdit(){
       closeEditRegModal();
       const ev=allEvents.find(e=>e.eventId===currentDrawerEventId);
       if(ev&&d.registeredCount!==undefined) ev.registeredCount=parseInt(d.registeredCount)||0;
-      updateCachedRegistration(currentDrawerEventId, reg.regId, updates);
+      Object.assign(reg, updates);
+      saveRegistrationsCache(currentDrawerEventId, {registrations: currentRegs, totalHeadcount: currentRegs.length});
       saveEventsCache(allEvents);
       renderStats(); renderCards();
       showToast('報名資料已更新');
-      const cachedAfterEdit=getCachedRegistrations(currentDrawerEventId);
-      if(cachedAfterEdit) renderRegistrationsDrawerFast(currentDrawerEventId,cachedAfterEdit,false);
+      renderRegistrationsDrawerFast(currentDrawerEventId,{registrations: currentRegs, totalHeadcount: currentRegs.length},false);
     }).catch(()=>{btn.disabled=false;btn.textContent='儲存修改';showToast('網路錯誤');});
 }
 function deleteRegistration(eventId, regId, btn){
@@ -779,12 +773,12 @@ function deleteRegistration(eventId, regId, btn){
       if(!d.success){btn.disabled=false;btn.textContent='刪';showToast('刪除失敗：'+(d.error||''));return;}
       const ev=allEvents.find(e=>e.eventId===eventId);
       if(ev&&d.registeredCount!==undefined) ev.registeredCount=parseInt(d.registeredCount)||0;
-      removeCachedRegistration(eventId, regId);
+      currentRegs=currentRegs.filter(r=>String(r.regId||'')!==String(regId||''));
+      saveRegistrationsCache(eventId, {registrations: currentRegs, totalHeadcount: currentRegs.length});
       saveEventsCache(allEvents);
       renderStats(); renderCards();
       showToast('報名資料已刪除');
-      const cachedAfterDelete=getCachedRegistrations(eventId);
-      if(cachedAfterDelete) renderRegistrationsDrawerFast(eventId,cachedAfterDelete,false);
+      renderRegistrationsDrawerFast(eventId,{registrations: currentRegs, totalHeadcount: currentRegs.length},false);
     }).catch(()=>{btn.disabled=false;btn.textContent='刪';showToast('網路錯誤');});
 }
 function closeDrawer(){
