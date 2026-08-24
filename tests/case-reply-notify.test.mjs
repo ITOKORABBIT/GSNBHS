@@ -9,6 +9,7 @@ function createHarness({ existingCase, pushOk = true, withBinding = true }) {
   const pushes = [];
   const writes = [];
   const waits = [];
+  const deliveries = new Set();
 
   const env = {
     ALLOWED_ORIGIN: "https://gsnbhs.pages.dev",
@@ -27,6 +28,13 @@ function createHarness({ existingCase, pushOk = true, withBinding = true }) {
               },
               async run() {
                 if (sql.includes("line_display_name")) writes.push(values);
+                if (sql.includes("INSERT OR IGNORE INTO case_reply_deliveries")) {
+                  const key = values.join(":");
+                  if (deliveries.has(key)) return { success: true, meta: { changes: 0 } };
+                  deliveries.add(key);
+                  return { success: true, meta: { changes: 1 } };
+                }
+                if (sql.includes("DELETE FROM case_reply_deliveries")) deliveries.delete(values.join(":"));
                 return { success: true, meta: { changes: 1 } };
               },
             };
@@ -154,6 +162,18 @@ test("推播失敗要誠實記錄，案件回覆本身仍然成功", async () =>
 
   assert.equal((await res.json()).success, true);
   assert.equal(lastPayload(h.writes).replyNotify.status, "failed");
+  restore();
+});
+
+test("相同案件、狀態與回覆內容重送時只推播一次", async () => {
+  const restore = stubGas();
+  const h = createHarness({ existingCase: LINE_CASE });
+  await worker.fetch(replyRequest({ notifyReporter: true }), h.env, h.ctx);
+  await Promise.all(h.waits.splice(0));
+  await worker.fetch(replyRequest({ notifyReporter: true }), h.env, h.ctx);
+  await Promise.all(h.waits.splice(0));
+
+  assert.equal(h.pushes.length, 1);
   restore();
 });
 

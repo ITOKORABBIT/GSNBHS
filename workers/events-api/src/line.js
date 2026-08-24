@@ -1688,9 +1688,12 @@ export async function buildReportUrl(env, userId) {
   if (!userId) return REPORT_URL;
   const profile = await getLineProfile(env, userId);
   const displayName = profile?.displayName || "";
-  return REPORT_URL +
-    "?lineUserId=" + encodeURIComponent(userId) +
-    (displayName ? "&displayName=" + encodeURIComponent(displayName) : "");
+  const token = crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO case_report_tokens (token, line_user_id, line_display_name, expires_at)
+     VALUES (?, ?, ?, datetime('now', '+2 hours'))`,
+  ).bind(token, userId, displayName).run();
+  return REPORT_URL + "?reportToken=" + encodeURIComponent(token);
 }
 
 // 點「案件通報」後回的卡片。多這一步是為了拿到通報人的 LINE 身分，

@@ -286,20 +286,39 @@ async function submitReport(env, ctx, data) {
   const validationError = await validatePublicReport(env, data);
   if (validationError) return { success: false, error: validationError };
 
+  const identity = await consumeCaseReportToken(env, text(data.reportToken));
+  if (identity.error) return { success: false, error: identity.error };
+  const trustedData = {
+    ...data,
+    lineUserId: identity.lineUserId,
+    lineDisplayName: identity.lineDisplayName,
+  };
+
   const caseId = await generateCaseId(env);
   const now = nowTW();
-  const c = buildCaseFromSubmit(data, caseId, now);
+  const c = buildCaseFromSubmit(trustedData, caseId, now);
   await upsertCaseStatement(env, c).run();
   const notificationSent = await deliverCaseNotification(env, c);
 
   ctx.waitUntil(
-    forwardToGas(env, { ...data, action: "submitReport", caseId })
+    forwardToGas(env, { ...trustedData, action: "submitReport", caseId })
       .catch((err) => {
         console.error(JSON.stringify({ action: "submitReport", caseId, syncTarget: "gas", error: err.message }));
       }),
   );
 
   return { success: true, caseId, notificationSent };
+}
+
+async function consumeCaseReportToken(env, token) {
+  if (!token) return { lineUserId: "", lineDisplayName: "", error: "" };
+  const row = await env.DB.prepare(
+    `UPDATE case_report_tokens SET consumed_at=CURRENT_TIMESTAMP
+      WHERE token=? AND consumed_at IS NULL AND expires_at > CURRENT_TIMESTAMP
+      RETURNING line_user_id AS lineUserId, line_display_name AS lineDisplayName`,
+  ).bind(token).first();
+  if (!row) return { lineUserId: "", lineDisplayName: "", error: "line_identity_expired" };
+  return { lineUserId: text(row.lineUserId), lineDisplayName: text(row.lineDisplayName), error: "" };
 }
 
 async function validatePublicReport(env, data) {
@@ -615,7 +634,8 @@ async function notifyReporterOfReply(env, c, data) {
 
   const to = text(c.lineUserId);
   const replyContent = text(c.replyContent);
-  const result = { at: nowTW(), status: "", error: "" };
+  const fingerprint = await replyNotificationFingerprint(c);
+  const result = { at: nowTW(), status: "", error: "", fingerprint };
 
   if (!to) {
     result.status = "skipped";
@@ -627,6 +647,8 @@ async function notifyReporterOfReply(env, c, data) {
     result.status = "failed";
     result.error = "推播管道未設定";
   } else {
+    const claimed = await claimReplyDelivery(env, c.caseId, fingerprint);
+    if (!claimed) return;
     try {
       const resp = await env.EVENTS_API.fetch("https://events-api/internal/line-push", {
         method: "POST",
@@ -639,17 +661,51 @@ async function notifyReporterOfReply(env, c, data) {
       const body = parseJson(await resp.text());
       if (resp.ok && body.success) {
         result.status = "sent";
+        await finishReplyDelivery(env, c.caseId, fingerprint);
       } else {
         result.status = "failed";
         result.error = text(body.error) || `HTTP ${resp.status}`;
+        await releaseReplyDelivery(env, c.caseId, fingerprint);
       }
     } catch (err) {
       result.status = "failed";
       result.error = err.message;
+      await releaseReplyDelivery(env, c.caseId, fingerprint);
     }
   }
 
   await upsertCaseStatement(env, { ...c, replyNotify: result }).run();
+}
+
+async function replyNotificationFingerprint(c) {
+  const raw = JSON.stringify({
+    caseId: text(c.caseId),
+    status: text(c.status),
+    replyContent: text(c.replyContent),
+  });
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function claimReplyDelivery(env, caseId, fingerprint) {
+  const result = await env.DB.prepare(
+    `INSERT OR IGNORE INTO case_reply_deliveries (case_id, fingerprint, status)
+     VALUES (?, ?, 'delivering')`,
+  ).bind(text(caseId), fingerprint).run();
+  return result.meta?.changes === 1;
+}
+
+async function finishReplyDelivery(env, caseId, fingerprint) {
+  await env.DB.prepare(
+    `UPDATE case_reply_deliveries SET status='sent', sent_at=CURRENT_TIMESTAMP
+      WHERE case_id=? AND fingerprint=?`,
+  ).bind(text(caseId), fingerprint).run();
+}
+
+async function releaseReplyDelivery(env, caseId, fingerprint) {
+  await env.DB.prepare(
+    "DELETE FROM case_reply_deliveries WHERE case_id=? AND fingerprint=? AND status='delivering'",
+  ).bind(text(caseId), fingerprint).run();
 }
 
 function buildReplyNoticeMessage(c) {

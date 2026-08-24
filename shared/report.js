@@ -1,16 +1,13 @@
 
 var FORM_STARTED_AT = Date.now();
 
-// ── 通報人的 LINE 身分 ──
-// 從 LINE 圖文選單點「案件通報」時，機器人會把身分帶在連結上傳進來，
-// 讓里長知道是誰通報的；填表者看不到這兩個值。
-// 用瀏覽器或書籤直接開這一頁時沒有這些參數，維持空字串，表單照常可以送出。
-var LINE_USER_ID = '', LINE_DISPLAY_NAME = '';
+// ── 通報人的 LINE 身分 token ──
+// 網址只帶短效、單次使用的 token；LINE userId 與名稱留在 Worker/D1。
+var REPORT_TOKEN = '';
 (function () {
   try {
     var q = new URLSearchParams(location.search);
-    LINE_USER_ID = q.get('lineUserId') || '';
-    LINE_DISPLAY_NAME = q.get('displayName') || '';
+    REPORT_TOKEN = q.get('reportToken') || '';
   } catch (e) {}
 })();
 
@@ -353,8 +350,7 @@ document.getElementById('reportForm').addEventListener('submit', async function(
       name: document.getElementById('f_name').value.trim(),
       phone: document.getElementById('f_phone').value.trim(),
       lineId: document.getElementById('f_line').value.trim(),
-      lineUserId: LINE_USER_ID,
-      lineDisplayName: LINE_DISPLAY_NAME,
+      reportToken: REPORT_TOKEN,
       cate: document.getElementById('f_cate').value,
       title: document.getElementById('f_title').value.trim(),
       desc: document.getElementById('f_desc').value.trim(),

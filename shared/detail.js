@@ -343,11 +343,12 @@ function openModal(){
 
   // 通知通報人（只有從 LINE 通報的案件才推得動，沒有身分就不顯示這一格）
   if (d.lineUserId) {
+    var notifyDefault = !(d.replyNotify && d.replyNotify.status === 'sent');
     html += '<div class="field">';
     html += '<div class="field-label">通知通報人</div>';
-    html += '<div class="toggle-field on" id="notifyToggle" onclick="toggleNotify()">';
+    html += '<div class="toggle-field' + (notifyDefault ? ' on' : '') + '" id="notifyToggle" onclick="toggleNotify()">';
     html += '<div class="toggle-track"></div>';
-    html += '<input type="checkbox" id="m_notify" checked style="display:none">';
+    html += '<input type="checkbox" id="m_notify"' + (notifyDefault ? ' checked' : '') + ' style="display:none">';
     html += '<span class="toggle-text">用 LINE 通知 ' + esc(d.lineDisplayName || '通報人') + '</span>';
     html += '</div>';
     html += '</div>';

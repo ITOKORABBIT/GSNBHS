@@ -9,6 +9,9 @@ function createHarness() {
   const caseInserts = [];
   const hubRequests = [];
   const waits = [];
+  const reportTokens = new Map([
+    ["valid-token", { lineUserId: "U1234567890abcdef", lineDisplayName: "王小明" }],
+  ]);
 
   const env = {
     ALLOWED_ORIGIN: "https://gsnbhs.pages.dev",
@@ -31,6 +34,12 @@ function createHarness() {
             return {
               async first() {
                 if (sql.includes("report_dedupe")) return null;
+                if (sql.includes("UPDATE case_report_tokens")) {
+                  const row = reportTokens.get(values[0]);
+                  if (!row) return null;
+                  reportTokens.delete(values[0]);
+                  return row;
+                }
                 if (sql.includes("MAX(CAST")) return { maxSeq: 0 };
                 return null;
               },
@@ -75,10 +84,10 @@ function flexRowValue(message, label) {
   return hit ? hit.contents[1].text : undefined;
 }
 
-test("從 LINE 進來的通報會存下 LINE 名稱與 userId，群組卡片也看得到", async () => {
+test("從 LINE 進來的通報以單次 token 取回 LINE 身分", async () => {
   const h = createHarness();
   const response = await worker.fetch(
-    reportRequest({ lineUserId: "U1234567890abcdef", lineDisplayName: "王小明" }),
+    reportRequest({ reportToken: "valid-token", lineUserId: "U-attacker", lineDisplayName: "假名字" }),
     h.env,
     h.ctx,
   );
@@ -103,6 +112,27 @@ test("從 LINE 進來的通報會存下 LINE 名稱與 userId，群組卡片也�
   assert.equal(flexRowValue(message, "LINE 名稱"), "王小明");
   assert.equal(flexRowValue(message, "通報人"), "測試里民（0912345678）");
   assert.equal(flexRowValue(message, "編號"), body.caseId);
+});
+
+test("偽造 LINE 身分參數不會被採用", async () => {
+  const h = createHarness();
+  const response = await worker.fetch(
+    reportRequest({ lineUserId: "U-attacker", lineDisplayName: "假名字" }),
+    h.env,
+    h.ctx,
+  );
+  await Promise.all(h.waits);
+  assert.equal((await response.json()).success, true);
+  const payload = JSON.parse(h.caseInserts[0].values.at(-1));
+  assert.equal(payload.lineUserId, "");
+  assert.equal(payload.lineDisplayName, "");
+});
+
+test("無效或已使用的 LINE 身分 token 會被拒絕", async () => {
+  const h = createHarness();
+  const response = await worker.fetch(reportRequest({ reportToken: "expired-token" }), h.env, h.ctx);
+  assert.deepEqual(await response.json(), { success: false, error: "line_identity_expired" });
+  assert.equal(h.caseInserts.length, 0);
 });
 
 test("瀏覽器直接開表單的通報照常成立，卡片不會多出空的 LINE 名稱列", async () => {
