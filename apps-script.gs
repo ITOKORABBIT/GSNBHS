@@ -543,7 +543,9 @@ function nextCaseId_(sheet, prefix) {
 }
 
 function buildDetailUrl_(caseId) {
-  return DETAIL_BASE_URL + encodeURIComponent(String(caseId || ""));
+  // 帶 openExternalBrowser=1：里長從 LINE 點開時，LINE 才會用 Chrome／Safari 開，
+  // 不會停在 LINE 內建瀏覽器（Google 登入在內建瀏覽器會被 Google 擋掉）。
+  return DETAIL_BASE_URL + encodeURIComponent(String(caseId || "")) + "&openExternalBrowser=1";
 }
 
 function uploadPublicReportPhotos_(photos, caseId) {

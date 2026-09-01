@@ -142,6 +142,10 @@ function initGoogle() {
       location.replace(url.toString());
       return;
     }
+    // 已經請 LINE 換外部瀏覽器還是停在 LINE 內建瀏覽器：Google 登入一定會被擋，
+    // 直接給複製網址的提示，不要顯示一個按了必失敗的登入按鈕。
+    document.getElementById('webviewWarn').style.display = 'block';
+    return;
   }
   if (isOtherWebView()) {
     document.getElementById('webviewWarn').style.display = 'block';

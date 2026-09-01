@@ -93,7 +93,12 @@ test("public report sends a truthful Flex notification through the village hub",
   const [message] = harness.hubRequests[0].body.messages;
   assert.equal(message.type, "flex");
   assert.match(message.altText, new RegExp(body.caseId));
-  assert.equal(message.contents.footer.contents[0].action.uri, `https://gsnbhs.pages.dev/detail.html?id=${body.caseId}`);
+  // 卡片網址一定要帶 openExternalBrowser=1：里長在 LINE 點開才會跳到 Chrome／Safari，
+  // 留在 LINE 內建瀏覽器的話 Google 登入會被擋，里長就進不了後台。
+  assert.equal(
+    message.contents.footer.contents[0].action.uri,
+    `https://gsnbhs.pages.dev/detail.html?id=${body.caseId}&openExternalBrowser=1`,
+  );
 
   assert.equal(harness.notificationWrites.length, 1);
   assert.equal(harness.notificationWrites[0][0], body.caseId);

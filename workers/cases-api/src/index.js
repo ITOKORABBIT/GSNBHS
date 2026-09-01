@@ -573,7 +573,7 @@ function buildCaseFromSubmit(data, caseId, now) {
     publicFlag: parseBoolean(data.publicFlag),
     publicTitle: text(data.publicTitle), publicCate: text(data.publicCate),
     publicLoc: text(data.publicLoc), publicSummary: text(data.publicSummary),
-    replyUrl: "https://gsnbhs.pages.dev/detail.html?id=" + encodeURIComponent(caseId),
+    replyUrl: caseDetailUrl(caseId),
     pinOrder: 0, sortOrder: 0,
   };
 }
@@ -939,7 +939,7 @@ function buildCaseNotification(c) {
         type: "button",
         style: "primary",
         color: "#3A6B52",
-        action: { type: "uri", label: "查看／回覆", uri: text(c.replyUrl) },
+        action: { type: "uri", label: "查看／回覆", uri: forceExternalBrowser(text(c.replyUrl) || caseDetailUrl(c.caseId)) },
       }],
     },
   };
@@ -1056,6 +1056,19 @@ function parseJson(value) {
 
 function text(value) {
   return value === undefined || value === null ? "" : String(value).trim();
+}
+
+// 里長從 LINE 點案件卡片時，LINE 會用內建瀏覽器開啟，而 Google 登入在內建瀏覽器
+// 一律被 Google 擋掉（disallowed_useragent）。網址帶 openExternalBrowser=1，LINE 才會
+// 直接丟給 Chrome／Safari 開，里長點進去就能正常登入。
+function caseDetailUrl(caseId) {
+  return "https://gsnbhs.pages.dev/detail.html?id=" + encodeURIComponent(text(caseId)) + "&openExternalBrowser=1";
+}
+
+function forceExternalBrowser(url) {
+  const raw = text(url);
+  if (!raw || /[?&]openExternalBrowser=/.test(raw)) return raw;
+  return raw + (raw.includes("?") ? "&" : "?") + "openExternalBrowser=1";
 }
 
 function normalizePublicUrl(value) {
