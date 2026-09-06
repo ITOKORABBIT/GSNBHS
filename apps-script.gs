@@ -73,7 +73,8 @@ var EVT_COL = {
   surveySentAt: 23,
   surveyDelay: 24,
 };
-var SESSION_TTL = 2592000;
+var SESSION_TTL = 2592000; // 30 天：session 真正有效期，存 ScriptProperties
+var SESSION_CACHE_TTL = 21600; // 6 小時：CacheService 上限，只當熱快取加速
 var PUBLIC_CACHE_TTL = 60; // 公開頁面快取秒數
 var PUBLIC_FORM_MIN_MS = 3000;
 var PUBLIC_FORM_MAX_MS = 2 * 60 * 60 * 1000;
@@ -252,11 +253,12 @@ function handleLogin(data) {
   if (!admin.valid) return jsonOut({ success: false, error: "Not authorized" });
 
   var sessionToken = Utilities.getUuid();
-  CacheService.getScriptCache().put(
-    "sess_" + sessionToken,
-    JSON.stringify({ email: email, name: admin.name, role: admin.role || "" }),
-    SESSION_TTL,
-  );
+  saveSession_(sessionToken, {
+    email: email,
+    name: admin.name,
+    role: admin.role || "",
+  });
+  purgeExpiredSessions_();
 
   return jsonOut({
     success: true,
@@ -305,27 +307,78 @@ function checkAdmin(email) {
   return { valid: false };
 }
 
+// session 以 ScriptProperties 為準（持久），CacheService 只當熱快取。
+// 原本只寫 CacheService：GAS 快取上限 6 小時，而且容器回收時會整批清掉，
+// 里長登入沒多久後台每個分頁就全部 401，畫面顯示「無法載入」。
+function saveSession_(token, sess, expiresAt) {
+  var record = {
+    email: sess.email,
+    name: sess.name,
+    role: sess.role || "",
+    expiresAt: expiresAt || Date.now() + SESSION_TTL * 1000,
+  };
+  var json = JSON.stringify(record);
+  SCRIPT_PROPS_.setProperty("sess_" + token, json);
+  SCRIPT_CACHE_.put("sess_" + token, json, SESSION_CACHE_TTL);
+  return record;
+}
+
+// ScriptProperties 總容量約 500KB，登入時順手清掉過期的 session，避免長年累積塞爆。
+function purgeExpiredSessions_() {
+  try {
+    var all = SCRIPT_PROPS_.getProperties();
+    var now = Date.now();
+    var expired = [];
+    for (var key in all) {
+      if (key.indexOf("sess_") !== 0) continue;
+      var record = null;
+      try {
+        record = JSON.parse(all[key]);
+      } catch (e) {
+        expired.push(key);
+        continue;
+      }
+      if (record.expiresAt && now > record.expiresAt) expired.push(key);
+    }
+    for (var i = 0; i < expired.length; i++) {
+      SCRIPT_PROPS_.deleteProperty(expired[i]);
+      SCRIPT_CACHE_.remove(expired[i]);
+    }
+  } catch (e) {
+    // 清理失敗不該擋住登入
+  }
+}
+
 function getSession(token) {
   if (!token) return null;
-  var raw = CacheService.getScriptCache().get("sess_" + token);
+  var key = "sess_" + token;
+  var raw = SCRIPT_CACHE_.get(key);
+  var fromCache = !!raw;
+  if (!raw) raw = SCRIPT_PROPS_.getProperty(key);
   if (!raw) return null;
+  var sess;
   try {
-    return JSON.parse(raw);
+    sess = JSON.parse(raw);
   } catch (e) {
     return null;
   }
+  if (sess.expiresAt && Date.now() > sess.expiresAt) {
+    SCRIPT_PROPS_.deleteProperty(key);
+    SCRIPT_CACHE_.remove(key);
+    return null;
+  }
+  if (!fromCache) SCRIPT_CACHE_.put(key, raw, SESSION_CACHE_TTL);
+  return sess;
 }
 
 function handleRefreshSession(data) {
   var sess = getSession(data.sessionToken);
   if (!sess)
     return jsonOut({ success: false, error: "Unauthorized", code: 401 });
-  // 延長 TTL：重新寫入同一個 sessionToken
-  CacheService.getScriptCache().put(
-    "sess_" + data.sessionToken,
-    JSON.stringify(sess),
-    SESSION_TTL,
-  );
+  // 延長效期：Worker 每 5 分鐘就會來 refresh 一次，過半期才真的續寫，
+  // 免得每次都動 ScriptProperties 吃掉寫入配額。
+  var remaining = sess.expiresAt ? sess.expiresAt - Date.now() : 0;
+  if (remaining < (SESSION_TTL * 1000) / 2) saveSession_(data.sessionToken, sess);
   return jsonOut({ success: true });
 }
 

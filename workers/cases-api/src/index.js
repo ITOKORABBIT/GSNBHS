@@ -970,6 +970,18 @@ function logSyncError(action, id) {
 
 // ─── Auth ─────────────────────────────────────────────────
 
+// GAS 偶爾不回 JSON 而是回一頁 HTML（冷啟動、配額、Google 錯誤頁）。
+// 直接 .json() 會丟出解析錯誤 → 500「伺服器錯誤」，里長只看到系統壞掉。
+// 這裡改判成 401，前端會直接跳「登入已失效，請重新登入」。
+async function parseGasAuthJson(response) {
+  const body = await response.text();
+  try {
+    return JSON.parse(body);
+  } catch {
+    throw httpError(401, "登入已失效，請重新登入");
+  }
+}
+
 async function requireAdmin(env, data) {
   const token = text(data.sessionToken);
   if (!token || !env.GAS_SCRIPT_URL) throw httpError(401, "Unauthorized");
@@ -982,7 +994,7 @@ async function requireAdmin(env, data) {
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "refreshSession", sessionToken: token }),
   });
-  const json = await response.json();
+  const json = await parseGasAuthJson(response);
   if (!json.success) throw httpError(401, "Unauthorized");
 
   sessionCache.set(token, { expiresAt: Date.now() + SESSION_CACHE_TTL });
