@@ -35,3 +35,9 @@ test("event page reuses the shared bulletin layout stylesheet", () => {
   assert.match(html, /assets\/bulletin-news\.css/);
   assert.match(html, /assets\/theme\.css/);
 });
+
+test("only 報名中 opens registration, every other status is closed", () => {
+  // 各里後台出現過「已截止」與「已結束」兩種寫法，不能逐一列舉
+  assert.match(script, /!==\s*'報名中'\)\s*return\s*'closed'/);
+  assert.doesNotMatch(script, /===\s*'已截止'\)\s*return\s*'closed'/);
+});

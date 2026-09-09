@@ -55,17 +55,24 @@ function regTimeText(e) {
 }
 
 /* ── 狀態 ── */
+// 各里後台用過的狀態不只一種寫法（已截止／已結束），所以走白名單：
+// 只有「報名中」才開放報名，其餘一律當成結束，未來新增狀態也不會誤開。
 function stateOf(e) {
-  if (String(e.status) === '已截止') return 'closed';
+  if (String(e.status || '') !== '報名中') return 'closed';
   if (e.isFull) return 'full';
   return 'open';
 }
-var STATE_LABEL = { open: '報名中', full: '已額滿', closed: '已截止' };
 var STATE_TAG = { open: 'tag-open', full: 'tag-full', closed: 'tag-closed' };
 
-function stateTag(e) {
+function stateLabel(e) {
   var st = stateOf(e);
-  return '<span class="tag ' + STATE_TAG[st] + '">' + STATE_LABEL[st] + '</span>';
+  if (st === 'open') return '報名中';
+  if (st === 'full') return '已額滿';
+  return String(e.status || '') || '已結束';   // 結束的直接顯示後台設定的字
+}
+
+function stateTag(e) {
+  return '<span class="tag ' + STATE_TAG[stateOf(e)] + '">' + esc(stateLabel(e)) + '</span>';
 }
 
 /* 報名中的排前面；同組內活動日期近的排前面，沒日期的往後 */
