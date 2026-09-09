@@ -240,11 +240,11 @@ function renderStats(){
   allEvents.forEach(e=>{
     if(e.status==='報名中') active++;
     else if(e.status==='草稿') draft++;
-    else closed++;
+    else closed++;   // 已截止與排程自動設的已結束
   });
   document.getElementById('statActive').textContent='🟢 報名中 '+active;
   document.getElementById('statDraft').textContent='📝 草稿 '+draft;
-  document.getElementById('statClosed').textContent='🔴 已截止 '+closed;
+  document.getElementById('statClosed').textContent='🔴 已截止・已結束 '+closed;
 }
 
 function setFilter(f, btn){
@@ -311,11 +311,13 @@ function cardHTML(e){
     ? '<span class="badge green">報名中</span>'
     : e.status==='草稿'
     ? '<span class="badge gray">草稿</span>'
-    : '<span class="badge red">已截止</span>';
+    : e.status==='已結束'
+    ? '<span class="badge gold">已結束</span>'
+    : `<span class="badge red">${esc(e.status||'已截止')}</span>`;
   const thumb = e.imageUrl
     ? `<img class="card-thumb" src="${toDriveImgUrl(e.imageUrl)}" alt="${esc(e.eventName)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+`<div class="card-thumb-placeholder" style="display:none">🎪</div>`
     : `<div class="card-thumb-placeholder">🎪</div>`;
-  const statusOptions=['草稿','報名中','已截止'].map(s=>`<option${s===e.status?' selected':''}>${s}</option>`).join('');
+  const statusOptions=['草稿','報名中','已截止','已結束'].map(s=>`<option${s===e.status?' selected':''}>${s}</option>`).join('');
   return `
 <div class="event-card" id="card-${e.eventId}" data-event-id="${e.eventId}">
   ${thumb}
