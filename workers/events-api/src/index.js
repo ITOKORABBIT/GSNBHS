@@ -2,7 +2,7 @@
 import { handleLineWebhook, handleHubCallback, linePush, getLineQuota } from "./line.js";
 import { getConsultRequests, retryConsultNotification, submitConsult, updateConsultStatus } from "./consult.js";
 import { closeEndedEvents, sendEventReminders, sendPostEventSurveys, resetReminderSent, resetSurveySentAt } from "./scheduled.js";
-import { getEvents, getEvent, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
+import { getEvents, getEvent, getPublicEvents, createEvent, updateEvent, updateEventStatus, deleteEvent, reorderEvents } from "./events.js";
 import { getRegistrations, getEventStats, checkInRegistration, updateRegistration, deleteRegistration, copyRegistration } from "./registrations.js";
 import {
   getSurveys, getSurvey, createSurvey, updateSurvey, deleteSurvey,
@@ -23,6 +23,7 @@ const ACTIONS = new Set([
   "importBundle",
   "getEvents",
   "getEvent",
+  "getPublicEvents",
   "getEventDetailBundle",
   "createEvent",
   "updateEvent",
@@ -65,7 +66,7 @@ const ACTIONS = new Set([
   "updateConsultStatus",
 ]);
 
-const PUBLIC_ACTIONS = new Set(["getSurveyPublic", "submitSurveyResponse", "submitRegistration", "uploadPublicPhoto", "submitConsult"]);
+const PUBLIC_ACTIONS = new Set(["getPublicEvents", "getSurveyPublic", "submitSurveyResponse", "submitRegistration", "uploadPublicPhoto", "submitConsult"]);
 
 export default {
   async scheduled(controller, env) {
@@ -176,6 +177,7 @@ export default {
       }
 
       if (PUBLIC_ACTIONS.has(action)) {
+        if (action === "getPublicEvents") return corsJson(env, await getPublicEvents(env));
         if (action === "getSurveyPublic") return corsJson(env, await getSurveyPublic(env, data));
         if (action === "submitSurveyResponse") {
           if (!(await checkRateLimit(env, request))) {

@@ -6,11 +6,13 @@ const modules = [
   "admin", "adminreport", "bulletin", "bulletinlist", "detail", "eventdetail",
   "eventlist", "list", "opendetail", "openlist", "report", "store",
   "storedetail", "storelist", "storeopendetail", "storeopenlist", "survey", "voucher",
+  "eventopenlist",
 ];
 
 // 版面各里不同的頁面改用舊社里專屬檔，不吃 shared/<name>.js
 const ownLayoutPages = {
   storeopenlist: "./assets/storefront-map.js",
+  eventopenlist: "./assets/eventopenlist.js",
 };
 
 test("all feature pages use the platform core with correct load order", () => {

@@ -35,6 +35,55 @@ export async function getEvents(env) {
   return { success: true, events };
 }
 
+// ── 公開活動 ─────────────────────────────────────────────────────────────────
+// 給里民看的活動頁用。只回白名單欄位，報名者名單、問卷題目、簽到座標、
+// 提醒排程這些內部設定一律不出去；草稿也不對外。
+const PUBLIC_EVENT_FIELDS = [
+  "eventId",
+  "eventName",
+  "description",
+  "imageUrl",
+  "eventDate",
+  "eventStart",
+  "eventEnd",
+  "eventLocation",
+  "mapUrl",
+  "registrationStart",
+  "registrationEnd",
+  "quota",
+  "registeredCount",
+  "status",
+  "sortOrder",
+];
+
+function toPublicEvent(event, reservedCount) {
+  const out = {};
+  for (const key of PUBLIC_EVENT_FIELDS) {
+    if (event[key] !== undefined && event[key] !== null) out[key] = event[key];
+  }
+  const quota = Number(event.quota || 0);
+  const taken = Number(event.registeredCount || 0) + Number(reservedCount || 0);
+  // 「暫佔中」是內部狀態，對外只講額滿與否
+  out.isFull = quota > 0 && taken >= quota;
+  return out;
+}
+
+export async function getPublicEvents(env) {
+  const rows = await env.DB.prepare(
+    `SELECT payload_json FROM events
+     ORDER BY CASE WHEN sort_order > 0 THEN sort_order ELSE 999999 END ASC,
+              updated_at DESC, event_id DESC`,
+  ).all();
+  const events = [];
+  for (const row of rows.results) {
+    const event = parseJson(row.payload_json);
+    if (text(event.status) === "草稿") continue;
+    const reserved = await getActiveReservationCount(env, event.eventId);
+    events.push(toPublicEvent(event, reserved));
+  }
+  return { success: true, events };
+}
+
 export async function getEvent(env, data) {
   const eventId = requireId(data.eventId, "Missing eventId");
   const row = await env.DB.prepare("SELECT payload_json FROM events WHERE event_id = ?")
