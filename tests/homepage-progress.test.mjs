@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 const page = readFileSync(new URL("../index.html", import.meta.url), "utf8");
@@ -51,7 +51,9 @@ test("public cases stay local while personal case lookup remains available throu
   }
   assert.equal(page.split(`href="${lineCaseUrl}"`).length - 1, 2);
   assert.match(page, /<a class="process-step process-step-link" href="\.\/report\.html">[\s\S]*?<h3>填寫通報<\/h3>/);
-  assert.match(page, /href="\.\/openlist\.html"[\s\S]*<span class="service-name">公開案件<\/span>/);
+  // 里長暫時不公開案件，首頁不放入口（2026-09-09）
+  assert.doesNotMatch(page, /href="\.\/openlist\.html"/);
+  assert.doesNotMatch(page, /<span class="service-name">公開案件<\/span>/);
   assert.match(page, />查看進度<\/a>/);
   assert.match(page, /由里長親自協助/);
   assert.doesNotMatch(page, /HPNBHS/);
@@ -69,8 +71,9 @@ test("homepage footer includes the ITOKO RABBIT copyright", () => {
   assert.doesNotMatch(page, /網頁版權/);
 });
 
-test("public case pages are enabled without LINE redirects", () => {
+test("case pages stay on this site instead of being redirected away", () => {
   assert.equal(redirects.trim(), "");
-  assert.match(page, /href="\.\/openlist\.html"/);
-  assert.match(page, />公開案件</);
+  // 公開案件頁仍在，只是首頁暫時不放入口，之後里長要開再把 service-row 加回來
+  assert.ok(existsSync(new URL("../openlist.html", import.meta.url)));
+  assert.ok(existsSync(new URL("../opendetail.html", import.meta.url)));
 });
