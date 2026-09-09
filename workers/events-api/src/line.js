@@ -94,19 +94,19 @@ const LINE_CATEGORY_MAP = {
   美食地圖: ["美食地圖","美食","餐廳","吃的","飲食","早餐","午餐","晚餐","宵夜","點心"],
   飲料冰品: ["飲料冰品","飲料","冰品","手搖","咖啡"],
   健康醫療: ["健康醫療","醫療","診所","藥局","牙醫","中醫"],
-  生活便利: ["生活便利","生活","美容","健身","攝影","維修"],
-  住宅相關: ["住宅相關","住宅","居家","裝修","房屋"],
-  寵物專區: ["寵物專區","寵物","毛孩","貓","狗"],
-  其他: ["其他","其它"],
+  生活便利: ["生活便利","生活","美容","攝影","維修"],
+  學術教育: ["學術教育","教育","補習","才藝","家教","安親","音樂","美術","課程"],
+  運動休閒: ["運動休閒","運動","健身","瑜伽","球館","舞蹈","休閒"],
+  其他各行各業: ["其他各行各業","其他","其它"],
 };
 const LINE_CATEGORY_INFO = {
   美食地圖: { title: "美食地圖", emoji: "🍽", subtitle: "在地餐廳 / 小吃", color: "#10B981" },
   飲料冰品: { title: "飲料冰品", emoji: "🥤", subtitle: "手搖飲 / 咖啡 / 冰品", color: "#3B82F6" },
   健康醫療: { title: "健康醫療", emoji: "🏥", subtitle: "診所 / 藥局", color: "#8B5CF6" },
-  生活便利: { title: "生活便利", emoji: "🧺", subtitle: "美容 / 健身 / 生活服務", color: "#0EA5E9" },
-  住宅相關: { title: "住宅相關", emoji: "🏠", subtitle: "居家 / 裝修服務", color: "#F59E0B" },
-  寵物專區: { title: "寵物專區", emoji: "🐾", subtitle: "毛孩相關服務", color: "#EC4899" },
-  其他: { title: "其他", emoji: "✨", subtitle: "其他特約商家", color: "#64748B" },
+  生活便利: { title: "生活便利", emoji: "🧺", subtitle: "美容 / 維修 / 生活服務", color: "#0EA5E9" },
+  學術教育: { title: "學術教育", emoji: "🎓", subtitle: "補習 / 才藝 / 課程", color: "#F59E0B" },
+  運動休閒: { title: "運動休閒", emoji: "🏃", subtitle: "運動 / 健身 / 休閒", color: "#EC4899" },
+  其他各行各業: { title: "其他各行各業", emoji: "✨", subtitle: "其他特約商家", color: "#64748B" },
 };
 const MENU_LABELS = {
   news: "最新消息",
@@ -118,9 +118,9 @@ const FOOD_MAP_MENU_ITEMS = [
   { title: "美食地圖", emoji: "🍽", text: "美食地圖", color: "#10B981", desc: "在地餐廳、小吃特約優惠。" },
   { title: "飲料冰品", emoji: "🥤", text: "飲料冰品", color: "#3B82F6", desc: "手搖飲、咖啡、冰品特約優惠。" },
   { title: "健康醫療", emoji: "🏥", text: "健康醫療", color: "#8B5CF6", desc: "診所、藥局特約優惠。" },
-  { title: "生活便利", emoji: "🧺", text: "生活便利", color: "#0EA5E9", desc: "美容、健身等生活服務。" },
-  { title: "住宅相關", emoji: "🏠", text: "住宅相關", color: "#F59E0B", desc: "居家、裝修相關服務。" },
-  { title: "寵物專區", emoji: "🐾", text: "寵物專區", color: "#EC4899", desc: "毛孩美容、用品等服務。" },
+  { title: "生活便利", emoji: "🧺", text: "生活便利", color: "#0EA5E9", desc: "美容、維修等生活服務。" },
+  { title: "學術教育", emoji: "🎓", text: "學術教育", color: "#F59E0B", desc: "補習班、才藝與課程特約優惠。" },
+  { title: "運動休閒", emoji: "🏃", text: "運動休閒", color: "#EC4899", desc: "運動、健身與休閒相關服務。" },
   { title: "申請特約", emoji: "📝", text: "商家申請", color: "#94A3B8", desc: "開放後可由商家自行提出申請。" },
 ];
 

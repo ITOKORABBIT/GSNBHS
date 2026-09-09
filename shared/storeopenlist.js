@@ -4,11 +4,11 @@ var CATE_COLOR = {
   '飲料冰品': { bg:'#EFF6FF', txt:'#1D4ED8' },
   '健康醫療': { bg:'#F3EBFF', txt:'#6B28A8' },
   '生活便利': { bg:'#E0F7FA', txt:'#036672' },
-  '住宅相關': { bg:'#FFF3E0', txt:'#B75D00' },
-  '寵物專區': { bg:'#FFF1F4', txt:'#B4235A' },
+  '學術教育': { bg:'#FFF3E0', txt:'#B75D00' },
+  '運動休閒': { bg:'#FFF1F4', txt:'#B4235A' },
   '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
 };
-var FOOD_CATES = ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '住宅相關', '寵物專區'];
+var FOOD_CATES = ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '學術教育', '運動休閒'];
 
 function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
 var storeBrandTagDefs = [];
@@ -141,7 +141,7 @@ function buildCateChips() {
   var cats = {};
   allStores.forEach(function(d){ if (d.pubCate) cats[d.pubCate] = true; });
   var keys = Object.keys(cats).sort(function(a,b){
-    var order = ['美食地圖','飲料冰品','健康醫療','生活便利','住宅相關','寵物專區','其他'];
+    var order = ['美食地圖','飲料冰品','健康醫療','生活便利','學術教育','運動休閒','其他各行各業'];
     var ia = order.indexOf(a), ib = order.indexOf(b);
     if (ia === -1) ia = 999; if (ib === -1) ib = 999;
     return ia - ib;

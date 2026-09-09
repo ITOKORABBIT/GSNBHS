@@ -110,8 +110,8 @@ var CATE_COLOR = {
   '飲料冰品': { bg:'#EFF6FF', txt:'#1D4ED8' },
   '健康醫療': { bg:'#F3EBFF', txt:'#6B28A8' },
   '生活便利': { bg:'#E0F7FA', txt:'#036672' },
-  '住宅相關': { bg:'#FFF3E0', txt:'#B75D00' },
-  '寵物專區': { bg:'#FFF1F4', txt:'#B4235A' },
+  '學術教育': { bg:'#FFF3E0', txt:'#B75D00' },
+  '運動休閒': { bg:'#FFF1F4', txt:'#B4235A' },
   '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
 };
 function cateBadge(cat) {
@@ -201,7 +201,7 @@ function renderStore() {
 }
 
 // ── MODAL ──
-var CATE_OPTIONS = ['美食地圖','飲料冰品','健康醫療','生活便利','住宅相關','寵物專區','其他'];
+var CATE_OPTIONS = ['美食地圖','飲料冰品','健康醫療','生活便利','學術教育','運動休閒','其他各行各業'];
 var taxonomyBrandTags = [];
 var taxonomyBrandTagDefs = [];
 var BRAND_TAG_PALETTE = {
@@ -292,9 +292,11 @@ function openModal() {
 
   html += mf('公開類別 <span class="req">*</span>', (function(){
     var sel = '<select id="m_pubCate">';
-    CATE_OPTIONS.forEach(function(c){
-      var cur = d.pubCate || d.category || '';
-      sel += '<option value="' + c + '"' + (cur === c ? ' selected' : '') + '>' + c + '</option>';
+    var curCate = d.pubCate || d.category || '';
+    var cateOptions = CATE_OPTIONS.slice();
+    if (curCate && cateOptions.indexOf(curCate) === -1) cateOptions.unshift(curCate);
+    cateOptions.forEach(function(c){
+      sel += '<option value="' + c + '"' + (curCate === c ? ' selected' : '') + '>' + c + '</option>';
     });
     sel += '</select>';
     return sel;

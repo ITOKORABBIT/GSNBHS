@@ -34,15 +34,13 @@ const PUB_OPTIONAL_FIELDS = [
 ];
 
 export const DEFAULT_STORE_CATEGORIES = [
-  "里內日常小吃",
-  "家庭好友聚餐",
-  "大坑名產貴賓招待",
-  "衣",
-  "住",
-  "行",
-  "育",
-  "樂",
-  "其他",
+  "美食地圖",
+  "飲料冰品",
+  "健康醫療",
+  "生活便利",
+  "學術教育",
+  "運動休閒",
+  "其他各行各業",
 ];
 export const BRAND_TAG_COLORS = ["gold", "mint", "blue", "rose", "violet", "stone"];
 
@@ -148,8 +146,8 @@ async function getPublicStores(env) {
           WHEN '飲料冰品' THEN 2
           WHEN '健康醫療' THEN 3
           WHEN '生活便利' THEN 4
-          WHEN '住宅相關' THEN 5
-          WHEN '寵物專區' THEN 6
+          WHEN '學術教育' THEN 5
+          WHEN '運動休閒' THEN 6
           ELSE 7
         END,
         CASE WHEN sort_order > 0 THEN 1 ELSE 0 END,

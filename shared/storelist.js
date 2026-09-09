@@ -120,15 +120,15 @@ var BRAND_TAG_PALETTE = {
   blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
   violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
 };
-var FOOD_CATES = ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '住宅相關', '寵物專區'];
+var FOOD_CATES = ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '學術教育', '運動休閒'];
 var CATEGORY_GROUPS = FOOD_CATES.concat(['其他各行各業']);
 var CATEGORY_SORT_OFFSET = {
   '美食地圖': 0,
   '飲料冰品': 10000,
   '健康醫療': 20000,
   '生活便利': 30000,
-  '住宅相關': 40000,
-  '寵物專區': 50000,
+  '學術教育': 40000,
+  '運動休閒': 50000,
   '其他各行各業': 60000
 };
 
@@ -138,8 +138,8 @@ var CATE_COLOR = {
   '飲料冰品': { bg:'#EFF6FF', txt:'#1D4ED8' },
   '健康醫療': { bg:'#F3EBFF', txt:'#6B28A8' },
   '生活便利': { bg:'#E0F7FA', txt:'#036672' },
-  '住宅相關': { bg:'#FFF3E0', txt:'#B75D00' },
-  '寵物專區': { bg:'#FFF1F4', txt:'#B4235A' },
+  '學術教育': { bg:'#FFF3E0', txt:'#B75D00' },
+  '運動休閒': { bg:'#FFF1F4', txt:'#B4235A' },
   '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
 };
 function cateBadge(cat) {
