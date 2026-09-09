@@ -12,5 +12,8 @@ const CONFIG = {
   BULLETIN_API_URL: 'https://gsnbhs-bulletins-api.ulch0709.workers.dev',
   BASE_URL: 'https://gsnbhs.pages.dev',
   GOOGLE_CLIENT_ID: '998009736888-v0hng93jchshicessbc6pjf4e6eiolju.apps.googleusercontent.com',
+  // 本里的商家分類（各里不同）。正式清單以本里 stores-api 的 taxonomy 為準，
+  // 這份是頁面載入、API 還沒回來前先顯示的預設值。
+  STORE_CATEGORIES: ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '學術教育', '運動休閒', '其他各行各業'],
   LINE_BOT_ID: '@900rucza',
 };

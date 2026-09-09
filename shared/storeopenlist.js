@@ -1,14 +1,38 @@
 
-var CATE_COLOR = {
-  '美食地圖': { bg:'#E6F7F0', txt:'#0F7A5C' },
-  '飲料冰品': { bg:'#EFF6FF', txt:'#1D4ED8' },
-  '健康醫療': { bg:'#F3EBFF', txt:'#6B28A8' },
-  '生活便利': { bg:'#E0F7FA', txt:'#036672' },
-  '學術教育': { bg:'#FFF3E0', txt:'#B75D00' },
-  '運動休閒': { bg:'#FFF1F4', txt:'#B4235A' },
-  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
-};
-var FOOD_CATES = ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '學術教育', '運動休閒'];
+// 分類清單各里不同，由該里自己的商家後端（taxonomy）決定，這裡不寫死分類名稱。
+var storeCategories = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];
+function setStoreCategories(list) {
+  if (!Array.isArray(list) || !list.length) return false;
+  var next = list.map(function(item){ return String(item || '').trim(); }).filter(Boolean);
+  if (next.join('|') === storeCategories.join('|')) return false;
+  storeCategories = next;
+  return true;
+}
+function storeCateOf(d) { return String((d && d.pubCate) || '').trim(); }
+// 分組＝該里的分類清單，加上資料裡出現、但清單已經沒有的舊分類（排在最後）。
+function categoryGroups() {
+  var groups = storeCategories.slice();
+  allStores.forEach(function(d){
+    var c = storeCateOf(d);
+    if (c && groups.indexOf(c) === -1) groups.push(c);
+  });
+  return groups;
+}
+// 分類名稱各里不同，顏色按該里清單的順序給，最後一色留給清單外的舊分類。
+var CATE_PALETTE = [
+  { bg:'#E6F7F0', txt:'#0F7A5C' },
+  { bg:'#EFF6FF', txt:'#1D4ED8' },
+  { bg:'#F3EBFF', txt:'#6B28A8' },
+  { bg:'#E0F7FA', txt:'#036672' },
+  { bg:'#FFF3E0', txt:'#B75D00' },
+  { bg:'#FFF1F4', txt:'#B4235A' },
+  { bg:'#F0EEEC', txt:'#7A6E66' },
+];
+function cateColor(cate) {
+  var idx = storeCategories.indexOf(cate);
+  if (idx === -1 || idx >= CATE_PALETTE.length - 1) return CATE_PALETTE[CATE_PALETTE.length - 1];
+  return CATE_PALETTE[idx];
+}
 
 function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
 var storeBrandTagDefs = [];
@@ -25,12 +49,13 @@ function brandTagStyle(tag) {
 function loadStoreBrandTagDefs() {
   apiCall('getPublicStoreTaxonomy').then(function(json){
     storeBrandTagDefs = json.success && json.taxonomy && Array.isArray(json.taxonomy.brandTagDefs) ? json.taxonomy.brandTagDefs : [];
-    if (allStores.length) applyFilters();
+    if (json.success && json.taxonomy) setStoreCategories(json.taxonomy.categories);
+    if (allStores.length) { buildCateChips(); applyFilters(); }
   }).catch(function(){});
 }
 
 function cateBadge(cat) {
-  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = cateColor(cat);
   return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
 }
 
@@ -140,8 +165,8 @@ function loadStores() {
 function buildCateChips() {
   var cats = {};
   allStores.forEach(function(d){ if (d.pubCate) cats[d.pubCate] = true; });
+  var order = categoryGroups();
   var keys = Object.keys(cats).sort(function(a,b){
-    var order = ['美食地圖','飲料冰品','健康醫療','生活便利','學術教育','運動休閒','其他各行各業'];
     var ia = order.indexOf(a), ib = order.indexOf(b);
     if (ia === -1) ia = 999; if (ib === -1) ib = 999;
     return ia - ib;
@@ -149,7 +174,7 @@ function buildCateChips() {
   var wrap = document.getElementById('cateChips');
   var html = '<span class="cate-chip active" data-cate="all" onclick="selectCate(this)">全部類別</span>';
   keys.forEach(function(c){
-    var col = CATE_COLOR[c] || { bg:'#F0EEEC', txt:'#7A6E66' };
+    var col = cateColor(c);
     html += '<span class="cate-chip" data-cate="' + esc(c) + '" onclick="selectCate(this)"' +
       ' style="--chip-bg:' + col.bg + ';--chip-txt:' + col.txt + '">' + esc(c) + '</span>';
   });
@@ -164,9 +189,9 @@ function selectCate(el) {
 }
 
 function categoryWeight(d) {
-  var idx = FOOD_CATES.indexOf(d.pubCate || '');
-  if (idx !== -1) return idx + 1;
-  return 4;
+  var groups = categoryGroups();
+  var idx = groups.indexOf(storeCateOf(d));
+  return idx === -1 ? groups.length : idx;
 }
 
 function applyFilters() {
@@ -210,13 +235,15 @@ function renderGrid(stores) {
     return;
   }
 
-  var groups = FOOD_CATES.map(function(c){ return { key: c, label: c, stores: [] }; });
-  groups.push({ key: 'other', label: '其他各行各業', stores: [] });
+  var order = categoryGroups();
+  var groups = order.map(function(c){ return { key: c, label: c, stores: [] }; });
+  var fallback = { key: '', label: '未分類', stores: [] };
 
   stores.forEach(function(d) {
-    var idx = FOOD_CATES.indexOf(d.pubCate || '');
-    groups[idx === -1 ? 3 : idx].stores.push(d);
+    var idx = order.indexOf(storeCateOf(d));
+    (idx === -1 ? fallback : groups[idx]).stores.push(d);
   });
+  groups.push(fallback);
 
   var html = '';
   groups.forEach(function(group) {

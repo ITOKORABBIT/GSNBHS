@@ -120,31 +120,44 @@ var BRAND_TAG_PALETTE = {
   blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
   violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
 };
-var FOOD_CATES = ['美食地圖', '飲料冰品', '健康醫療', '生活便利', '學術教育', '運動休閒'];
-var CATEGORY_GROUPS = FOOD_CATES.concat(['其他各行各業']);
-var CATEGORY_SORT_OFFSET = {
-  '美食地圖': 0,
-  '飲料冰品': 10000,
-  '健康醫療': 20000,
-  '生活便利': 30000,
-  '學術教育': 40000,
-  '運動休閒': 50000,
-  '其他各行各業': 60000
-};
+var storeCategories = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];
+var currentGroups = storeCategories.slice();
 
 // ── CATEGORY COLORS ──
-var CATE_COLOR = {
-  '美食地圖': { bg:'#E6F7F0', txt:'#0F7A5C' },
-  '飲料冰品': { bg:'#EFF6FF', txt:'#1D4ED8' },
-  '健康醫療': { bg:'#F3EBFF', txt:'#6B28A8' },
-  '生活便利': { bg:'#E0F7FA', txt:'#036672' },
-  '學術教育': { bg:'#FFF3E0', txt:'#B75D00' },
-  '運動休閒': { bg:'#FFF1F4', txt:'#B4235A' },
-  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
-};
+// 分類名稱各里不同，所以顏色按分類在該里清單裡的順序給，最後一色留給清單外的舊分類。
+var CATE_PALETTE = [
+  { bg:'#E6F7F0', txt:'#0F7A5C' },
+  { bg:'#EFF6FF', txt:'#1D4ED8' },
+  { bg:'#F3EBFF', txt:'#6B28A8' },
+  { bg:'#E0F7FA', txt:'#036672' },
+  { bg:'#FFF3E0', txt:'#B75D00' },
+  { bg:'#FFF1F4', txt:'#B4235A' },
+  { bg:'#F0EEEC', txt:'#7A6E66' },
+];
+function cateColor(cate) {
+  var idx = storeCategories.indexOf(cate);
+  if (idx === -1 || idx >= CATE_PALETTE.length - 1) return CATE_PALETTE[CATE_PALETTE.length - 1];
+  return CATE_PALETTE[idx];
+}
 function cateBadge(cat) {
-  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = cateColor(cat);
   return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
+}
+function setStoreCategories(list) {
+  if (!Array.isArray(list) || !list.length) return false;
+  var next = list.map(function(item){ return String(item || '').trim(); }).filter(Boolean);
+  if (next.join('|') === storeCategories.join('|')) return false;
+  storeCategories = next;
+  return true;
+}
+// 分組＝該里的分類清單，加上資料裡出現、但清單已經沒有的舊分類（排在後面，不會憑空消失）。
+function categoryGroups() {
+  var groups = storeCategories.slice();
+  allStores.forEach(function(d){
+    var c = categoryGroupKey(d);
+    if (c && groups.indexOf(c) === -1) groups.push(c);
+  });
+  return groups;
 }
 
 function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
@@ -160,12 +173,11 @@ function storeCate(d) {
   return String((d && (d.pubCate || d.category)) || '').trim();
 }
 function categoryGroupKey(d) {
-  var cate = storeCate(d);
-  return FOOD_CATES.indexOf(cate) !== -1 ? cate : '其他各行各業';
+  return storeCate(d) || '未分類';
 }
 function categoryWeight(d) {
-  var idx = CATEGORY_GROUPS.indexOf(categoryGroupKey(d));
-  return idx === -1 ? CATEGORY_GROUPS.length : idx;
+  var idx = currentGroups.indexOf(categoryGroupKey(d));
+  return idx === -1 ? currentGroups.length : idx;
 }
 
 function taxonomyInput(kind) {
@@ -260,6 +272,7 @@ function openTaxonomyModal() {
         brandTagDefs: Array.isArray(json.effectiveTaxonomy && json.effectiveTaxonomy.brandTagDefs) ? json.effectiveTaxonomy.brandTagDefs.map(function(def){ return { name:def.name, sourceName:def.name, color:def.color || 'gold' }; }) : []
       };
       syncManagedBrandTagDefs();
+      setStoreCategories(effectiveTaxonomy.categories);
       renderTaxonomyValues();
     })
     .catch(function(err){ alert('類別與標籤載入失敗：' + err.message); });
@@ -280,6 +293,7 @@ function saveTaxonomy() {
       if (!json.success) throw new Error(json.error || '儲存失敗');
       managedTaxonomy = json.taxonomy || managedTaxonomy;
       effectiveTaxonomy = json.effectiveTaxonomy || effectiveTaxonomy;
+      if (setStoreCategories(effectiveTaxonomy.categories) && allStores.length) applyFilters();
       closeTaxonomyModal();
       alert('類別與標籤已更新');
     })
@@ -347,6 +361,7 @@ function loadStoreBrandTagDefs() {
     body:JSON.stringify({ action:'getPublicStoreTaxonomy' })
   }).then(function(res){ return res.json(); }).then(function(json){
     storeBrandTagDefs = json.success && json.taxonomy && Array.isArray(json.taxonomy.brandTagDefs) ? json.taxonomy.brandTagDefs : [];
+    if (json.success && json.taxonomy) setStoreCategories(json.taxonomy.categories);
     if (allStores.length) applyFilters();
   }).catch(function(){});
 }
@@ -393,6 +408,7 @@ function buildCategoryChips() {
 
 // ── FILTER & RENDER ──
 function applyFilters() {
+  currentGroups = categoryGroups();
   var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
   var sf = currentStatusFilter;
   var cf = currentCategoryFilter;
@@ -427,7 +443,7 @@ function applyFilters() {
   if (q)           tags += ' <span style="background:#F3EBFF;color:#6B28A8;padding:1px 6px;border-radius:4px;font-size:11px">「' + esc(q) + '」</span>';
   bar.innerHTML =
     '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ' +
-    '共 <strong>' + filtered.length + '</strong> 間' + (isFiltered ? tags : '・共 ' + allStores.length + ' 間美食地圖商家');
+    '共 <strong>' + filtered.length + '</strong> 間' + (isFiltered ? tags : '・共 ' + allStores.length + ' 間商家');
 }
 
 function renderGrid(stores) {
@@ -440,14 +456,14 @@ function renderGrid(stores) {
     return;
   }
   var groups = {};
-  CATEGORY_GROUPS.forEach(function(p){ groups[p] = []; });
+  currentGroups.forEach(function(p){ groups[p] = []; });
   stores.forEach(function(d){
     var p = categoryGroupKey(d);
     if (!groups[p]) groups[p] = [];
     groups[p].push(d);
   });
   var html = '';
-  CATEGORY_GROUPS.forEach(function(groupKey){
+  currentGroups.forEach(function(groupKey){
     var grp = groups[groupKey];
     if (!grp.length) return;
     html += '<div class="group-header"><span class="group-label">' + esc(groupKey) + '</span><span class="group-count">' + grp.length + ' 間</span><div class="group-line"></div></div>';
@@ -456,7 +472,7 @@ function renderGrid(stores) {
     html += '</div>';
   });
   grid.innerHTML = html;
-  CATEGORY_GROUPS.forEach(function(groupKey){
+  currentGroups.forEach(function(groupKey){
     var el = grid.querySelector('.group-cards[data-group-key="' + groupKey + '"]');
     if (!el) return;
     (function(key, container){
@@ -536,7 +552,8 @@ function updateViewBadges() {
 
 function onSortEnd(groupKey, el) {
   var cards = el.querySelectorAll('[data-store-id]');
-  var offset = CATEGORY_SORT_OFFSET[groupKey] || 0;
+  var groupIdx = currentGroups.indexOf(groupKey);
+  var offset = (groupIdx === -1 ? currentGroups.length : groupIdx) * 10000;
   var orders = [];
   for (var i = 0; i < cards.length; i++) {
     var sid = cards[i].getAttribute('data-store-id');
@@ -596,7 +613,7 @@ function renderStats() {
   var publicCount = allStores.filter(function(d){ return d.status === '已公開'; }).length;
   var pendingCount = allStores.filter(function(d){ return d.status === '申請審核中'; }).length;
   var rejectCount = allStores.filter(function(d){ return d.status === '不通過'; }).length;
-  var foodCount = allStores.filter(function(d){ return FOOD_CATES.indexOf(storeCate(d)) !== -1; }).length;
+  var foodCount = allStores.filter(function(d){ return storeCategories.indexOf(storeCate(d)) !== -1; }).length;
   var otherCount = total - foodCount;
 
   var statusCounts = {};

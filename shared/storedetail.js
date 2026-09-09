@@ -105,17 +105,23 @@ function urlValue(s) {
   return esc(text);
 }
 
-var CATE_COLOR = {
-  '美食地圖': { bg:'#E6F7F0', txt:'#0F7A5C' },
-  '飲料冰品': { bg:'#EFF6FF', txt:'#1D4ED8' },
-  '健康醫療': { bg:'#F3EBFF', txt:'#6B28A8' },
-  '生活便利': { bg:'#E0F7FA', txt:'#036672' },
-  '學術教育': { bg:'#FFF3E0', txt:'#B75D00' },
-  '運動休閒': { bg:'#FFF1F4', txt:'#B4235A' },
-  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
-};
+// 分類名稱各里不同，顏色按分類在該里清單裡的順序給，最後一色留給清單外的舊分類。
+var CATE_PALETTE = [
+  { bg:'#E6F7F0', txt:'#0F7A5C' },
+  { bg:'#EFF6FF', txt:'#1D4ED8' },
+  { bg:'#F3EBFF', txt:'#6B28A8' },
+  { bg:'#E0F7FA', txt:'#036672' },
+  { bg:'#FFF3E0', txt:'#B75D00' },
+  { bg:'#FFF1F4', txt:'#B4235A' },
+  { bg:'#F0EEEC', txt:'#7A6E66' },
+];
+function cateColor(cate) {
+  var idx = CATE_OPTIONS.indexOf(cate);
+  if (idx === -1 || idx >= CATE_PALETTE.length - 1) return CATE_PALETTE[CATE_PALETTE.length - 1];
+  return CATE_PALETTE[idx];
+}
 function cateBadge(cat) {
-  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = cateColor(cat);
   return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
 }
 function badgeCls(s){ if (s==='已公開') return 'badge-public'; if (s==='不通過') return 'badge-reject'; return 'badge-pending'; }
@@ -201,7 +207,7 @@ function renderStore() {
 }
 
 // ── MODAL ──
-var CATE_OPTIONS = ['美食地圖','飲料冰品','健康醫療','生活便利','學術教育','運動休閒','其他各行各業'];
+var CATE_OPTIONS = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];
 var taxonomyBrandTags = [];
 var taxonomyBrandTagDefs = [];
 var BRAND_TAG_PALETTE = {

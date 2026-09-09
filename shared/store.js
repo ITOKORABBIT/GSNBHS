@@ -89,7 +89,8 @@ var BRAND_TAG_PALETTE = {
   blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
   violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
 };
-var storeCategoryFallback = ['美食地圖','飲料冰品','健康醫療','生活便利','學術教育','運動休閒','其他各行各業'];
+// 各里分類不同：正式清單來自該里 stores-api 的 taxonomy，這份只是 API 回來前的墊檔。
+var storeCategoryFallback = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];
 
 function brandTagValue(value) {
   return String(value || '').trim();
