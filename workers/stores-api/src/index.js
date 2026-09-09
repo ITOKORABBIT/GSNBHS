@@ -292,7 +292,140 @@ async function submitStore(env, data, request) {
   for (let i = 1; i <= 10; i++) store["photo" + i] = normalizePublicUrl(data["photo" + i]);
   store.brandTag = store.brandTags[0] || "";
   await upsertStore(env, store);
-  return { success: true, storeId };
+  const notificationSent = await deliverStoreNotification(env, store);
+  return { success: true, storeId, notificationSent };
+}
+
+// ─── 新商家申請通知 ───────────────────────────────────────
+//
+// 商家送出申請後，比照案件通報，立刻丟一張卡片到里的 LINE 群組，
+// 里長不必天天開後台才發現有人申請。走的是同一個通報中心
+// （village-notify-hub），推播失敗只留 log，不影響商家的申請已送出。
+async function deliverStoreNotification(env, store) {
+  const delivered = await notifyHub(env, [buildStoreNotification(store)]);
+  if (!delivered) {
+    console.error(JSON.stringify({ fn: "deliverStoreNotification", storeId: text(store.storeId), error: "hub notify failed" }));
+  }
+  return delivered;
+}
+
+async function notifyHub(env, messages) {
+  if (!env.NOTIFY_HUB_URL || !env.NOTIFY_HUB_SECRET) {
+    console.error(JSON.stringify({ fn: "notifyHub", error: "hub not configured" }));
+    return false;
+  }
+
+  try {
+    const request = new Request(env.NOTIFY_HUB_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + env.NOTIFY_HUB_SECRET,
+      },
+      body: JSON.stringify({
+        villageCode: env.NOTIFY_HUB_VILLAGE_CODE || "GSNBHS",
+        messages,
+      }),
+    });
+    // 同帳號 Worker 之間不能用公開網址互打（Cloudflare error 1042），有 binding 就走內部直連。
+    const response = env.NOTIFY_HUB
+      ? await env.NOTIFY_HUB.fetch(request)
+      : await fetch(request);
+    const bodyText = await response.text().catch(() => "");
+    if (!response.ok) {
+      console.error(JSON.stringify({ fn: "notifyHub", status: response.status, body: bodyText.slice(0, 200) }));
+      return false;
+    }
+    const result = parseJson(bodyText);
+    if (result.success === false) {
+      console.error(JSON.stringify({ fn: "notifyHub", error: text(result.error) || "hub rejected notification" }));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ fn: "notifyHub", error: err.message }));
+    return false;
+  }
+}
+
+function buildStoreNotification(store) {
+  const flexRow = (label, value) => ({
+    type: "box",
+    layout: "baseline",
+    spacing: "sm",
+    contents: [
+      { type: "text", text: label, color: "#8C8C8C", size: "sm", flex: 2 },
+      { type: "text", text: text(value) || "—", color: "#111111", size: "sm", flex: 5, wrap: true },
+    ],
+  });
+  const clip = (value, max) => {
+    const raw = text(value);
+    return raw.length > max ? raw.slice(0, max) + "…" : raw;
+  };
+  const rows = [
+    flexRow("編號", store.storeId),
+    flexRow("店名", store.storeName),
+    flexRow("類別", store.category),
+    flexRow("地址", store.addr),
+    flexRow("店家電話", store.storePhone),
+    flexRow("申請人", text(store.name) + (text(store.phone) ? `（${text(store.phone)}）` : "")),
+    flexRow("申請時間", store.applyTime),
+  ];
+  if (text(store.offer)) rows.push(flexRow("優惠", clip(store.offer, 120)));
+  if (text(store.desc)) rows.splice(4, 0, flexRow("介紹", clip(store.desc, 120)));
+
+  const bubble = {
+    type: "bubble",
+    header: {
+      type: "box",
+      layout: "vertical",
+      backgroundColor: "#B07C2E",
+      paddingAll: "12px",
+      contents: [
+        { type: "text", text: "🏪 新商家申請", color: "#FFFFFF", weight: "bold", size: "md" },
+        { type: "text", text: text(store.storeName) || text(store.storeId), color: "#FFFFFFCC", size: "xs", margin: "xs", wrap: true },
+      ],
+    },
+    body: {
+      type: "box",
+      layout: "vertical",
+      spacing: "sm",
+      contents: rows,
+    },
+    footer: {
+      type: "box",
+      layout: "vertical",
+      contents: [{
+        type: "button",
+        style: "primary",
+        color: "#B07C2E",
+        action: { type: "uri", label: "前往審核", uri: storeReviewUrl(store.storeId) },
+      }],
+    },
+  };
+
+  const photo = normalizePublicUrl(store.photo1);
+  if (photo) {
+    bubble.hero = {
+      type: "image",
+      url: photo,
+      size: "full",
+      aspectRatio: "20:13",
+      aspectMode: "cover",
+    };
+  }
+
+  return {
+    type: "flex",
+    altText: `🏪 新商家申請 ${text(store.storeName) || text(store.storeId)}`,
+    contents: bubble,
+  };
+}
+
+// 網址帶 openExternalBrowser=1，LINE 才會用 Chrome／Safari 開，
+// 留在 LINE 內建瀏覽器的話 Google 登入會被擋，里長進不了後台。
+function storeReviewUrl(storeId) {
+  return "https://gsnbhs.pages.dev/storedetail.html?id=" + encodeURIComponent(text(storeId)) + "&openExternalBrowser=1";
 }
 
 async function updateStore(env, data) {

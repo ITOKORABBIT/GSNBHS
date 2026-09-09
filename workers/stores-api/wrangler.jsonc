@@ -9,8 +9,17 @@
   },
   "vars": {
     "ALLOWED_ORIGIN": "https://gsnbhs.pages.dev",
-    "GAS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzzp0iFCBkJmlxHuR2j8Ae8xpVPc9gzmvbqBBGNUt0Whm9QpJIrUC0dIs7ZnUjacuuS/exec"
+    "GAS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzzp0iFCBkJmlxHuR2j8Ae8xpVPc9gzmvbqBBGNUt0Whm9QpJIrUC0dIs7ZnUjacuuS/exec",
+    "NOTIFY_HUB_URL": "https://village-notify-hub.ulch0709.workers.dev/notify",
+    "NOTIFY_HUB_VILLAGE_CODE": "GSNBHS"
   },
+  // 新商家申請要推卡片到里的 LINE 群組，跟案件通報走同一個通報中心。
+  "services": [
+    {
+      "binding": "NOTIFY_HUB",
+      "service": "village-notify-hub"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
