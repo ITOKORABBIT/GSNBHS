@@ -122,11 +122,15 @@ function openAttrs(id) {
 function renderFeed(list) {
   var feed = document.getElementById('feed');
   if (!list.length) {
+    var nothingAtAll = !allBulletins.length;
     feed.innerHTML = '<div class="state">' +
       '<svg width="46" height="46" fill="none" stroke-width="1.5" viewBox="0 0 24 24">' +
       '<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>' +
       '<rect x="9" y="3" width="6" height="4" rx="1"/></svg>' +
-      '<h3>這個分類還沒有公告</h3><p>換個分類看看，或稍後再回來。</p></div>';
+      (nothingAtAll
+        ? '<h3>目前尚無公告</h3><p>里辦發布的消息會第一時間出現在這裡。</p>'
+        : '<h3>這個分類還沒有公告</h3><p>換個分類看看，或稍後再回來。</p>') +
+      '</div>';
     return;
   }
 
