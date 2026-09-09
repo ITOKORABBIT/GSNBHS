@@ -10,7 +10,6 @@ const modules = [
 
 // 版面各里不同的頁面改用舊社里專屬檔，不吃 shared/<name>.js
 const ownLayoutPages = {
-  bulletin: "./assets/bulletin-news.js",
   storeopenlist: "./assets/storefront-map.js",
 };
 
@@ -18,9 +17,11 @@ test("all feature pages use the platform core with correct load order", () => {
   for (const name of modules) {
     const html = fs.readFileSync(new URL(`../${name}.html`, import.meta.url), "utf8");
     const ownScript = ownLayoutPages[name];
+    // 換版面時要能帶 ?v= 破快取，所以版本參數要放行
+    const sharedMatch = new RegExp(`src="\\./shared/${name}\\.js(?:\\?[^"]*)?"`).exec(html);
     const sharedAt = ownScript
       ? html.indexOf(`src="${ownScript}`)
-      : html.indexOf(`src="./shared/${name}.js"`);
+      : (sharedMatch ? sharedMatch.index : -1);
     assert.notEqual(sharedAt, -1, `${name}: missing page script`);
     if (ownScript) {
       // 專屬版面頁不該再載入共用版面，否則兩份渲染會打架
