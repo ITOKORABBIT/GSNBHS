@@ -20,12 +20,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:'Noto Sans TC',sans-serif;
-  background:#f3f0ea;
-  color:#2b231b;
+  background:var(--gs-paper);
+  color:var(--gs-ink);
   min-height:100vh;
 }
 button,input,textarea,select{font:inherit}
@@ -33,21 +34,22 @@ button{cursor:pointer}
 a{text-decoration:none;color:inherit}
 
 :root{
-  --card:#fff;
-  --border:#e4d9ce;
-  --muted:#8d7968;
-  --text:#2b231b;
-  --heading:#18120d;
-  --accent:#b95353;
-  --accent-soft:#fff1ef;
-  --green:#2f6836;
-  --green-soft:#eaf3eb;
-  --gold:#9b6112;
-  --gold-soft:#fff4df;
-  --gray:#6f645a;
-  --gray-soft:#f2efea;
-  --shadow:0 14px 40px rgba(43,35,27,.08);
-  --radius:18px;
+  /* 對應 assets/theme.css 的全站色票 */
+  --card:var(--gs-surface);
+  --border:var(--gs-line);
+  --muted:var(--gs-muted);
+  --text:var(--gs-ink);
+  --heading:var(--gs-ink-strong);
+  --accent:var(--gs-green);
+  --accent-soft:var(--gs-green-soft);
+  --green:var(--gs-ok);
+  --green-soft:var(--gs-ok-soft);
+  --gold:var(--gs-warn);
+  --gold-soft:var(--gs-warn-soft);
+  --gray:var(--gs-neutral);
+  --gray-soft:var(--gs-neutral-soft);
+  --shadow:var(--gs-shadow-lg);
+  --radius:var(--gs-radius);
 }
 
 .login-shell{
@@ -60,7 +62,7 @@ a{text-decoration:none;color:inherit}
   width:min(100%,420px);
   padding:30px 26px;
   border:1px solid var(--border);
-  border-radius:24px;
+  border-radius:14px;
   background:#fff;
   box-shadow:var(--shadow);
 }
@@ -110,7 +112,7 @@ a{text-decoration:none;color:inherit}
   margin-bottom:20px;
   padding:22px 24px;
   border:1px solid rgba(228,217,206,.8);
-  border-radius:24px;
+  border-radius:14px;
   background:
     radial-gradient(circle at top right, rgba(185,83,83,.08), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,251,247,.92));
@@ -139,7 +141,7 @@ a{text-decoration:none;color:inherit}
   color:#fff;
 }
 .btn.ghost{
-  background:#fbf7f2;
+  background:var(--gs-surface-alt);
 }
 .btn.primary.needs-save{
   box-shadow:0 0 0 4px rgba(214,138,42,.28);
@@ -152,7 +154,7 @@ a{text-decoration:none;color:inherit}
 .save-hint{
   flex-basis:100%;
   margin-top:-2px;
-  color:#b06a12;
+  color:var(--gs-warn);
   font-weight:700;
   font-size:14px;
 }
@@ -220,7 +222,7 @@ a{text-decoration:none;color:inherit}
 .bull-item{
   display:flex;align-items:center;gap:12px;
   padding:14px 16px;
-  border:1px solid var(--border);border-radius:14px;background:#fff;
+  border:1px solid var(--border);border-radius:var(--gs-radius);background:var(--gs-surface);
   transition:transform .15s,box-shadow .15s;
 }
 .bull-item:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(43,35,27,.08)}
@@ -252,7 +254,7 @@ a{text-decoration:none;color:inherit}
   padding:8px 10px;
   border:none;
   border-radius:10px;
-  background:#f7f3ee;
+  background:var(--gs-surface-alt);
   font-size:13px;
   font-weight:700;
   white-space:nowrap;
@@ -306,7 +308,7 @@ a{text-decoration:none;color:inherit}
   transition:background .18s ease, color .18s ease, transform .18s ease;
 }
 .editor-close:hover{
-  background:#f8f2ec;
+  background:var(--gs-surface-alt);
   color:var(--heading);
   transform:translateY(-1px);
 }
@@ -354,7 +356,7 @@ a{text-decoration:none;color:inherit}
   font-weight:700;
 }
 .editor-btn:hover{
-  background:#faf6f1;
+  background:var(--gs-surface-alt);
   color:var(--heading);
 }
 .rich-editor{
@@ -399,7 +401,7 @@ a{text-decoration:none;color:inherit}
   padding:12px 14px;
   border:1px solid var(--border);
   border-radius:12px;
-  background:#fcfaf7;
+  background:var(--gs-surface-sub);
   color:var(--muted);
   font-size:13px;
   line-height:1.6;
@@ -432,11 +434,11 @@ a{text-decoration:none;color:inherit}
   border:1px solid var(--border);
   border-radius:999px;
   background:#fff;
-  color:#b0584d;
+  color:var(--gs-danger);
   font-size:12px;
   font-weight:700;
 }
-.upload-remove:hover{background:#fff4f2}
+.upload-remove:hover{background:var(--gs-danger-soft)}
 .upload-actions{
   display:flex;
   flex-wrap:wrap;
@@ -455,14 +457,14 @@ a{text-decoration:none;color:inherit}
   padding:12px 14px;
   border:1px solid var(--border);
   border-radius:12px;
-  background:#fcf8f4;
+  background:var(--gs-surface-sub);
 }
 .preview-box{
   margin-top:16px;
   padding:16px;
   border:1px dashed var(--border);
   border-radius:14px;
-  background:linear-gradient(180deg, #fffdfb, #fff8f2);
+  background:linear-gradient(180deg, var(--gs-surface), var(--gs-surface-alt));
 }
 .preview-gallery{
   display:flex;

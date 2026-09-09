@@ -14,29 +14,29 @@ function apiCall(action, extra) {
 }
 
 var CATE_COLOR = {
-  '生活': { bg:'#e0f7fa', txt:'#006b6b' },
-  '校園': { bg:'#fff3e0', txt:'#b75d00' },
-  '交通': { bg:'#ebf3ff', txt:'#1a56a8' },
-  '環境': { bg:'#eaf3eb', txt:'#2f6836' },
-  '治安': { bg:'#fee2e2', txt:'#991b1b' },
-  '修繕': { bg:'#fff8e1', txt:'#f57f17' },
-  '其他': { bg:'#f0eeec', txt:'#7a6e66' }
+  '生活': { bg:'#e5efee', txt:'#2c6660' },
+  '校園': { bg:'#f6efe1', txt:'#8f6218' },
+  '交通': { bg:'#e9eff2', txt:'#35627a' },
+  '環境': { bg:'#e7efe6', txt:'#245f49' },
+  '治安': { bg:'#f7ece5', txt:'#8b5336' },
+  '修繕': { bg:'#efecf4', txt:'#6b5a7d' },
+  '其他': { bg:'#eeefea', txt:'#6f7a72' }
 };
 
 var STATUS_COLOR = {
-  '處理中': { bg:'#fff8e1', txt:'#b75d00' },
-  '已結案': { bg:'#f0eeec', txt:'#7a6e66' }
+  '處理中': { bg:'#f6efe1', txt:'#8f6218' },
+  '已結案': { bg:'#e7efe6', txt:'#245f49' }
 };
 
 function statusBadge(status) {
   if (!status) return '';
-  var color = STATUS_COLOR[status] || { bg:'#f0eeec', txt:'#7a6e66' };
+  var color = STATUS_COLOR[status] || { bg:'#eeefea', txt:'#6f7a72' };
   return '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:' + color.bg + ';color:' + color.txt + '">' + esc(status) + '</span>';
 }
 
 function cateBadge(cat) {
   if (!cat) return '';
-  var color = CATE_COLOR[cat] || { bg:'#f0eeec', txt:'#7a6e66' };
+  var color = CATE_COLOR[cat] || { bg:'#eeefea', txt:'#6f7a72' };
   return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:' + color.bg + ';color:' + color.txt + '">' +
     '<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>' +
     esc(cat) + '</span>';
@@ -217,7 +217,7 @@ function renderGrid(cases) {
 
 function imgFallback(img) {
   img.parentNode.innerHTML = '<div class="card-thumb-placeholder">' +
-    '<svg width="28" height="28" fill="none" stroke="#b8a898" stroke-width="1.5" viewBox="0 0 24 24">' +
+    '<svg width="28" height="28" fill="none" stroke="#a9b3a8" stroke-width="1.5" viewBox="0 0 24 24">' +
     '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +
     '<polyline points="21 15 16 10 5 21"/></svg></div>';
 }
@@ -235,7 +235,7 @@ function renderCard(item) {
   var thumb = thumbSrc
     ? '<div class="card-thumb"><img src="' + esc(thumbSrc) + '" alt="" loading="lazy" onerror="imgFallback(this)"></div>'
     : '<div class="card-thumb"><div class="card-thumb-placeholder">' +
-      '<svg width="28" height="28" fill="none" stroke="#b8a898" stroke-width="1.5" viewBox="0 0 24 24">' +
+      '<svg width="28" height="28" fill="none" stroke="#a9b3a8" stroke-width="1.5" viewBox="0 0 24 24">' +
       '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +
       '<polyline points="21 15 16 10 5 21"/></svg></div></div>';
 

@@ -1,0 +1,50 @@
+/* 舊社里小幫手：全站共用設計 token。
+   來源＝首頁形象頁（index.html + assets/home.css）的暖白／松綠語彙。
+   所有子頁把自己的 :root 變數指到這裡，改色只要動這一支。 */
+:root{
+  /* 底色層 */
+  --gs-paper:#f8f7f2;        /* 頁面底：暖白 */
+  --gs-surface:#ffffff;      /* 卡片、面板 */
+  --gs-surface-alt:#edf1e8;  /* 鼠尾草淺底（區塊、tag、hover） */
+  --gs-surface-sub:#f0f0e9;  /* 頁尾、次要底 */
+  --gs-surface-deep:#e4eadc; /* 首頁綠色塊 */
+
+  /* 文字層 */
+  --gs-ink:#233c33;          /* 標題、主要文字 */
+  --gs-ink-strong:#16261f;   /* 大標 */
+  --gs-ink-soft:#54675b;     /* 次要文字 */
+  --gs-muted:#68756c;        /* 說明、時間、label */
+  --gs-faint:#8b968e;        /* placeholder、停用 */
+
+  /* 線條 */
+  --gs-line:#d8dfd7;         /* 主要邊框 */
+  --gs-line-soft:#e4e8df;    /* 分隔線 */
+  --gs-line-strong:#c6d2c5;  /* 強調邊框、focus 外框 */
+
+  /* 主色（松綠） */
+  --gs-green:#245f49;
+  --gs-green-dark:#174734;
+  --gs-green-mid:#3d7c61;
+  --gs-green-soft:#edf1e8;
+  --gs-green-line:#c2d3c5;
+
+  /* 狀態色：同一組低彩度暖調，維持可辨識又不跳色 */
+  --gs-info:#35627a;      --gs-info-soft:#e9eff2;
+  --gs-warn:#8f6218;      --gs-warn-soft:#f6efe1;
+  --gs-ok:#245f49;        --gs-ok-soft:#e7efe6;
+  --gs-alt:#6b5a7d;       --gs-alt-soft:#efecf4;
+  --gs-danger:#8b5336;    --gs-danger-soft:#f7ece5;
+  --gs-neutral:#6f7a72;   --gs-neutral-soft:#eeefea;
+
+  /* 形狀與陰影：首頁是扁平＋1px 線，子頁只留極淡的綠調陰影 */
+  --gs-radius:10px;
+  --gs-radius-sm:8px;
+  --gs-radius-pill:999px;
+  --gs-shadow-sm:0 1px 2px rgba(35,60,51,.05);
+  --gs-shadow-md:0 2px 10px rgba(35,60,51,.06),0 1px 2px rgba(35,60,51,.04);
+  --gs-shadow-lg:0 10px 30px rgba(35,60,51,.09);
+
+  /* 字體 */
+  --gs-font:'Noto Sans TC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --gs-font-num:'DM Sans','Noto Sans TC',sans-serif;
+}

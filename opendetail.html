@@ -19,27 +19,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 img{display:block;max-width:100%}
 button{cursor:pointer;font-family:inherit}
 
 :root{
-  --bg:        #EFF8F2;
-  --card:      #FFFFFF;
-  --border:    #BDD9CA;
-  --divider:   #D0E8DA;
-  --lbl:       #4E7260;
-  --val:       #1A3028;
-  --muted:     #86B09E;
-  --heading:   #112620;
-  --primary:       #5B9B7B;
-  --primary-light: #E6F1EA;
-  --primary-dark:  #4A8366;
-  --shadow-sm: 0 1px 3px rgba(30,80,55,.07);
-  --shadow-md: 0 2px 8px rgba(30,80,55,.09), 0 1px 2px rgba(30,80,55,.05);
-  --radius:    10px;
-  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* 對應 assets/theme.css 的全站色票 */
+  --bg:        var(--gs-paper);
+  --card:      var(--gs-surface);
+  --border:    var(--gs-line);
+  --divider:   var(--gs-line-soft);
+  --lbl:       var(--gs-ink-soft);
+  --val:       var(--gs-ink);
+  --muted:     var(--gs-faint);
+  --heading:   var(--gs-ink-strong);
+  --primary:       var(--gs-green);
+  --primary-light: var(--gs-green-soft);
+  --primary-dark:  var(--gs-green-dark);
+  --shadow-sm: var(--gs-shadow-sm);
+  --shadow-md: var(--gs-shadow-md);
+  --radius:    var(--gs-radius);
+  --font: var(--gs-font);
 }
 
 body{
@@ -79,12 +81,12 @@ body{
   padding: 6px 13px;
   border-radius: 8px;
   border: none;
-  background: #F08080;
+  background: var(--gs-green);
   font-size: 13px; font-weight: 600;
   color: #fff;
   transition: background .15s;
 }
-.report-btn:hover{ background: #D85C5C; }
+.report-btn:hover{ background: var(--gs-green-dark); }
 
 /* ── Container ── */
 .container{
@@ -197,7 +199,7 @@ body{
 .lb-counter{
   position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
   color: rgba(255,255,255,.9); font-size: 13px;
-  background: rgba(0,0,0,.45); padding: 4px 14px; border-radius: 20px;
+  background: rgba(0,0,0,.45); padding: 4px 14px; border-radius:999px;
   display: none; pointer-events: none;
 }
 

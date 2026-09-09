@@ -14,9 +14,10 @@ function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.lengt
 var taxonomyBrandTagDefs = [];
 var renderedStoreData = null;
 var BRAND_TAG_PALETTE = {
-  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
-  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
-  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+  // 色票對齊 assets/theme.css
+  gold:{ bg:'#F6EFE1', txt:'#8F6218', bd:'#E0D0AB' }, mint:{ bg:'#E7EFE6', txt:'#245F49', bd:'#C2D3C5' },
+  blue:{ bg:'#E9EFF2', txt:'#35627A', bd:'#CBD8DE' }, rose:{ bg:'#F7ECE5', txt:'#8B5336', bd:'#DDC6B6' },
+  violet:{ bg:'#EFECF4', txt:'#6B5A7D', bd:'#D3CADF' }, stone:{ bg:'#EEEFEA', txt:'#6F7A72', bd:'#D5D8CF' }
 };
 function brandTagCss(tag) {
   var def = taxonomyBrandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };
@@ -42,16 +43,16 @@ function paragraphValue(s) {
 }
 
 var CATE_COLOR = {
-  '食': { bg:'#FFF3E0', txt:'#B75D00' },
-  '衣': { bg:'#F3EBFF', txt:'#6B28A8' },
-  '住': { bg:'#EBF3FF', txt:'#1A56A8' },
-  '行': { bg:'#E0F7FA', txt:'#006B6B' },
-  '育': { bg:'#EAF3EB', txt:'#2F6836' },
-  '樂': { bg:'#FEE2E2', txt:'#991B1B' },
-  '其他': { bg:'#F0EEEC', txt:'#7A6E66' },
+  '食': { bg:'#F6EFE1', txt:'#8F6218' },
+  '衣': { bg:'#EFECF4', txt:'#6B5A7D' },
+  '住': { bg:'#E9EFF2', txt:'#35627A' },
+  '行': { bg:'#E5EFEE', txt:'#2C6660' },
+  '育': { bg:'#E7EFE6', txt:'#245F49' },
+  '樂': { bg:'#F7ECE5', txt:'#8B5336' },
+  '其他': { bg:'#EEEFEA', txt:'#6F7A72' },
 };
 function cateBadge(cat) {
-  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = CATE_COLOR[cat] || { bg:'#EEEFEA', txt:'#6F7A72' };
   return '<span class="cate-badge" style="background:' + c.bg + ';color:' + c.txt + '">' + esc(cat) + '</span>';
 }
 
@@ -92,7 +93,7 @@ var carouselIdx = 0;
 
 function buildCarousel(photos) {
   if (!photos.length) {
-    return '<div class="hero-placeholder"><svg width="48" height="48" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>';
+    return '<div class="hero-placeholder"><svg width="48" height="48" fill="none" stroke="#8FA79A" stroke-width="1.5" opacity=".4" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>';
   }
   var slides = photos.map(function(url, i) {
     return '<div class="carousel-slide" onclick="openLb(carouselPhotos,' + i + ')">' +

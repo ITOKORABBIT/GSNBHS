@@ -20,12 +20,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:'Noto Sans TC',sans-serif;
-  background:#f3f0ea;
-  color:#2b231b;
+  background:var(--gs-paper);
+  color:var(--gs-ink);
   min-height:100vh;
 }
 button,input,select{font:inherit}
@@ -33,23 +34,21 @@ button{cursor:pointer}
 a{color:inherit;text-decoration:none}
 
 :root{
-  --bg:#f3f0ea;
-  --card:#ffffff;
-  --border:#e1d7cb;
-  --muted:#8f7c69;
-  --text:#2b231b;
-  --heading:#17110c;
-  --green:#4d7a56;
-  --green-soft:#ebf3ec;
-  --gold:#be9445;
-  --gold-soft:#fbf4e4;
-  --blue:#2f63ce;
-  --blue-soft:#eef4ff;
-  --rose:#b95353;
-  --rose-soft:#fff1ef;
-  --shadow:0 14px 40px rgba(43,35,27,.08);
-  --radius:18px;
-  --topbar-h:72px;
+  /* 對應 assets/theme.css 的全站色票 */
+  --bg:var(--gs-paper);
+  --card:var(--gs-surface);
+  --border:var(--gs-line);
+  --muted:var(--gs-muted);
+  --text:var(--gs-ink);
+  --heading:var(--gs-ink-strong);
+  --green:var(--gs-green);
+  --green-soft:var(--gs-green-soft);
+  --gold:var(--gs-warn);
+  --gold-soft:var(--gs-warn-soft);
+  --blue:var(--gs-info);
+  --blue-soft:var(--gs-info-soft);
+  --rose:var(--gs-danger);
+  --rose-soft:var(--gs-danger-soft);
 }
 
 .login-shell{
@@ -67,7 +66,7 @@ a{color:inherit;text-decoration:none}
   background:rgba(255,255,255,.88);
   backdrop-filter:blur(14px);
   border:1px solid rgba(225,215,203,.9);
-  border-radius:28px;
+  border-radius:14px;
   box-shadow:var(--shadow);
   padding:32px 28px;
 }
@@ -108,9 +107,9 @@ a{color:inherit;text-decoration:none}
   margin-bottom:18px;
   padding:14px 16px;
   border-radius:14px;
-  background:#fff8e1;
-  border:1px solid #ffe082;
-  color:#7a5800;
+  background:var(--gs-warn-soft);
+  border:1px solid #e0d0ab;
+  color:var(--gs-warn);
   font-size:14px;
   line-height:1.7;
 }
@@ -123,7 +122,7 @@ a{color:inherit;text-decoration:none}
   padding:10px 16px;
   border:none;
   border-radius:12px;
-  background:#f59e0b;
+  background:var(--gs-warn);
   color:#fff;
   font-size:14px;
   font-weight:700;
@@ -152,7 +151,7 @@ a{color:inherit;text-decoration:none}
   border-radius:14px;
   display:grid;
   place-items:center;
-  background:linear-gradient(135deg,#4d7a56,#6b9d75);
+  background:var(--gs-green);
   color:#fff;
   box-shadow:0 10px 24px rgba(77,122,86,.25);
 }
@@ -198,7 +197,7 @@ a{color:inherit;text-decoration:none}
   padding:10px 14px;
   border:none;
   border-radius:12px;
-  background:#1e1915;
+  background:var(--gs-ink);
   color:#fff;
   font-weight:700;
 }
@@ -238,7 +237,7 @@ a{color:inherit;text-decoration:none}
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  border-radius:16px;
+  border-radius:12px;
 }
 .summary-label{font-size:13px;color:var(--muted);font-weight:700}
 .summary-value{font-size:32px;font-weight:800;color:var(--heading)}
@@ -250,7 +249,7 @@ a{color:inherit;text-decoration:none}
   gap:0;
   border-bottom:1px solid var(--border);
   overflow:auto;
-  background:#fcfbfa;
+  background:var(--gs-surface-sub);
 }
 .tab-btn{
   flex:1;
@@ -264,8 +263,8 @@ a{color:inherit;text-decoration:none}
 }
 .tab-btn.active{
   color:var(--heading);
-  border-bottom-color:var(--tab-accent,#4d7a56);
-  background:var(--tab-soft,#ebf3ec);
+  border-bottom-color:var(--tab-accent,var(--gs-green));
+  background:var(--tab-soft,var(--gs-green-soft));
 }
 .tab-panel{display:none;padding:20px}
 .tab-panel.active{display:block}
@@ -287,7 +286,7 @@ a{color:inherit;text-decoration:none}
   background:#fff;
   font-weight:700;
 }
-.action-btn.primary{background:var(--tab-accent,#4d7a56);border-color:var(--tab-accent,#4d7a56);color:#fff}
+.action-btn.primary{background:var(--tab-accent,var(--gs-green));border-color:var(--tab-accent,var(--gs-green));color:#fff}
 .toolbar{
   display:flex;
   flex-wrap:wrap;
@@ -313,8 +312,8 @@ a{color:inherit;text-decoration:none}
   font-weight:700;
 }
 .pill.active{
-  background:var(--tab-soft,#ebf3ec);
-  color:var(--tab-accent,#4d7a56);
+  background:var(--tab-soft,var(--gs-green-soft));
+  color:var(--tab-accent,var(--gs-green));
   border-color:transparent;
 }
 
@@ -330,7 +329,7 @@ table{
 }
 th,td{
   padding:14px 16px;
-  border-bottom:1px solid #efe8df;
+  border-bottom:1px solid var(--gs-line-soft);
   text-align:left;
   vertical-align:middle;
 }
@@ -339,10 +338,10 @@ th{
   color:var(--muted);
   text-transform:uppercase;
   letter-spacing:.05em;
-  background:#faf8f5;
+  background:var(--gs-surface-alt);
 }
 td{font-size:14px}
-tbody tr:hover{background:#fcfaf7}
+tbody tr:hover{background:var(--gs-surface-alt)}
 tbody tr:last-child td{border-bottom:none}
 .badge{
   display:inline-flex;
@@ -352,10 +351,10 @@ tbody tr:last-child td{border-bottom:none}
   font-size:12px;
   font-weight:800;
 }
-.badge-green{background:#eaf3eb;color:#2f6836}
-.badge-gold{background:#fff4df;color:#9b6112}
-.badge-blue{background:#eef4ff;color:#1a56a8}
-.badge-gray{background:#f2efea;color:#6f645a}
+.badge-green{background:var(--gs-ok-soft);color:var(--gs-ok)}
+.badge-gold{background:var(--gs-warn-soft);color:var(--gs-warn)}
+.badge-blue{background:var(--gs-info-soft);color:var(--gs-info)}
+.badge-gray{background:var(--gs-neutral-soft);color:var(--gs-neutral)}
 .inline-actions{display:flex;flex-wrap:wrap;gap:8px}
 .inline-link{
   display:inline-flex;
@@ -364,7 +363,7 @@ tbody tr:last-child td{border-bottom:none}
   padding:8px 10px;
   border:none;
   border-radius:10px;
-  background:#f7f3ee;
+  background:var(--gs-surface-alt);
   font-size:13px;
   font-weight:700;
   color:inherit;
@@ -393,7 +392,7 @@ tbody tr:last-child td{border-bottom:none}
   gap:12px;
   padding:16px;
   border:1px solid var(--border);
-  border-radius:16px;
+  border-radius:12px;
   background:#fff;
 }
 .account-main{display:flex;align-items:center;gap:12px}
@@ -444,7 +443,7 @@ tbody tr:last-child td{border-bottom:none}
   height:36px;
   border:none;
   border-radius:50%;
-  background:#f4f0ea;
+  background:var(--gs-surface-alt);
   font-size:20px;
 }
 .field{margin-bottom:14px}
@@ -516,15 +515,15 @@ tbody tr:last-child td{border-bottom:none}
 .view-total{
   font-size:28px;
   font-weight:800;
-  color:var(--tab-accent,#4d7a56);
+  color:var(--tab-accent,var(--gs-green));
   margin-top:4px;
 }
 .view-message{
   margin:0 0 12px;
   padding:10px 12px;
   border-radius:12px;
-  background:var(--tab-soft,#ebf3ec);
-  color:var(--tab-accent,#4d7a56);
+  background:var(--tab-soft,var(--gs-green-soft));
+  color:var(--tab-accent,var(--gs-green));
   font-size:13px;
   font-weight:700;
   display:none;

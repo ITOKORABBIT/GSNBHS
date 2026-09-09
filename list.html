@@ -21,6 +21,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 /* ── Reset & Tokens ── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -28,29 +29,30 @@ img{display:block;max-width:100%}
 button{cursor:pointer;font-family:inherit}
 
 :root{
-  --bg:        #F5F2EE;
-  --card:      #FFFFFF;
-  --border:    #E2D9CF;
-  --divider:   #EDE7DF;
-  --lbl:       #8C7B6A;
-  --val:       #2C2018;
-  --muted:     #B8A898;
-  --heading:   #1E160E;
+  /* 對應 assets/theme.css 的全站色票 */
+  --bg:        var(--gs-paper);
+  --card:      var(--gs-surface);
+  --border:    var(--gs-line);
+  --divider:   var(--gs-line-soft);
+  --lbl:       var(--gs-muted);
+  --val:       var(--gs-ink);
+  --muted:     var(--gs-faint);
+  --heading:   var(--gs-ink-strong);
 
-  --primary:       #4B7A52;
-  --primary-light: #EAF3EB;
-  --primary-dark:  #3A5E3F;
+  --primary:       var(--gs-green);
+  --primary-light: var(--gs-green-soft);
+  --primary-dark:  var(--gs-green-dark);
 
-  --badge-new-bg:   #EBF3FF; --badge-new-txt:  #1A56A8;
-  --badge-proc-bg:  #FFF3E0; --badge-proc-txt: #B75D00;
-  --badge-done-bg:  #EAF3EB; --badge-done-txt: #2F6836;
-  --badge-fwd-bg:   #F3EBFF; --badge-fwd-txt:  #6B28A8;
-  --badge-grey-bg:  #F0EEEC; --badge-grey-txt: #7A6E66;
+  --badge-new-bg:   var(--gs-info-soft);    --badge-new-txt:  var(--gs-info);
+  --badge-proc-bg:  var(--gs-warn-soft);    --badge-proc-txt: var(--gs-warn);
+  --badge-done-bg:  var(--gs-ok-soft);      --badge-done-txt: var(--gs-ok);
+  --badge-fwd-bg:   var(--gs-alt-soft);     --badge-fwd-txt:  var(--gs-alt);
+  --badge-grey-bg:  var(--gs-neutral-soft); --badge-grey-txt: var(--gs-neutral);
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.07);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-  --radius: 10px;
-  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  --shadow-sm: var(--gs-shadow-sm);
+  --shadow-md: var(--gs-shadow-md);
+  --radius: var(--gs-radius);
+  --font: var(--gs-font);
 
   --sidebar-w: 300px;
 }
@@ -236,7 +238,7 @@ body{
 .case-card.status-proc  { border-left: 3px solid var(--badge-proc-txt); }
 .case-card.status-fwd   { border-left: 3px solid var(--badge-fwd-txt); }
 .case-card.status-done  { border-left: 3px solid var(--badge-done-txt); }
-.case-card.status-grey  { border-left: 3px solid #B8A898; }
+.case-card.status-grey  { border-left: 3px solid var(--gs-neutral); }
 
 .card-thumb{
   width: 100%; aspect-ratio: 16/9;
@@ -257,7 +259,7 @@ body{
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
   color: var(--muted);
-  background: linear-gradient(135deg, #F0EBE4 0%, #EDE7DF 100%);
+  background: linear-gradient(135deg, var(--gs-surface-alt) 0%, var(--gs-surface-sub) 100%);
 }
 .no-photo-content{
   display: flex; flex-direction: column; align-items: center; gap: 5px;
@@ -317,7 +319,7 @@ body{
 .badge-public{
   background: var(--primary-light);
   color: var(--primary-dark);
-  border: 1px solid #c5dfc8;
+  border: 1px solid var(--gs-green-line);
 }
 
 .card-title{
@@ -373,7 +375,7 @@ body{
 
 /* Skeleton */
 .skel{
-  background: linear-gradient(90deg,var(--divider) 25%,#ece6de 50%,var(--divider) 75%);
+  background: linear-gradient(90deg,var(--divider) 25%,var(--gs-surface-alt) 50%,var(--divider) 75%);
   background-size: 300% 100%;
   animation: shimmer 1.4s infinite;
   border-radius: 5px;
@@ -461,7 +463,7 @@ body{
 .stat-row:last-child{ border-bottom: none; }
 .stat-row-lbl{ color: var(--lbl); }
 .stat-row-val{ font-weight: 700; color: var(--heading); }
-.stat-row-val.warn{ color: #B75D00; }
+.stat-row-val.warn{ color: var(--gs-warn); }
 .stat-row-val.ok{ color: var(--primary); }
 
 /* Chart sections */
@@ -491,9 +493,9 @@ body{
   cursor: pointer; flex-shrink: 0; padding: 0;
 }
 .pin-btn svg{ width: 13px; height: 13px; display: block; }
-.pin-btn:hover { background: #F5F2EE; border-color: #D6C8BA; color: #8C7B6A; }
-.pin-btn.pinned { background: #FFF1F1; border-color: #E57373; color: #C62828; }
-.case-card.is-pinned { border-left: 3px solid #F59E0B; }
+.pin-btn:hover { background: var(--gs-surface-alt); border-color: var(--gs-line-strong); color: var(--gs-ink-soft); }
+.pin-btn.pinned { background: var(--gs-danger-soft); border-color: #c9a08a; color: var(--gs-danger); }
+.case-card.is-pinned { border-left: 3px solid var(--gs-warn); }
 
 /* ── 刪除按鈕 ── */
 .del-btn {
@@ -504,7 +506,7 @@ body{
   cursor: pointer; flex-shrink: 0; padding: 0; margin-left: auto;
 }
 .del-btn svg { width: 13px; height: 13px; display: block; }
-.del-btn:hover { background: #FFF1F1; border-color: #E57373; color: #C62828; }
+.del-btn:hover { background: var(--gs-danger-soft); border-color: #c9a08a; color: var(--gs-danger); }
 .card-actions .del-btn{ margin-left: 0; }
 
 /* ── 拖曳排序 ── */
@@ -726,12 +728,12 @@ body{
         <input type="text" class="dropdown-search" placeholder="Search" oninput="filterDropdown('statusList', this.value)">
       </div>
       <div class="dropdown-list" id="statusList">
-        <div class="dropdown-item selected" data-value="all"  onclick="selectStatus(this)"><span class="item-dot" style="background:#B8A898"></span>全部狀態</div>
-        <div class="dropdown-item" data-value="新案件"        onclick="selectStatus(this)"><span class="item-dot" style="background:#1A56A8"></span>1.新案件</div>
-        <div class="dropdown-item" data-value="處理中"        onclick="selectStatus(this)"><span class="item-dot" style="background:#B75D00"></span>2.處理中</div>
-        <div class="dropdown-item" data-value="已轉交"        onclick="selectStatus(this)"><span class="item-dot" style="background:#6B28A8"></span>3.已轉交相關單位</div>
-        <div class="dropdown-item" data-value="已結案"        onclick="selectStatus(this)"><span class="item-dot" style="background:#2F6836"></span>4.已結案</div>
-        <div class="dropdown-item" data-value="不受理"        onclick="selectStatus(this)"><span class="item-dot" style="background:#7A6E66"></span>5.不受理</div>
+        <div class="dropdown-item selected" data-value="all"  onclick="selectStatus(this)"><span class="item-dot" style="background:var(--gs-neutral)"></span>全部狀態</div>
+        <div class="dropdown-item" data-value="新案件"        onclick="selectStatus(this)"><span class="item-dot" style="background:var(--gs-info)"></span>1.新案件</div>
+        <div class="dropdown-item" data-value="處理中"        onclick="selectStatus(this)"><span class="item-dot" style="background:var(--gs-warn)"></span>2.處理中</div>
+        <div class="dropdown-item" data-value="已轉交"        onclick="selectStatus(this)"><span class="item-dot" style="background:var(--gs-alt)"></span>3.已轉交相關單位</div>
+        <div class="dropdown-item" data-value="已結案"        onclick="selectStatus(this)"><span class="item-dot" style="background:var(--gs-ok)"></span>4.已結案</div>
+        <div class="dropdown-item" data-value="不受理"        onclick="selectStatus(this)"><span class="item-dot" style="background:var(--gs-neutral)"></span>5.不受理</div>
       </div>
     </div>
   </div>

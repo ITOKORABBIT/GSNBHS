@@ -16,43 +16,48 @@
 <link rel="icon" type="image/jpeg" href="./圖庫/S__27246628_0.jpg?v=20260816">
 <link rel="shortcut icon" href="./圖庫/S__27246628_0.jpg?v=20260816">
 <link rel="apple-touch-icon" href="./圖庫/S__27246628_0.jpg?v=20260816">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei',sans-serif;background:#f3f0ea;color:#2b231b;min-height:100vh}
+body{font-family:var(--gs-font);background:var(--gs-paper);color:var(--gs-ink);min-height:100vh}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 a{text-decoration:none;color:inherit}
 
 :root{
-  --card:#fff;--border:#e4d9ce;--muted:#8d7968;--text:#2b231b;--heading:#18120d;
-  --accent:#b95353;--accent-soft:#fff1ef;
-  --blue:#1a73e8;--blue-soft:#e8f0fe;
-  --green:#2f6836;--green-soft:#eaf3eb;
-  --gold:#9b6112;--gold-soft:#fff4df;
-  --gray:#6f645a;--gray-soft:#f2efea;
-  --shadow:0 14px 40px rgba(43,35,27,.08);--radius:18px;
+  /* 對應 assets/theme.css 的全站色票 */
+  --card:var(--gs-surface);--border:var(--gs-line);--muted:var(--gs-muted);--text:var(--gs-ink);--heading:var(--gs-ink-strong);
+  --accent:var(--gs-danger);--accent-soft:var(--gs-danger-soft);
+  --blue:var(--gs-green);--blue-soft:var(--gs-green-soft);
+  --green:var(--gs-ok);--green-soft:var(--gs-ok-soft);
+  --gold:var(--gs-warn);--gold-soft:var(--gs-warn-soft);
+  --gray:var(--gs-neutral);--gray-soft:var(--gs-neutral-soft);
+  --shadow:var(--gs-shadow-md);--radius:var(--gs-radius);
 }
 
 /* ── 登入 ── */
 .login-shell{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
-.login-card{width:min(100%,420px);padding:30px 26px;border:1px solid var(--border);border-radius:24px;background:#fff;box-shadow:var(--shadow)}
+.login-card{width:min(100%,420px);padding:30px 26px;border:1px solid var(--border);border-radius:10px;background:#fff;box-shadow:var(--shadow)}
 .login-badge{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:800;margin-bottom:16px}
 .login-title{font-size:28px;font-weight:800;color:var(--heading);margin-bottom:10px}
 .login-sub{color:var(--muted);line-height:1.7;margin-bottom:22px}
-.login-error{display:none;margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:14px}
+.login-error{display:none;margin-top:16px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:14px}
 
 /* ── 主頁 ── */
 .page{max-width:800px;margin:0 auto;padding:24px 20px 80px}
-.topbar{position:sticky;top:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;padding:18px 22px;border:1px solid rgba(228,217,206,.8);border-radius:24px;background:radial-gradient(circle at top right,rgba(26,115,232,.06),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,251,247,.96));box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.topbar{position:sticky;top:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;padding:18px 22px;border:1px solid rgba(228,217,206,.8);border-radius:10px;background:radial-gradient(circle at top right,rgba(26,115,232,.06),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,251,247,.96));box-shadow:var(--shadow);backdrop-filter:blur(10px)}
 .topbar h1{font-size:22px;font-weight:800}
 .topbar p{font-size:13px;color:var(--muted);margin-top:2px}
 
 /* ── 按鈕 ── */
-.btn{padding:10px 18px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:14px;transition:transform .18s,box-shadow .18s,background .18s}
+.btn{padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:14px;transition:transform .18s,box-shadow .18s,background .18s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,35,27,.1)}
 .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-.btn.primary:hover{background:#1557b0}
-.btn.ghost{background:#fbf7f2}
+.btn.primary:hover{background:var(--gs-green-dark)}
+.btn.ghost{background:var(--gs-surface-alt)}
 .btn:disabled{opacity:.5;pointer-events:none}
 
 /* ── 區塊卡片 ── */
@@ -63,20 +68,20 @@ a{text-decoration:none;color:inherit}
 .form-row{margin-bottom:16px}
 .form-row label{display:block;font-size:13px;font-weight:700;color:var(--gray);margin-bottom:6px}
 .form-row label .req{color:var(--accent);margin-left:2px}
-.form-row input,.form-row textarea,.form-row select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;color:var(--text);background:#fff;transition:border-color .2s}
+.form-row input,.form-row textarea,.form-row select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:#fff;transition:border-color .2s}
 .form-row input:focus,.form-row textarea:focus,.form-row select:focus{outline:none;border-color:var(--blue)}
 .form-row textarea{resize:vertical;min-height:80px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .toggle-row{display:flex;align-items:center;gap:12px;padding:10px 0}
 .toggle-row label{font-size:14px;font-weight:600}
-.toggle{width:44px;height:24px;border-radius:999px;background:#ddd;border:none;position:relative;transition:.2s;flex-shrink:0}
+.toggle{width:44px;height:24px;border-radius:999px;background:var(--gs-line);border:none;position:relative;transition:.2s;flex-shrink:0}
 .toggle.on{background:var(--blue)}
 .toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .toggle.on::after{left:23px}
 .hint{font-size:12px;color:var(--muted);margin-top:4px}
 
 /* ── 圖片上傳 ── */
-.img-upload-box{border:2px dashed var(--border);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.img-upload-box{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
 .img-upload-box:hover{border-color:var(--blue);background:var(--blue-soft)}
 .img-upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:12px;display:none}
@@ -86,7 +91,7 @@ a{text-decoration:none;color:inherit}
 
 /* ── 問券 Builder ── */
 .questions-list{display:flex;flex-direction:column;gap:12px}
-.q-card{background:#f8f5f0;border:1.5px solid var(--border);border-radius:14px;padding:16px;position:relative}
+.q-card{background:var(--gs-surface-alt);border:1.5px solid var(--border);border-radius:10px;padding:16px;position:relative}
 .q-card.dragging{opacity:.55;border-color:var(--blue);box-shadow:0 12px 30px rgba(26,115,232,.12)}
 .q-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .q-card-header select{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:13px;font-weight:600}
@@ -109,14 +114,14 @@ a{text-decoration:none;color:inherit}
 .maxlen-input{width:70px;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:#fff}
 .add-option-btn{font-size:12px;color:var(--blue);background:none;border:none;padding:4px 0;font-weight:700;margin-top:2px}
 .add-option-btn:hover{text-decoration:underline}
-.add-q-btn{border:2px dashed var(--border);background:#faf7f2;border-radius:14px;padding:14px;text-align:center;font-size:14px;font-weight:700;color:var(--muted);width:100%;transition:.2s}
+.add-q-btn{border:2px dashed var(--border);background:var(--gs-surface-alt);border-radius:10px;padding:14px;text-align:center;font-size:14px;font-weight:700;color:var(--muted);width:100%;transition:.2s}
 .add-q-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
 
 /* ── 統計（編輯模式） ── */
 .stats-section{display:none}
 .stat-bar-wrap{margin:6px 0}
 .stat-bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
-.stat-bar{height:8px;border-radius:999px;background:#e8e0d8;overflow:hidden}
+.stat-bar{height:8px;border-radius:999px;background:var(--gs-line);overflow:hidden}
 .stat-bar-fill{height:100%;border-radius:999px;background:var(--blue);transition:width .4s}
 
 /* ── 問券設定 ── */
@@ -137,7 +142,7 @@ a{text-decoration:none;color:inherit}
 .action-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;box-shadow:0 -4px 20px rgba(43,35,27,.06);z-index:100}
 
 /* ── Toast ── */
-#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(30px);padding:11px 18px;border-radius:14px;background:#1e1815;color:#fff;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(30px);padding:11px 18px;border-radius:10px;background:var(--gs-ink);color:#fff;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @media(max-width:600px){

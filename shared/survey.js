@@ -71,7 +71,7 @@
     function renderSurvey(survey, displayName, eventName) {
       pageTitle.textContent = survey.introTitle || survey.surveyName || '活動問券填寫';
       var introDescription = personalizeIntro(survey.introDescription || '感謝您參加活動，請協助填寫問卷。', displayName, eventName);
-      var introHtml = '<div class="field"><div style="color:#475569;line-height:1.8;white-space:pre-wrap;">'
+      var introHtml = '<div class="field"><div style="color:var(--gs-ink-soft);line-height:1.8;white-space:pre-wrap;">'
         + escapeHtml(introDescription) + '</div></div>';
       document.getElementById('surveyIntro').innerHTML = introHtml;
       questionList.innerHTML = survey.questions.map(function(q, idx) {

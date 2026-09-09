@@ -116,9 +116,10 @@ var effectiveTaxonomy = { categories: [], brandTags: [], brandTagDefs: [] };
 var BRAND_TAG_COLORS = ['gold','mint','blue','rose','violet','stone'];
 var storeBrandTagDefs = [];
 var BRAND_TAG_PALETTE = {
-  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
-  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
-  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+  // 色票對齊 assets/theme.css：同一組低彩度暖調，六色仍可辨識但不跳出全站配色
+  gold:{ bg:'#F6EFE1', txt:'#8F6218', bd:'#E0D0AB' }, mint:{ bg:'#E7EFE6', txt:'#245F49', bd:'#C2D3C5' },
+  blue:{ bg:'#E9EFF2', txt:'#35627A', bd:'#CBD8DE' }, rose:{ bg:'#F7ECE5', txt:'#8B5336', bd:'#DDC6B6' },
+  violet:{ bg:'#EFECF4', txt:'#6B5A7D', bd:'#D3CADF' }, stone:{ bg:'#EEEFEA', txt:'#6F7A72', bd:'#D5D8CF' }
 };
 var storeCategories = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];
 var currentGroups = storeCategories.slice();
@@ -126,13 +127,13 @@ var currentGroups = storeCategories.slice();
 // ── CATEGORY COLORS ──
 // 分類名稱各里不同，所以顏色按分類在該里清單裡的順序給，最後一色留給清單外的舊分類。
 var CATE_PALETTE = [
-  { bg:'#E6F7F0', txt:'#0F7A5C' },
-  { bg:'#EFF6FF', txt:'#1D4ED8' },
-  { bg:'#F3EBFF', txt:'#6B28A8' },
-  { bg:'#E0F7FA', txt:'#036672' },
-  { bg:'#FFF3E0', txt:'#B75D00' },
-  { bg:'#FFF1F4', txt:'#B4235A' },
-  { bg:'#F0EEEC', txt:'#7A6E66' },
+  { bg:'#E7EFE6', txt:'#245F49' },
+  { bg:'#E9EFF2', txt:'#35627A' },
+  { bg:'#EFECF4', txt:'#6B5A7D' },
+  { bg:'#E5EFEE', txt:'#2C6660' },
+  { bg:'#F6EFE1', txt:'#8F6218' },
+  { bg:'#F7ECE5', txt:'#8B5336' },
+  { bg:'#EEEFEA', txt:'#6F7A72' },
 ];
 function cateColor(cate) {
   var idx = storeCategories.indexOf(cate);
@@ -439,8 +440,8 @@ function applyFilters() {
   var isFiltered = sf !== 'all' || cf !== 'all' || q;
   var tags = '';
   if (sf !== 'all') tags += ' <span style="background:var(--primary-light);color:var(--primary);padding:1px 6px;border-radius:4px;font-size:11px">' + sf + '</span>';
-  if (cf !== 'all') tags += ' <span style="background:#FFF3E0;color:#B75D00;padding:1px 6px;border-radius:4px;font-size:11px">' + cf + '</span>';
-  if (q)           tags += ' <span style="background:#F3EBFF;color:#6B28A8;padding:1px 6px;border-radius:4px;font-size:11px">「' + esc(q) + '」</span>';
+  if (cf !== 'all') tags += ' <span style="background:#F6EFE1;color:#8F6218;padding:1px 6px;border-radius:4px;font-size:11px">' + cf + '</span>';
+  if (q)           tags += ' <span style="background:#EFECF4;color:#6B5A7D;padding:1px 6px;border-radius:4px;font-size:11px">「' + esc(q) + '」</span>';
   bar.innerHTML =
     '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ' +
     '共 <strong>' + filtered.length + '</strong> 間' + (isFiltered ? tags : '・共 ' + allStores.length + ' 間商家');
@@ -636,7 +637,7 @@ function renderStats() {
   html += '</div>';
 
   html += '<div class="stat-section"><div class="stat-title">狀態分布</div>' + renderStatRows(statusItems, {
-    '申請審核中':'#B75D00','已公開':'#2F6836','不通過':'#7A6E66','未設定':'#B8A898'
+    '申請審核中':'#8F6218','已公開':'#245F49','不通過':'#6F7A72','未設定':'#A2AAA3'
   }) + '</div>';
   html += '<div class="stat-section"><div class="stat-title">熱門類別</div>' + renderStatRows(categoryItems, null) + '</div>';
   html += '<div class="chart-section"><div class="chart-title">商店狀態圖表</div><div class="chart-wrap"><canvas id="storeStatusChart"></canvas></div></div>';
@@ -647,10 +648,10 @@ function renderStats() {
   var ctx = document.getElementById('storeStatusChart');
   if (ctx && statusItems.length) {
     var colors = statusItems.map(function(item){
-      if (item.label === '申請審核中') return '#DDAA4B';
-      if (item.label === '已公開') return '#5B9B7B';
-      if (item.label === '不通過') return '#A89B90';
-      return '#C8B9A8';
+      if (item.label === '申請審核中') return '#C9A64E';
+      if (item.label === '已公開') return '#5C8F76';
+      if (item.label === '不通過') return '#A2AAA3';
+      return '#CBD3C8';
     });
     var chart = new Chart(ctx, {
       type: 'doughnut',
@@ -661,7 +662,7 @@ function renderStats() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, color: '#8C7B6A', font: { size: 11 } } } }
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, color: '#68756C', font: { size: 11 } } } }
       }
     });
     chartInstances.push(chart);

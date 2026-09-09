@@ -1,13 +1,14 @@
 
 const TAB_STYLES = {
-  cases:    { accent: '#4d7a56', soft: '#ebf3ec' },
-  stores:   { accent: '#be9445', soft: '#fbf4e4' },
-  bulletins:{ accent: '#b95353', soft: '#fff1ef' },
-  events:   { accent: '#1a73e8', soft: '#e8f0fe' },
-  views:    { accent: '#5f5aa2', soft: '#f0efff' },
-  admins:   { accent: '#2f63ce', soft: '#eef4ff' },
-  emergency:{ accent: '#c0392b', soft: '#fdeceb' },
-  chat:     { accent: '#0f9d8d', soft: '#e6f7f5' }
+  // 分頁強調色對齊 assets/theme.css：八個分頁仍可辨識，但都收在暖調色系裡
+  cases:    { accent: '#245f49', soft: '#e7efe6' },
+  stores:   { accent: '#8f6218', soft: '#f6efe1' },
+  bulletins:{ accent: '#8b5336', soft: '#f7ece5' },
+  events:   { accent: '#35627a', soft: '#e9eff2' },
+  views:    { accent: '#6b5a7d', soft: '#efecf4' },
+  admins:   { accent: '#4a6b57', soft: '#eaefe8' },
+  emergency:{ accent: '#a1442c', soft: '#f8e7e0' },
+  chat:     { accent: '#2c6660', soft: '#e5efee' }
 };
 const VIEW_PAGE_CONFIG = {
   cases: {
@@ -128,7 +129,7 @@ function copyLoginUrl() {
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.querySelector('.webview-copy-btn');
     btn.textContent = '✓ 已複製！貼到 Chrome 開啟';
-    btn.style.background = '#16a34a';
+    btn.style.background = '#245f49';
   }).catch(() => {
     prompt('請手動複製此網址：', url);
   });
@@ -1010,7 +1011,7 @@ function renderChatMessages(messages) {
     const who = m.role === 'user' ? '里民' : 'AI 小幫手';
     const at = (m.created_at || '').replace('T', ' ').substring(0, 16);
     const align = m.role === 'user' ? 'left' : 'right';
-    const bg = m.role === 'user' ? '#eef4ff' : '#f0f0f0';
+    const bg = m.role === 'user' ? '#e9eff2' : '#eeefea';
     return '<div style="text-align:' + align + ';margin:8px 0;">' +
       '<div style="display:inline-block;max-width:80%;background:' + bg + ';border-radius:10px;padding:8px 12px;">' +
       '<div style="font-size:12px;color:#888;margin-bottom:2px;">' + escapeHtml(who) + ' · ' + escapeHtml(at) + '</div>' +

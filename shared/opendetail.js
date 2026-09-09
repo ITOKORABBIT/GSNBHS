@@ -18,25 +18,25 @@ function apiCall(action, extra) {
 function v(s){ return s ? esc(s) : '<span class="empty">—</span>'; }
 
 var CATE_COLOR = {
-  '生活':  { bg:'#E0F7FA', txt:'#006B6B' },
-  '校園':  { bg:'#FFF3E0', txt:'#B75D00' },
-  '交通':  { bg:'#EBF3FF', txt:'#1A56A8' },
-  '環境':  { bg:'#EAF3EB', txt:'#2F6836' },
-  '治安':  { bg:'#FEE2E2', txt:'#991B1B' },
-  '修繕':  { bg:'#FFF8E1', txt:'#F57F17' },
-  '其他':  { bg:'#F0EEEC', txt:'#7A6E66' },
+  '生活':  { bg:'#E5EFEE', txt:'#2C6660' },
+  '校園':  { bg:'#F6EFE1', txt:'#8F6218' },
+  '交通':  { bg:'#E9EFF2', txt:'#35627A' },
+  '環境':  { bg:'#E7EFE6', txt:'#245F49' },
+  '治安':  { bg:'#F7ECE5', txt:'#8B5336' },
+  '修繕':  { bg:'#EFECF4', txt:'#6B5A7D' },
+  '其他':  { bg:'#EEEFEA', txt:'#6F7A72' },
 };
 var STATUS_COLOR = {
-  '處理中':  { bg:'#FFF8E1', txt:'#B75D00' },
-  '已結案':  { bg:'#F0EEEC', txt:'#7A6E66' },
+  '處理中':  { bg:'#F6EFE1', txt:'#8F6218' },
+  '已結案':  { bg:'#EEEFEA', txt:'#6F7A72' },
 };
 function statusBadge(status) {
   if (!status) return '';
-  var c = STATUS_COLOR[status] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = STATUS_COLOR[status] || { bg:'#EEEFEA', txt:'#6F7A72' };
   return '<span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:' + c.bg + ';color:' + c.txt + '">' + esc(status) + '</span>';
 }
 function cateBadge(cat) {
-  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = CATE_COLOR[cat] || { bg:'#EEEFEA', txt:'#6F7A72' };
   return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:700;background:' + c.bg + ';color:' + c.txt + '">' +
     '<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>' +
     esc(cat) + '</span>';

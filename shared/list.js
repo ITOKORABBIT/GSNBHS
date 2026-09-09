@@ -106,16 +106,16 @@ function isPublicCase(d) {
 
 // ── 類別彩色標籤 ──
 var CATE_COLOR = {
-  '生活':  { bg:'#E0F7FA', txt:'#006B6B' },
-  '校園':  { bg:'#FFF3E0', txt:'#B75D00' },
-  '交通':  { bg:'#EBF3FF', txt:'#1A56A8' },
-  '環境':  { bg:'#EAF3EB', txt:'#2F6836' },
-  '治安':  { bg:'#FEE2E2', txt:'#991B1B' },
-  '修繕':  { bg:'#FFF8E1', txt:'#F57F17' },
-  '其他':  { bg:'#F0EEEC', txt:'#7A6E66' },
+  '生活':  { bg:'#E5EFEE', txt:'#2C6660' },
+  '校園':  { bg:'#F6EFE1', txt:'#8F6218' },
+  '交通':  { bg:'#E9EFF2', txt:'#35627A' },
+  '環境':  { bg:'#E7EFE6', txt:'#245F49' },
+  '治安':  { bg:'#F7ECE5', txt:'#8B5336' },
+  '修繕':  { bg:'#EFECF4', txt:'#6B5A7D' },
+  '其他':  { bg:'#EEEFEA', txt:'#6F7A72' },
 };
 function cateBadge(cat) {
-  var c = CATE_COLOR[cat] || { bg:'#F0EEEC', txt:'#7A6E66' };
+  var c = CATE_COLOR[cat] || { bg:'#EEEFEA', txt:'#6F7A72' };
   return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:' + c.bg + ';color:' + c.txt + '">' +
     '<svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>' +
     esc(cat) + '</span>';
@@ -323,8 +323,8 @@ function applyFilters() {
   var isFiltered = statusF !== 'all' || categoryF !== 'all' || q;
   var tags = '';
   if (statusF   !== 'all') tags += ' <span style="background:var(--primary-light);color:var(--primary);padding:1px 6px;border-radius:4px;font-size:11px">' + statusF + '</span>';
-  if (categoryF !== 'all') tags += ' <span style="background:#FFF3E0;color:#B75D00;padding:1px 6px;border-radius:4px;font-size:11px">' + categoryF + '</span>';
-  if (q)                   tags += ' <span style="background:#F3EBFF;color:#6B28A8;padding:1px 6px;border-radius:4px;font-size:11px">「' + esc(q) + '」</span>';
+  if (categoryF !== 'all') tags += ' <span style="background:#F6EFE1;color:#8F6218;padding:1px 6px;border-radius:4px;font-size:11px">' + categoryF + '</span>';
+  if (q)                   tags += ' <span style="background:#EFECF4;color:#6B5A7D;padding:1px 6px;border-radius:4px;font-size:11px">「' + esc(q) + '」</span>';
   bar.innerHTML =
     '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
     '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ' +
@@ -797,7 +797,7 @@ function renderStats() {
   var avgDays = resolvedCount ? Math.round(totalResolveDays / resolvedCount) : null;
 
   // Category pie colors
-  var CAT_COLORS = ['#4B7A52','#6FAB76','#F4A261','#E76F51','#457B9D','#A8DADC','#B5838D','#6B7C93'];
+  var CAT_COLORS = ['#245F49','#5C8F76','#C9A64E','#B98467','#35627A','#7FA6A0','#9A8CAE','#8B9A90'];
   var catKeys = Object.keys(catMap);
   var catVals = catKeys.map(function(k){ return catMap[k]; });
   var catColors = catKeys.map(function(_,i){ return CAT_COLORS[i % CAT_COLORS.length]; });
@@ -805,8 +805,8 @@ function renderStats() {
   // Status bar colors
   var statusOrder = ['新案件','處理中','已轉交','已結案','不受理'];
   var statusColors = {
-    '新案件': '#1A56A8', '處理中': '#B75D00',
-    '已轉交': '#6B28A8', '已結案': '#2F6836', '不受理': '#7A6E66'
+    '新案件': '#35627A', '處理中': '#8F6218',
+    '已轉交': '#6B5A7D', '已結案': '#245F49', '不受理': '#6F7A72'
   };
   var statusKeys = statusOrder.filter(function(k){ return statusMap[k]; });
   var statusVals = statusKeys.map(function(k){ return statusMap[k] || 0; });
@@ -901,7 +901,7 @@ function renderStats() {
         label: function(ctx){ return ' ' + ctx.raw + ' 件'; }
       }}},
       scales: {
-        x: { beginAtZero: true, ticks: { font: fontDef, stepSize: 1 }, grid: { color: '#EDE7DF' } },
+        x: { beginAtZero: true, ticks: { font: fontDef, stepSize: 1 }, grid: { color: '#E4E8DF' } },
         y: { ticks: { font: fontDef }, grid: { display: false } }
       }
     }
@@ -916,10 +916,10 @@ function renderStats() {
       datasets: [{
         label: '新增案件',
         data: lineVals,
-        borderColor: '#4B7A52',
+        borderColor: '#245F49',
         backgroundColor: 'rgba(75,122,82,.12)',
         borderWidth: 2,
-        pointBackgroundColor: '#4B7A52',
+        pointBackgroundColor: '#245F49',
         pointRadius: 4,
         fill: true, tension: 0.4
       }]
@@ -931,7 +931,7 @@ function renderStats() {
       }}},
       scales: {
         x: { ticks: { font: fontDef }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { font: fontDef, stepSize: 1 }, grid: { color: '#EDE7DF' } }
+        y: { beginAtZero: true, ticks: { font: fontDef, stepSize: 1 }, grid: { color: '#E4E8DF' } }
       }
     }
   });

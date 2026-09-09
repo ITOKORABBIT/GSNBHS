@@ -107,13 +107,13 @@ function urlValue(s) {
 
 // 分類名稱各里不同，顏色按分類在該里清單裡的順序給，最後一色留給清單外的舊分類。
 var CATE_PALETTE = [
-  { bg:'#E6F7F0', txt:'#0F7A5C' },
-  { bg:'#EFF6FF', txt:'#1D4ED8' },
-  { bg:'#F3EBFF', txt:'#6B28A8' },
-  { bg:'#E0F7FA', txt:'#036672' },
-  { bg:'#FFF3E0', txt:'#B75D00' },
-  { bg:'#FFF1F4', txt:'#B4235A' },
-  { bg:'#F0EEEC', txt:'#7A6E66' },
+  { bg:'#E7EFE6', txt:'#245F49' },
+  { bg:'#E9EFF2', txt:'#35627A' },
+  { bg:'#EFECF4', txt:'#6B5A7D' },
+  { bg:'#E5EFEE', txt:'#2C6660' },
+  { bg:'#F6EFE1', txt:'#8F6218' },
+  { bg:'#F7ECE5', txt:'#8B5336' },
+  { bg:'#EEEFEA', txt:'#6F7A72' },
 ];
 function cateColor(cate) {
   var idx = CATE_OPTIONS.indexOf(cate);
@@ -211,9 +211,10 @@ var CATE_OPTIONS = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGOR
 var taxonomyBrandTags = [];
 var taxonomyBrandTagDefs = [];
 var BRAND_TAG_PALETTE = {
-  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
-  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
-  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+  // 色票對齊 assets/theme.css
+  gold:{ bg:'#F6EFE1', txt:'#8F6218', bd:'#E0D0AB' }, mint:{ bg:'#E7EFE6', txt:'#245F49', bd:'#C2D3C5' },
+  blue:{ bg:'#E9EFF2', txt:'#35627A', bd:'#CBD8DE' }, rose:{ bg:'#F7ECE5', txt:'#8B5336', bd:'#DDC6B6' },
+  violet:{ bg:'#EFECF4', txt:'#6B5A7D', bd:'#D3CADF' }, stone:{ bg:'#EEEFEA', txt:'#6F7A72', bd:'#D5D8CF' }
 };
 function brandTagCss(tag) {
   var def = taxonomyBrandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };

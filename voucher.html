@@ -16,30 +16,32 @@
 <link rel="shortcut icon" href="./圖庫/S__27246628_0.jpg?v=20260816">
 <link rel="apple-touch-icon" href="./圖庫/S__27246628_0.jpg?v=20260816">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="theme-color" content="#5B9B7B">
+<meta name="theme-color" content="#245f49">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 :root {
-  --green-50:  #F4F9F5;
-  --green-100: #E8F1EB;
-  --green-300: #B4D8C2;
-  --green-500: #5B9B7B;
-  --green-600: #4A8568;
-  --green-700: #3A6952;
-  --green-800: #2D5240;
-  --ink-700: #4A5C52;
-  --ink-500: #6B7C73;
-  --ink-300: #9CADAB;
-  --shadow-md: 0 8px 24px rgba(45, 82, 64, 0.12);
-  --shadow-lg: 0 16px 48px rgba(45, 82, 64, 0.18);
+  /* 對應 assets/theme.css 的全站色票 */
+  --green-50:  var(--gs-paper);
+  --green-100: var(--gs-green-soft);
+  --green-300: var(--gs-green-line);
+  --green-500: var(--gs-green-mid);
+  --green-600: var(--gs-green);
+  --green-700: var(--gs-green);
+  --green-800: var(--gs-green-dark);
+  --ink-700: var(--gs-ink-soft);
+  --ink-500: var(--gs-muted);
+  --ink-300: var(--gs-faint);
+  --shadow-md: var(--gs-shadow-md);
+  --shadow-lg: var(--gs-shadow-lg);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body {
   font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
   color: var(--green-800);
-  background: linear-gradient(160deg, #9FCFB3 0%, #7BB596 50%, #5B9B7B 100%);
+  background: linear-gradient(160deg, #2f7358 0%, #245f49 50%, #1c5240 100%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -66,7 +68,7 @@ body::after  { width: 220px; height: 220px; bottom: -60px; left: -60px; backgrou
   width: 100%;
   max-width: 380px;
   background: #FFFFFF;
-  border-radius: 24px;
+  border-radius: 14px;
   padding: 32px 28px 28px;
   box-shadow: var(--shadow-lg);
   position: relative;
@@ -87,7 +89,7 @@ body::after  { width: 220px; height: 220px; bottom: -60px; left: -60px; backgrou
 .logo-ring {
   width: 124px; height: 124px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--green-100), #FFFFFF);
+  background: linear-gradient(135deg, var(--gs-green-soft), #FFFFFF);
   border: 2.5px solid var(--green-500);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 20px rgba(91, 155, 123, 0.22), inset 0 0 0 4px rgba(255,255,255,0.7);
@@ -163,7 +165,7 @@ body::after  { width: 220px; height: 220px; bottom: -60px; left: -60px; backgrou
 .live-time .dot {
   display: inline-block; width: 7px; height: 7px;
   border-radius: 50%;
-  background: #22C55E;
+  background: var(--gs-green);
   margin-right: 6px;
   vertical-align: middle;
   animation: pulse 1.4s ease-in-out infinite;

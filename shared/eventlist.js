@@ -329,7 +329,7 @@ function cardHTML(e){
     ${(e.registrationStart||e.registrationEnd)?`<div class="card-meta"><span>🕒 報名：${esc(formatDateRangeText(e.registrationStart,e.registrationEnd)||'未設定')}</span></div>`:''}
     ${quota}
     ${e.questions&&e.questions.length?`<div style="font-size:12px;color:var(--muted);margin-top:2px">📋 ${e.questions.length} 道問題</div>`:''}
-    ${e.surveyId&&e.surveySentAt?`<div style="font-size:11px;color:var(--muted);margin-top:2px">📨 問券已推播 <button onclick="resetSurveySentAt('${e.eventId}')" style="font-size:11px;color:#b45309;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline">重置</button></div>`:''}
+    ${e.surveyId&&e.surveySentAt?`<div style="font-size:11px;color:var(--muted);margin-top:2px">📨 問券已推播 <button onclick="resetSurveySentAt('${e.eventId}')" style="font-size:11px;color:var(--gs-warn);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline">重置</button></div>`:''}
   </div>
   <div class="card-footer">
     <select class="status-select" onchange="changeStatus('${e.eventId}',this.value)">
@@ -1193,7 +1193,7 @@ function openSurveyEdit(surveyId){
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">問券名稱</label>
       <input type="text" id="surveyNameInput" value="${esc(name)}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box" placeholder="例：活動意見調查">
     </div>
-    <div style="margin-bottom:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#faf7f2">
+    <div style="margin-bottom:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--gs-surface-alt)">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">封面標題</label>
       <input type="text" id="surveyIntroTitleInput" value="${esc(introTitle)}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;margin-bottom:10px" placeholder="例：一起來規劃${esc((CONFIG.VILLAGE_NAME || '').replace(/^.*區/, ''))}的活動吧">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">封面說明</label>
@@ -1201,7 +1201,7 @@ function openSurveyEdit(surveyId){
     </div>
     <div id="qCards">${qHtml}</div>
     <button class="srv-add-q-btn" onclick="addSurveyQuestion()">＋ 新增題目</button>
-    <div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#faf7f2">
+    <div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--gs-surface-alt)">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">送出後標題</label>
       <input type="text" id="surveyOutroTitleInput" value="${esc(outroTitle)}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px;box-sizing:border-box;margin-bottom:10px" placeholder="例：問券已送出，感謝！">
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">送出後說明</label>

@@ -19,31 +19,34 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 :root {
-  --green-50:  #F4F9F5;
-  --green-100: #E6F1EA;
-  --green-200: #CDE3D4;
-  --green-300: #A8CDB6;
-  --green-400: #7BB596;
-  --green-500: #5B9B7B;
-  --green-600: #4A8366;
-  --green-700: #3A6952;
-  --green-800: #2D5240;
+  /* 對應 assets/theme.css 的全站色票 */
+  --green-50:  var(--gs-paper);
+  --green-100: var(--gs-green-soft);
+  --green-200: var(--gs-line);
+  --green-300: var(--gs-green-line);
+  --green-400: var(--gs-green-mid);
+  --green-500: var(--gs-green-mid);
+  --green-600: var(--gs-green);
+  --green-700: var(--gs-green);
+  --green-800: var(--gs-green-dark);
 
-  --ink-900: #2C3E36;
-  --ink-700: #4A5C52;
-  --ink-500: #6B7C73;
-  --ink-300: #A4B0A8;
-  --ink-200: #DCE8DF;
-  --ink-100: #EEF4F0;
+  --ink-900: var(--gs-ink);
+  --ink-700: var(--gs-ink-soft);
+  --ink-500: var(--gs-muted);
+  --ink-400: var(--gs-faint);
+  --ink-300: var(--gs-faint);
+  --ink-200: var(--gs-line);
+  --ink-100: var(--gs-line-soft);
 
-  --warn:     #D97757;
-  --warn-bg:  #FDF1EC;
+  --warn:     var(--gs-danger);
+  --warn-bg:  var(--gs-danger-soft);
 
-  --shadow-sm: 0 1px 2px rgba(45, 82, 64, 0.04);
-  --shadow-md: 0 4px 16px rgba(45, 82, 64, 0.06), 0 1px 3px rgba(45, 82, 64, 0.04);
-  --shadow-lg: 0 8px 24px rgba(45, 82, 64, 0.10);
+  --shadow-sm: var(--gs-shadow-sm);
+  --shadow-md: var(--gs-shadow-md);
+  --shadow-lg: var(--gs-shadow-lg);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -72,7 +75,7 @@ body {
 
 /* 頂部標題區 */
 .header {
-  background: linear-gradient(135deg, #9FCFB3 0%, #7BB596 55%, #5B9B7B 100%);
+  background: linear-gradient(135deg, #2f7358 0%, #245f49 55%, #1c5240 100%);
   padding: 44px 24px 56px;
   text-align: center;
   position: relative;
@@ -137,7 +140,7 @@ body {
 /* 卡片 */
 .card {
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 10px;
   padding: 28px 26px;
   margin-bottom: 16px;
   box-shadow: var(--shadow-md);
@@ -204,7 +207,7 @@ select {
   width: 100%;
   padding: 12px 15px;
   border: 1.5px solid var(--ink-200);
-  border-radius: 11px;
+  border-radius: 8px;
   font-size: 15px;
   font-family: inherit;
   color: var(--ink-900);
@@ -256,7 +259,7 @@ select {
 }
 .field-hint.hint-box {
   color: var(--ink-500);
-  background: #F5F7F6;
+  background: var(--gs-surface-alt);
   padding: 9px 12px;
   border-radius: 8px;
   font-size: 12px;
@@ -277,7 +280,7 @@ select {
 .locate-btn {
   flex: 0 0 auto;
   border: 0;
-  border-radius: 11px;
+  border-radius: 8px;
   padding: 0 13px;
   min-height: 45px;
   display: inline-flex;
@@ -288,11 +291,11 @@ select {
   font-size: 14px;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, var(--green-500), var(--green-600));
+  background: var(--gs-green);
   cursor: pointer;
   touch-action: manipulation;
   white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(74, 128, 100, 0.18);
+  box-shadow: 0 3px 10px rgba(36, 95, 73, 0.16);
 }
 .locate-btn .icon {
   width: 16px;
@@ -322,7 +325,7 @@ select {
 }
 .photo-preview-item {
   border: 1.5px solid var(--ink-200);
-  border-radius: 12px;
+  border-radius: 10px;
   aspect-ratio: 4/3;
   position: relative;
   background: var(--green-50);
@@ -340,7 +343,7 @@ select {
   position: absolute; top: 6px; right: 6px; z-index: 3;
   width: 28px; height: 28px; border-radius: 50%;
   background: rgba(255,255,255,.92);
-  border: 1px solid rgba(91,155,123,.22);
+  border: 1px solid rgba(36,95,73,.22);
   color: var(--green-700);
   font-size: 13px; font-weight: 700;
   cursor: pointer;
@@ -361,7 +364,7 @@ select {
   display: flex; align-items: center; justify-content: center; gap: 7px;
   padding: 14px 12px;
   border: 2px dashed var(--ink-200);
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--green-50);
   color: var(--ink-400);
   font-size: 13px; font-weight: 500;
@@ -376,11 +379,11 @@ select {
 .photo-add-btn svg { flex-shrink: 0; color: var(--green-400); }
 .photo-add-btn.hidden { display: none; }
 .photo-preview-item.is-sorting { opacity: .35; }
-.sort-ghost { border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.sort-ghost { border-radius: 10px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
 .sort-placeholder {
   border: 2px dashed var(--green-400);
-  border-radius: 12px;
-  background: rgba(91,155,123,.07);
+  border-radius: 10px;
+  background: rgba(36,95,73,.07);
   aspect-ratio: 4/3;
 }
 
@@ -388,10 +391,10 @@ select {
 .submit-btn {
   width: 100%;
   padding: 16px 24px;
-  background: linear-gradient(135deg, #F08080 0%, #E05C5C 100%);
+  background: var(--gs-green);
   color: #ffffff;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
   font-family: inherit;
@@ -402,7 +405,7 @@ select {
   gap: 10px;
   transition: all 0.25s ease;
   margin-top: 12px;
-  box-shadow: 0 4px 14px rgba(224, 92, 92, 0.38);
+  box-shadow: 0 4px 14px rgba(36, 95, 73, 0.22);
   letter-spacing: 1px;
 }
 .submit-btn .icon {
@@ -410,11 +413,11 @@ select {
   height: 18px;
 }
 .submit-btn:hover {
-  background: linear-gradient(135deg, #E05C5C 0%, #C84444 100%);
-  box-shadow: 0 6px 20px rgba(200, 68, 68, 0.48);
+  background: var(--gs-green-dark);
+  box-shadow: 0 6px 20px rgba(23, 71, 52, 0.28);
   transform: translateY(-1px);
 }
-.submit-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(224,92,92,0.28); }
+.submit-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(36,95,73,0.20); }
 .submit-btn { touch-action: manipulation; }
 .submit-btn:disabled {
   background: var(--ink-300);
@@ -468,10 +471,10 @@ select {
 }
 .success-msg button {
   padding: 13px 36px;
-  background: linear-gradient(135deg, var(--green-500), var(--green-600));
+  background: var(--gs-green);
   color: #fff;
   border: none;
-  border-radius: 11px;
+  border-radius: 8px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -515,7 +518,7 @@ input.invalid, textarea.invalid, select.invalid {
   position: fixed;
   bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: #2C3E36;
+  background: var(--gs-ink);
   color: #fff;
   padding: 12px 20px;
   border-radius: 10px;
@@ -538,7 +541,7 @@ input.invalid, textarea.invalid, select.invalid {
 /* 送出進度 Overlay */
 .submit-progress-overlay {
   position: fixed; inset: 0; z-index: 650;
-  background: rgba(15,30,50,.56);
+  background: rgba(28,40,34,.55);
   display: none; align-items: center; justify-content: center; padding: 20px;
 }
 .submit-progress-overlay.open { display: flex; }
@@ -546,8 +549,8 @@ input.invalid, textarea.invalid, select.invalid {
   width: 100%; max-width: 380px;
   background: rgba(255,255,255,.96);
   border: 1px solid rgba(255,255,255,.7);
-  border-radius: 22px;
-  box-shadow: 0 24px 64px rgba(15,30,50,.2);
+  border-radius: 10px;
+  box-shadow: 0 24px 64px rgba(35,60,51,.20);
   padding: 28px 24px 22px;
   text-align: center;
   backdrop-filter: blur(10px);
@@ -555,7 +558,7 @@ input.invalid, textarea.invalid, select.invalid {
 .submit-progress-spinner {
   width: 56px; height: 56px; margin: 0 auto 14px;
   border-radius: 50%;
-  border: 4px solid rgba(91,155,123,.14);
+  border: 4px solid rgba(36,95,73,.14);
   border-top-color: var(--green-500);
   animation: spin .8s linear infinite;
 }
@@ -570,11 +573,11 @@ input.invalid, textarea.invalid, select.invalid {
 }
 .submit-progress-bar {
   width: 100%; height: 10px; border-radius: 999px; overflow: hidden;
-  background: #E7F1EB; margin-bottom: 10px;
+  background: var(--gs-green-soft); margin-bottom: 10px;
 }
 .submit-progress-fill {
   width: 0%; height: 100%;
-  background: linear-gradient(135deg, var(--green-500), #8CC9A4);
+  background: linear-gradient(90deg, #0f7552, var(--gs-green));
   border-radius: inherit; transition: width .25s ease;
 }
 .submit-progress-note {
@@ -597,7 +600,7 @@ body.loading-submit { overflow: hidden; }
   .header { padding: 36px 16px 50px; }
   .header h1 { font-size: 20px; }
   .header-icon { width: 38px; height: 38px; }
-  .card { padding: 22px 18px; border-radius: 16px; }
+  .card { padding: 22px 18px; border-radius: 12px; }
 
 }
 </style>

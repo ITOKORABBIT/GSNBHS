@@ -20,6 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Google GSI 已移除，改用 admin.html session -->
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 /* ────────── Reset ────────── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -28,30 +29,31 @@ button{cursor:pointer;font-family:inherit}
 
 /* ────────── Design tokens ────────── */
 :root{
-  --bg:        #F5F2EE;
-  --card:      #FFFFFF;
-  --border:    #E2D9CF;
-  --divider:   #EDE7DF;
-  --lbl:       #8C7B6A;
-  --val:       #2C2018;
-  --muted:     #B8A898;
-  --heading:   #1E160E;
+  /* 對應 assets/theme.css 的全站色票 */
+  --bg:        var(--gs-paper);
+  --card:      var(--gs-surface);
+  --border:    var(--gs-line);
+  --divider:   var(--gs-line-soft);
+  --lbl:       var(--gs-muted);
+  --val:       var(--gs-ink);
+  --muted:     var(--gs-faint);
+  --heading:   var(--gs-ink-strong);
 
-  --primary:       #4B7A52;
-  --primary-light: #EAF3EB;
-  --primary-dark:  #3A5E3F;
+  --primary:       var(--gs-green);
+  --primary-light: var(--gs-green-soft);
+  --primary-dark:  var(--gs-green-dark);
 
-  --warn:      #C0582A;
-  --warn-bg:   #FDF0EA;
+  --warn:      var(--gs-danger);
+  --warn-bg:   var(--gs-danger-soft);
 
-  --badge-new-bg:  #EBF3FF; --badge-new-txt: #1A56A8;
-  --badge-proc-bg: #FFF3E0; --badge-proc-txt: #B75D00;
-  --badge-done-bg: #EAF3EB; --badge-done-txt: #2F6836;
+  --badge-new-bg:  var(--gs-info-soft); --badge-new-txt: var(--gs-info);
+  --badge-proc-bg: var(--gs-warn-soft); --badge-proc-txt: var(--gs-warn);
+  --badge-done-bg: var(--gs-ok-soft);   --badge-done-txt: var(--gs-ok);
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.07);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-  --radius:    10px;
-  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  --shadow-sm: var(--gs-shadow-sm);
+  --shadow-md: var(--gs-shadow-md);
+  --radius:    var(--gs-radius);
+  --font: var(--gs-font);
 }
 
 /* ────────── Base ────────── */
@@ -154,7 +156,7 @@ body{
 .badge-new  { background: var(--badge-new-bg);  color: var(--badge-new-txt); }
 .badge-proc { background: var(--badge-proc-bg); color: var(--badge-proc-txt); }
 .badge-done { background: var(--badge-done-bg); color: var(--badge-done-txt); }
-.badge-grey { background: #F0EEEC; color: #7A6E66; }
+.badge-grey { background: var(--gs-neutral-soft); color: var(--gs-neutral); }
 
 /* ────────── Case title card ────────── */
 .case-title-card{
@@ -287,7 +289,7 @@ body{
 }
 .modal-box{
   background: var(--card);
-  border-radius: 16px 16px 0 0;
+  border-radius: 12px 12px 0 0;
   width: 100%; max-width: 680px;
   max-height: 90vh;
   display: flex; flex-direction: column;
@@ -543,7 +545,7 @@ body{
 .lb-counter{
   position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
   color: rgba(255,255,255,.9); font-size: 13px;
-  background: rgba(0,0,0,.45); padding: 4px 14px; border-radius: 20px;
+  background: rgba(0,0,0,.45); padding: 4px 14px; border-radius:999px;
   display: none; pointer-events: none;
 }
 
@@ -604,7 +606,7 @@ body{
 <!-- ── Success ── -->
 <div class="success-overlay" id="successOverlay">
   <div class="success-icon">
-    <svg width="36" height="36" fill="none" stroke="#4B7A52" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <svg width="36" height="36" fill="none" stroke="#245f49" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
   </div>
   <h2>回覆已送出！</h2>
   <p>案件狀態已更新<br>謝謝您的處理</p>

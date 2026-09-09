@@ -85,9 +85,10 @@ var availableBrandTags = [];
 var selectedBrandTags = [];
 var brandTagDefs = [];
 var BRAND_TAG_PALETTE = {
-  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
-  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
-  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+  // 色票對齊 assets/theme.css
+  gold:{ bg:'#F6EFE1', txt:'#8F6218', bd:'#E0D0AB' }, mint:{ bg:'#E7EFE6', txt:'#245F49', bd:'#C2D3C5' },
+  blue:{ bg:'#E9EFF2', txt:'#35627A', bd:'#CBD8DE' }, rose:{ bg:'#F7ECE5', txt:'#8B5336', bd:'#DDC6B6' },
+  violet:{ bg:'#EFECF4', txt:'#6B5A7D', bd:'#D3CADF' }, stone:{ bg:'#EEEFEA', txt:'#6F7A72', bd:'#D5D8CF' }
 };
 // 各里分類不同：正式清單來自該里 stores-api 的 taxonomy，這份只是 API 回來前的墊檔。
 var storeCategoryFallback = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];

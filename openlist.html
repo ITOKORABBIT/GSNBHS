@@ -19,27 +19,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 img{display:block;max-width:100%}
 button{cursor:pointer;font-family:inherit}
 
 :root{
-  --bg:#eff8f2;
-  --card:#ffffff;
-  --border:#bdd9ca;
-  --divider:#d0e8da;
-  --lbl:#4e7260;
-  --val:#1a3028;
-  --muted:#86b09e;
-  --heading:#112620;
-  --primary:#5b9b7b;
-  --primary-light:#e6f1ea;
-  --primary-dark:#4a8366;
-  --shadow-sm:0 1px 3px rgba(30,80,55,.07);
-  --shadow-md:0 2px 8px rgba(30,80,55,.09),0 1px 2px rgba(30,80,55,.05);
-  --radius:10px;
-  --font:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+  /* 對應 assets/theme.css 的全站色票 */
+  --bg:        var(--gs-paper);
+  --card:      var(--gs-surface);
+  --border:    var(--gs-line);
+  --divider:   var(--gs-line-soft);
+  --lbl:       var(--gs-ink-soft);
+  --val:       var(--gs-ink);
+  --muted:     var(--gs-faint);
+  --heading:   var(--gs-ink-strong);
+  --primary:       var(--gs-green);
+  --primary-light: var(--gs-green-soft);
+  --primary-dark:  var(--gs-green-dark);
+  --shadow-sm: var(--gs-shadow-sm);
+  --shadow-md: var(--gs-shadow-md);
+  --radius:    var(--gs-radius);
+  --font: var(--gs-font);
 }
 
 body{
@@ -86,7 +88,7 @@ body{
   padding:7px 13px;
   border-radius:8px;
   border:none;
-  background:#f08080;
+  background:var(--gs-green);
   font-size:13px;
   font-weight:600;
   color:#fff;
@@ -94,7 +96,7 @@ body{
   white-space:nowrap;
 }
 
-.report-btn:hover{background:#d85c5c}
+.report-btn:hover{background:var(--gs-green-dark)}
 
 .filter-wrap{
   background:var(--card);
@@ -249,7 +251,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(135deg,#d8eee2 0%,#c8e4d5 100%);
+  background:linear-gradient(135deg,var(--gs-surface-alt) 0%,var(--gs-surface-deep) 100%);
 }
 
 .card-body{
@@ -321,7 +323,7 @@ body{
 .state-wrap p{font-size:13px}
 
 .skel{
-  background:linear-gradient(90deg,var(--divider) 25%,#c2ddd0 50%,var(--divider) 75%);
+  background:linear-gradient(90deg,var(--divider) 25%,var(--gs-surface-alt) 50%,var(--divider) 75%);
   background-size:300% 100%;
   animation:shimmer 1.4s infinite;
   border-radius:5px;
@@ -374,7 +376,7 @@ body{
 }
 .vm-backdrop.open{display:flex}
 .vm-box{
-  background:#fff;border-radius:16px;
+  background:var(--gs-surface);border-radius:var(--gs-radius);
   width:min(100%,360px);max-height:80vh;overflow:auto;
   box-shadow:0 12px 40px rgba(17,38,32,.18);
 }
@@ -402,9 +404,9 @@ body{
   font-size:11px;font-weight:700;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
 }
-.rank-num.r1{background:#e9a21b}
-.rank-num.r2{background:#8a8a8a}
-.rank-num.r3{background:#a06432}
+.rank-num.r1{background:var(--gs-warn)}
+.rank-num.r2{background:var(--gs-neutral)}
+.rank-num.r3{background:#8b5336}
 .rank-name{flex:1;font-size:13px;color:var(--val);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rank-cnt{font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:2px}
 </style>
