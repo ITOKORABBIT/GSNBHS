@@ -156,8 +156,12 @@ function brandTagStyle(tag) {
 function badgeCls(s){ if (s==='已公開') return 'badge-public'; if (s==='不通過') return 'badge-reject'; return 'badge-pending'; }
 function cardStatusCls(s){ if (s==='已公開') return 'status-public'; if (s==='不通過') return 'status-reject'; return 'status-pending'; }
 function storeIdNum(id){ if (!id) return 0; var m = String(id).match(/(\d+)/); return m ? parseInt(m[1],10) : 0; }
+function storeCate(d) {
+  return String((d && (d.pubCate || d.category)) || '').trim();
+}
 function categoryGroupKey(d) {
-  return FOOD_CATES.indexOf(d.category || '') !== -1 ? d.category : '其他各行各業';
+  var cate = storeCate(d);
+  return FOOD_CATES.indexOf(cate) !== -1 ? cate : '其他各行各業';
 }
 function categoryWeight(d) {
   var idx = CATEGORY_GROUPS.indexOf(categoryGroupKey(d));
@@ -379,7 +383,7 @@ function selectCategory(el) {
 }
 function buildCategoryChips() {
   var cats = {};
-  allStores.forEach(function(d){ if (d.category) cats[d.category] = true; });
+  allStores.forEach(function(d){ var c = storeCate(d); if (c) cats[c] = true; });
   var keys = Object.keys(cats).sort();
   var list = document.getElementById('categoryList');
   var html = '<div class="dropdown-item selected" data-value="all" onclick="selectCategory(this)">全部類別</div>';
@@ -394,10 +398,10 @@ function applyFilters() {
   var cf = currentCategoryFilter;
 
   var filtered = allStores.filter(function(d){
-    if (cf !== 'all' && (d.category || '') !== cf) return false;
+    if (cf !== 'all' && storeCate(d) !== cf) return false;
     if (sf !== 'all' && d.status !== sf) return false;
     if (q) {
-      var hay = [d.storeId, d.storeName, brandTags(d).join(' '), d.addr, d.category, d.desc, d.offer, d.name, d.phone].join(' ').toLowerCase();
+      var hay = [d.storeId, d.storeName, brandTags(d).join(' '), d.addr, d.category, d.pubCate, d.desc, d.offer, d.name, d.phone].join(' ').toLowerCase();
       if (hay.indexOf(q) === -1) return false;
     }
     return true;
@@ -498,7 +502,7 @@ function renderCard(d) {
   if (dispPhone) html += '<div class="card-phone"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' + esc(dispPhone) + '</div>';
   if (dispAddr) html += '<div class="card-address">' + esc(dispAddr.length > 18 ? dispAddr.slice(0,18)+'…' : dispAddr) + '</div>';
   html += '<div class="card-meta">';
-  var dispCate = d.category || d.pubCate;
+  var dispCate = storeCate(d);
   if (dispCate) html += cateBadge(dispCate);
   brandTags(d).forEach(function(tag){ html += '<span class="brand-tag" style="' + brandTagStyle(tag) + '">' + esc(tag) + '</span>'; });
   html += '</div>';
@@ -592,14 +596,14 @@ function renderStats() {
   var publicCount = allStores.filter(function(d){ return d.status === '已公開'; }).length;
   var pendingCount = allStores.filter(function(d){ return d.status === '申請審核中'; }).length;
   var rejectCount = allStores.filter(function(d){ return d.status === '不通過'; }).length;
-  var foodCount = allStores.filter(function(d){ return FOOD_CATES.indexOf(d.category || '') !== -1; }).length;
+  var foodCount = allStores.filter(function(d){ return FOOD_CATES.indexOf(storeCate(d)) !== -1; }).length;
   var otherCount = total - foodCount;
 
   var statusCounts = {};
   var categoryCounts = {};
   allStores.forEach(function(d){
     var status = d.status || '未設定';
-    var cate = d.category || '未分類';
+    var cate = storeCate(d) || '未分類';
     statusCounts[status] = (statusCounts[status] || 0) + 1;
     categoryCounts[cate] = (categoryCounts[cate] || 0) + 1;
   });

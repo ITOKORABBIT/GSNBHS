@@ -46,3 +46,13 @@ test("LINE 美食地圖選單跟著換成新分類", () => {
   // 健身歸運動休閒，不要再同時掛在生活便利底下
   assert.doesNotMatch(line, /生活便利: \["生活便利","生活","美容","健身"/);
 });
+
+test("後台清單以審核後的公開分類為準", () => {
+  const src = read("shared/storelist.js");
+  // 里長在審核頁改的是 pubCate，申請時填的 category 不會跟著動；
+  // 清單若只看 category，改完分類的店家還是掛在原本的分組。
+  assert.match(src, /function storeCate\(d\) \{[\s\S]*d\.pubCate \|\| d\.category/);
+  assert.doesNotMatch(src, /FOOD_CATES\.indexOf\(d\.category/);
+  assert.doesNotMatch(src, /if \(d\.category\) cats\[d\.category\]/);
+  assert.doesNotMatch(src, /var dispCate = d\.category/);
+});
