@@ -8,9 +8,10 @@ const redirects = readFileSync(new URL("../_redirects", import.meta.url), "utf8"
 const lineCaseUrl = "https://line.me/R/oaMessage/%40900rucza/?%E6%82%A8%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E8%A9%A2%E5%95%8F%E6%A1%88%E4%BB%B6%E9%80%B2%E5%BA%A6";
 const officialLineUrl = "https://line.me/R/oaMessage/%40900rucza";
 
-test("homepage uses the official aggregate case stats without synthetic growth", () => {
-  assert.match(page, /action:'getPublicStats'/);
-  assert.match(page, /typeof CONFIG==='undefined'/);
+test("homepage uses the dated village-office transition baseline without synthetic growth", () => {
+  assert.match(page, /total:2038,completed:2025,new:0,active:13,thisMonth:6,completionRate:99.4/);
+  assert.match(page, /更新至 2026 年 9 月 9 日/);
+  assert.doesNotMatch(page, /fetch\(CONFIG.CASE_API_URL/);
   assert.match(page, /案件處理概況/);
   assert.match(page, /目前尚無案件/);
   assert.doesNotMatch(page, /Math\.random|setInterval/);

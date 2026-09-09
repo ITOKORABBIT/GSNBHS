@@ -24,3 +24,6 @@ playwright-mcp/
 # wrangler --dry-run 的建置產物
 tmp/
 **/tmp/
+dist/
+output/
+.playwright-cli/

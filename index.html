@@ -437,6 +437,7 @@ img{display:block;max-width:100%}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
+<link rel="stylesheet" href="./assets/home.css?v=20260909">
 </head>
 <body>
   <div class="demo-badge" id="demoBadge">DEMO 示意資料</div>
@@ -445,9 +446,10 @@ img{display:block;max-width:100%}
       <nav class="topbar" aria-label="主要導覽">
         <a class="brand" href="#top" aria-label="回到舊社里里民小幫手首頁">
           <span class="brand-logo"><img src="./圖庫/S__27246628_0.jpg" alt="舊社里標誌"></span>
-          <span class="brand-copy"><strong>里民小幫手</strong><small>舊社里便民服務</small></span>
+          <span class="brand-copy"><strong>謝秉憲</strong><small>舊社里里長・便民服務</small></span>
         </a>
         <div class="top-links">
+          <a href="#local-life">生活資訊</a>
           <a href="#performance">案件概況</a>
           <a href="#services">便民服務</a>
           <a class="line-id" href="https://line.me/R/oaMessage/%40900rucza" target="_blank" rel="noopener" aria-label="開啟舊社里官方 LINE"><span class="live-dot"></span>LINE @900rucza</a>
@@ -457,7 +459,7 @@ img{display:block;max-width:100%}
       <div class="hero-grid">
         <div class="hero-copy">
           <div class="kicker">舊社里便民服務</div>
-          <h1><span class="village">舊社里</span><span class="helper">里民小幫手</span></h1>
+          <h1><span class="village">北屯區舊社里里長</span><span class="helper">謝秉憲</span></h1>
           <p class="hero-lead">案件通報、最新公告、在地商家與里民諮詢，都可以在這裡辦理。</p>
           <div class="hero-actions">
             <a class="button button-primary" href="./report.html">
@@ -471,18 +473,48 @@ img{display:block;max-width:100%}
         <div class="portrait-stage" aria-label="舊社里辦公處線上服務">
           <div class="portrait-glow" aria-hidden="true"></div>
           <img class="portrait" src="./圖庫/XE209360_20260530_B.jpg" alt="舊社里辦公處服務形象照">
-          <div class="portrait-label"><small>舊社里辦公處</small><strong>線上便民服務</strong></div>
+          <div class="portrait-label"><small>GOOD SHOT・舊社里</small><strong>里民小幫手</strong></div>
         </div>
       </div>
     </div>
   </header>
 
   <main>
+    <section class="local-life" id="local-life" aria-labelledby="life-title">
+      <div class="shell">
+        <div class="life-heading">
+          <div><h2 id="life-title">舊社生活資訊</h2><p>天氣、停水停電與周邊動態。</p></div>
+          <button class="life-refresh" id="life-refresh" type="button">重新整理 ↻</button>
+        </div>
+        <div class="life-layout">
+          <div class="weather-block" aria-live="polite">
+            <div class="weather-place">舊社里周邊天氣</div>
+            <div class="weather-temperature" id="weather-temperature">—</div>
+            <div class="weather-text" id="weather-text">正在取得天氣</div>
+            <div class="weather-details" id="weather-details"></div>
+            <div class="source-note" id="weather-source"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo 天氣預報 ↗</a></div>
+          </div>
+          <div>
+            <div class="life-tabs" role="tablist" aria-label="生活資訊類別">
+              <button class="life-tab" id="tab-water" role="tab" aria-selected="true" aria-controls="panel-water" data-feed="water">停水</button>
+              <button class="life-tab" id="tab-power" role="tab" aria-selected="false" aria-controls="panel-power" tabindex="-1" data-feed="power">停電</button>
+              <button class="life-tab" id="tab-fire" role="tab" aria-selected="false" aria-controls="panel-fire" tabindex="-1" data-feed="fire">消防</button>
+              <button class="life-tab" id="tab-traffic" role="tab" aria-selected="false" aria-controls="panel-traffic" tabindex="-1" data-feed="traffic">交通事故</button>
+            </div>
+            <div class="life-panel" id="panel-water" role="tabpanel" aria-labelledby="tab-water" tabindex="0" aria-live="polite"><p class="life-scope">北屯區停水公告，請核對停水範圍是否包含您的地址。</p><div class="life-items" id="items-water">載入中…</div><div class="source-note" id="source-water"><a href="https://web.water.gov.tw/wateroff" target="_blank" rel="noopener">台灣自來水公司 ↗</a></div></div>
+            <div class="life-panel" id="panel-power" role="tabpanel" aria-labelledby="tab-power" tabindex="0" aria-live="polite" hidden><p class="life-scope">北屯區計畫性停電，請核對路段與門牌；不含突發停電。</p><div class="life-items" id="items-power">載入中…</div><div class="source-note" id="source-power"><a href="https://data.gov.tw/dataset/26144" target="_blank" rel="noopener">台灣電力公司 ↗</a></div></div>
+            <div class="life-panel" id="panel-fire" role="tabpanel" aria-labelledby="tab-fire" tabindex="0" aria-live="polite" hidden><p class="life-scope">北屯區消防救災與交通救護案件。</p><div class="life-items" id="items-fire">載入中…</div><div class="source-note" id="source-fire"><a href="https://www.fire.taichung.gov.tw/caselist/index.asp?Parser=99,8,226" target="_blank" rel="noopener">臺中市政府消防局 ↗</a></div></div>
+            <div class="life-panel" id="panel-traffic" role="tabpanel" aria-labelledby="tab-traffic" tabindex="0" aria-live="polite" hidden><p class="life-scope">舊社公園周邊 3 公里的警廣路況，含事故、施工與交通障礙。</p><div class="life-items" id="items-traffic">載入中…</div><div class="source-note" id="source-traffic"><a href="https://data.gov.tw/dataset/15221" target="_blank" rel="noopener">警察廣播電臺 ↗</a></div></div>
+            <p class="life-footnote">公告未列出不代表現場沒有狀況。緊急救援請撥 <a href="tel:119">119</a>，交通事故請撥 <a href="tel:110">110</a>。</p>
+          </div>
+        </div>
+      </div>
+    </section>
     <section class="performance" id="performance">
       <div class="shell performance-inner">
         <div class="performance-head reveal">
           <h2 class="section-title">案件處理概況</h2>
-          <p class="section-desc" id="performanceDesc">查看目前案件受理與處理情形。</p>
+          <p class="section-desc" id="performanceDesc">里辦服務案件彙整<br>更新至 2026 年 9 月 9 日</p>
           <div class="sync-state loading sr-only" id="syncState" aria-live="polite"><span class="sync-dot"></span><span id="syncText">案件資料載入中</span></div>
           <div class="empty-note" id="emptyNote">目前尚無案件。</div>
         </div>
@@ -587,7 +619,8 @@ img{display:block;max-width:100%}
     function frame(now){
       var ratio=Math.min((now-start)/700,1);
       var eased=1-Math.pow(1-ratio,3);
-      el.textContent=Math.round(value*eased).toLocaleString('zh-TW');
+      var scale=Number.isInteger(value)?1:10;
+      el.textContent=(Math.round(value*eased*scale)/scale).toLocaleString('zh-TW');
       if(ratio<1)requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
@@ -620,33 +653,11 @@ img{display:block;max-width:100%}
     syncText.textContent=isDemo?'DEMO 示意資料':'案件資料已更新';
   }
 
-  function renderError(){
-    Object.keys(ids).forEach(function(key){ids[key].textContent='—'});
-    rateUnit.textContent='';
-    syncState.classList.remove('loading');
-    syncState.classList.add('error');
-    syncText.textContent='目前無法載入案件資料';
-    progressLabel.textContent='同步失敗';
-    emptyNote.textContent='目前無法載入案件資料，請稍後再試。';
-    emptyNote.classList.add('show');
-  }
-
-  async function loadStats(){
-    var controller=new AbortController();
-    var timer=setTimeout(function(){controller.abort()},8000);
-    try{
-      if(typeof CONFIG==='undefined'||!CONFIG.CASE_API_URL)throw new Error('missing api');
-      var response=await fetch(CONFIG.CASE_API_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'getPublicStats'}),
-        signal:controller.signal
-      });
-      var json=await response.json();
-      if(!response.ok||!json.success||!json.stats)throw new Error(json.error||'stats unavailable');
-      renderStats(json.stats);
-    }catch(error){renderError()}
-    finally{clearTimeout(timer)}
+  function loadStats(){
+    // 2026-09-09 使用者提供的過渡期里辦彙整；不加總系統既有案件，避免重複計算。
+    // 恢復即時統計時再接回 getPublicStats。後台及正式案件資料維持原狀。
+    var baseline={total:2038,completed:2025,new:0,active:13,thisMonth:6,completionRate:99.4};
+    renderStats(baseline);
   }
 
   if(isDemo){
@@ -658,5 +669,6 @@ img{display:block;max-width:100%}
   }
 })();
 </script>
+<script src="./assets/local-life.js?v=20260909" defer></script>
 </body>
 </html>

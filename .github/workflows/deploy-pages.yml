@@ -14,10 +14,15 @@ jobs:
     name: Deploy gsnbhs Pages site
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build public files
+        run: node tools/build-pages.mjs
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4"
-          command: pages deploy . --project-name=gsnbhs --branch=main
+          command: pages deploy dist --project-name=gsnbhs --branch=main
