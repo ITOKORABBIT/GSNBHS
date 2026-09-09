@@ -348,7 +348,7 @@ async function notifyHub(env, messages) {
   }
 }
 
-function buildStoreNotification(store) {
+export function buildStoreNotification(store) {
   const flexRow = (label, value) => ({
     type: "box",
     layout: "baseline",
@@ -362,6 +362,16 @@ function buildStoreNotification(store) {
     const raw = text(value);
     return raw.length > max ? raw.slice(0, max) + "…" : raw;
   };
+  const blockRow = (label, value) => ({
+    type: "box",
+    layout: "vertical",
+    spacing: "xs",
+    margin: "sm",
+    contents: [
+      { type: "text", text: label, color: "#8C8C8C", size: "sm" },
+      { type: "text", text: text(value) || "—", color: "#111111", size: "sm", wrap: true },
+    ],
+  });
   const rows = [
     flexRow("編號", store.storeId),
     flexRow("店名", store.storeName),
@@ -371,8 +381,8 @@ function buildStoreNotification(store) {
     flexRow("申請人", text(store.name) + (text(store.phone) ? `（${text(store.phone)}）` : "")),
     flexRow("申請時間", store.applyTime),
   ];
-  if (text(store.offer)) rows.push(flexRow("優惠", clip(store.offer, 120)));
-  if (text(store.desc)) rows.splice(4, 0, flexRow("介紹", clip(store.desc, 120)));
+  if (text(store.desc)) rows.push(blockRow("介紹", clip(store.desc, 120)));
+  if (text(store.offer)) rows.push(blockRow("優惠", clip(store.offer, 120)));
 
   const bubble = {
     type: "bubble",
