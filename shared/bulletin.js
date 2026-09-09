@@ -1,3 +1,5 @@
+// 註：舊社里的 bulletin.html 已改用 assets/bulletin-news.js（里刊新聞版面），不再載入這支。
+// 這支保留給其他里的公佈欄版面沿用，改動前先確認是哪一里在吃。
 
 document.getElementById('villageLabel').textContent = CONFIG.VILLAGE_NAME;
 

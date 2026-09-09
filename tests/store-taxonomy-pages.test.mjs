@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
-function page(name) {
+function page(name, extraScript) {
   const html = fs.readFileSync(new URL("../" + name, import.meta.url), "utf8");
   const scripts = [...html.matchAll(/<script\s+src=["'](\.\/shared\/[^"']+)["'][^>]*><\/script>/g)]
     .map((match) => fs.readFileSync(new URL("../" + match[1], import.meta.url), "utf8"));
+  // 版面各里不同的頁面用自己的 assets/ 腳本，測試要一起讀進來
+  if (extraScript) scripts.push(fs.readFileSync(new URL("../" + extraScript, import.meta.url), "utf8"));
   return [html, ...scripts].join("\n");
 }
 
@@ -49,13 +51,14 @@ test("public store detail returns to the store list without an apply action", ()
   assert.doesNotMatch(html, /class="apply-btn"/);
 });
 
-test("public store list cards mirror the approved store card hierarchy", () => {
-  const html = page("storeopenlist.html");
-  assert.match(html, /thumb-view-badge/);
-  assert.match(html, /card-offer-divider/);
-  assert.match(html, /card-offer-label">優惠活動/);
-  assert.match(html, /card-address/);
-  assert.match(html, /<a href="' \+ esc\(d\.pubMapUrl\)[\s\S]*card-address-text/);
-  assert.doesNotMatch(html, />地圖<\/a>/);
-  assert.doesNotMatch(html, /if \(d\.pubDesc\) html \+= '<div class="card-desc">/);
+test("public store list is the storefront directory layout", () => {
+  const html = page("storeopenlist.html", "assets/storefront-map.js");
+  assert.match(html, /舊社商圈/);
+  assert.match(html, /class="tile"/);                       // 分類導覽磚
+  assert.match(html, /shop-views/);                         // 瀏覽數
+  assert.match(html, /shop-offer"><b>里民優惠/);             // 優惠區塊
+  assert.match(html, /esc\(d\.pubAddr\)/);                   // 地址
+  assert.match(html, /esc\(d\.pubMapUrl\)[\s\S]{0,120}導航/); // 導航連 Google Map
+  assert.match(html, /tel:' \+ esc\(d\.pubPhone\)/);          // 撥號
+  assert.doesNotMatch(html, /pubDesc[\s\S]{0,60}card-desc/);  // 卡片不露出長介紹
 });

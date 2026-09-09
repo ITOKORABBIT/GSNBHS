@@ -8,11 +8,24 @@ const modules = [
   "storedetail", "storelist", "storeopendetail", "storeopenlist", "survey", "voucher",
 ];
 
+// 版面各里不同的頁面改用舊社里專屬檔，不吃 shared/<name>.js
+const ownLayoutPages = {
+  bulletin: "./assets/bulletin-news.js",
+  storeopenlist: "./assets/storefront-map.js",
+};
+
 test("all feature pages use the platform core with correct load order", () => {
   for (const name of modules) {
     const html = fs.readFileSync(new URL(`../${name}.html`, import.meta.url), "utf8");
-    const sharedAt = html.indexOf(`src="./shared/${name}.js"`);
-    assert.notEqual(sharedAt, -1, `${name}: missing shared script`);
+    const ownScript = ownLayoutPages[name];
+    const sharedAt = ownScript
+      ? html.indexOf(`src="${ownScript}`)
+      : html.indexOf(`src="./shared/${name}.js"`);
+    assert.notEqual(sharedAt, -1, `${name}: missing page script`);
+    if (ownScript) {
+      // 專屬版面頁不該再載入共用版面，否則兩份渲染會打架
+      assert.equal(html.indexOf(`src="./shared/${name}.js"`), -1, `${name}: must not load shared layout`);
+    }
     if (name === "voucher") continue;
     const config = /src=["'](?:\.\/)?(?:store)?config\.js["']/.exec(html);
     const utils = /src=["'](?:\.\/)?utils\.js["']/.exec(html);
@@ -32,6 +45,7 @@ test("platform pages have the GSNBHS Open Graph identity", () => {
 
 test("shared scripts use dynamic village namespaces", () => {
   for (const name of modules) {
+    if (ownLayoutPages[name]) continue;
     const script = fs.readFileSync(new URL(`../shared/${name}.js`, import.meta.url), "utf8");
     assert.doesNotMatch(script, /(?:gsnbhs|gznbhs|hpnbhs|omnbhs)_(?:admin|event|bulletin)/i, name);
   }

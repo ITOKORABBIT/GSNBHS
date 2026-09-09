@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>美食地圖 - 舊社里 里民小幫手</title>
+<meta name="theme-color" content="#f8f7f2">
+<title>舊社商圈 - 舊社里 里民小幫手</title>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:title" content="美食地圖 - 舊社里 里民小幫手">
-<meta property="og:description" content="舊社里美食地圖">
+<meta property="og:title" content="舊社商圈 - 舊社里 里民小幫手">
+<meta property="og:description" content="舊社里特約商家導覽：美食、飲品、醫療、生活與教育，含地址、營業時間與里民優惠。">
 <meta property="og:url" content="https://gsnbhs.pages.dev/storeopenlist">
 <meta property="og:image" content="https://gsnbhs.pages.dev/圖庫/S__27246628_0.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -18,391 +19,240 @@
 <link rel="apple-touch-icon" href="./圖庫/S__27246628_0.jpg?v=20260816">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 img{display:block;max-width:100%}
-button{cursor:pointer;font-family:inherit}
-
-:root{
-  --bg:        #EDF5FF;
-  --card:      #FFFFFF;
-  --border:    #B8D4EE;
-  --divider:   #CCE2F5;
-  --lbl:       #456280;
-  --val:       #182C44;
-  --muted:     #80AACB;
-  --heading:   #0E2038;
-  --primary:       #4A92C4;
-  --primary-light: #E3F2FF;
-  --primary-dark:  #3070A0;
-  --shadow-sm: 0 1px 3px rgba(20,60,100,.07);
-  --shadow-md: 0 2px 8px rgba(20,60,100,.09), 0 1px 2px rgba(20,60,100,.05);
-  --radius: 10px;
-  --font: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
-}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
 
 body{
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--val);
-  font-size: 15px;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
+  background:var(--gs-paper);
+  color:var(--gs-ink);
+  font-family:var(--gs-font);
+  -webkit-font-smoothing:antialiased;
 }
+.shell{width:min(1180px,calc(100% - 48px));margin-inline:auto}
 
-/* ── Page header ── */
-.page-header{
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 0 16px;
-  height: 54px;
-  display: flex; align-items: center; gap: 10px;
-  position: sticky; top: 0; z-index: 100;
-}
-.header-title{
-  flex: 1;
-  font-size: 16px; font-weight: 700;
-  color: var(--heading);
-  text-align: center;
-}
-.header-subtitle{
-  font-size: 12px; font-weight: 400;
-  color: var(--lbl); margin-top: 1px;
-}
-/* ── Filter bar ── */
-.filter-wrap{
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: 54px; z-index: 90;
-}
-.filter-bar{
-  padding: 8px 16px;
-  display: flex; gap: 8px; align-items: center;
-  flex-wrap: wrap;
-}
-.search-wrap{
-  flex: 1; min-width: 180px;
-  position: relative;
-  display: flex; align-items: center;
-}
-.search-wrap svg{
-  position: absolute; left: 10px;
-  color: var(--muted); pointer-events: none;
-}
+/* ── 頁首 ── */
+.topbar{height:60px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--gs-line-soft);font-size:13px;font-weight:600;color:var(--gs-muted)}
+.back-home{display:inline-flex;align-items:center;gap:7px;transition:color .18s ease}
+.back-home:hover{color:var(--gs-green)}
+.topbar-stat{display:inline-flex;align-items:center;gap:6px;font-family:var(--gs-font-num)}
+
+.hero{border-bottom:1px solid var(--gs-line);background:var(--gs-paper)}
+.hero-inner{padding:38px 0 34px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:36px;align-items:end}
+.hero-kicker{display:flex;align-items:center;gap:12px;color:var(--gs-green);font-size:12px;font-weight:800;letter-spacing:.14em}
+.hero-kicker::before{content:"";width:36px;height:1px;background:var(--gs-green)}
+.hero h1{margin-top:14px;font-size:clamp(40px,5.6vw,68px);line-height:1.02;letter-spacing:-.05em;font-weight:900;color:var(--gs-ink-strong)}
+.hero-lead{max-width:520px;margin-top:16px;color:var(--gs-ink-soft);font-size:15px;line-height:1.9}
+.hero-figures{display:flex;gap:34px;padding-bottom:6px}
+.figure-n{font:700 34px/1 var(--gs-font-num);letter-spacing:-.04em;color:var(--gs-green)}
+.figure-l{margin-top:7px;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--gs-muted)}
+
+/* ── 搜尋 + 分類導覽 ── */
+.browse{position:sticky;top:0;z-index:20;background:var(--gs-paper);border-bottom:1px solid var(--gs-line)}
+.browse-inner{padding:14px 0}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:14px;color:var(--gs-faint);pointer-events:none}
 .search-input{
-  width: 100%; padding: 7px 10px 7px 34px;
-  border-radius: 7px; border: 1px solid var(--border);
-  background: var(--bg); font-family: var(--font); font-size: 13px;
-  color: var(--val); outline: none; transition: border-color .15s;
+  width:100%;min-height:46px;padding:0 14px 0 40px;
+  border:1px solid var(--gs-line);border-radius:var(--gs-radius-sm);
+  background:var(--gs-surface);color:var(--gs-ink);font:inherit;font-size:15px;
+  transition:border-color .18s ease;
 }
-.search-input:focus{ border-color: var(--primary); }
+.search-input::placeholder{color:var(--gs-faint)}
+.search-input:focus{outline:0;border-color:var(--gs-green)}
+.tiles{display:flex;gap:9px;margin-top:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tiles::-webkit-scrollbar{display:none}
+.tile{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:8px;
+  min-height:40px;padding:0 15px;border:1px solid var(--gs-line);border-radius:var(--gs-radius-pill);
+  background:var(--gs-surface);color:var(--gs-ink-soft);
+  font-size:14px;font-weight:700;white-space:nowrap;
+  transition:border-color .18s ease,background .18s ease,color .18s ease;
+}
+.tile:hover{border-color:var(--gs-green-line);color:var(--gs-green)}
+.tile .n{font-family:var(--gs-font-num);font-size:12px;color:var(--gs-faint)}
+.tile[aria-pressed=true]{background:var(--gs-green);border-color:var(--gs-green);color:#fff}
+.tile[aria-pressed=true] .n{color:rgba(255,255,255,.7)}
 
-/* ── Category chips ── */
-.cate-chips{
-  display: flex; gap: 6px; flex-wrap: wrap;
-  padding: 0 16px 10px;
-}
-.cate-chip{
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 11px; border-radius: 999px;
-  font-size: 12px; font-weight: 700;
-  border: 1.5px solid transparent;
-  cursor: pointer; transition: all .15s; white-space: nowrap;
-  background: var(--bg); color: var(--lbl); border-color: var(--border);
-}
-.cate-chip.active{ border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+/* ── 名錄 ── */
+.directory{padding:26px 0 64px}
+.result-bar{display:flex;align-items:baseline;gap:10px;padding-bottom:18px;color:var(--gs-muted);font-size:13px}
+.result-bar strong{font-family:var(--gs-font-num);font-size:15px;color:var(--gs-ink)}
 
-/* ── Result bar ── */
-.result-bar{
-  padding: 10px 16px 4px;
-  font-size: 12px; color: var(--lbl);
-}
-.result-bar strong{ color: var(--primary); }
+.block-head{display:flex;align-items:center;gap:14px;margin:30px 0 16px}
+.block-head:first-child{margin-top:0}
+.block-head h2{font-size:19px;font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+.block-head .n{font-family:var(--gs-font-num);font-size:13px;color:var(--gs-muted)}
+.block-head::after{content:"";flex:1;height:1px;background:var(--gs-line)}
 
-/* ── Card grid ── */
-.card-grid{
-  padding: 4px 12px 100px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
+.shops{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.shop{
+  display:grid;grid-template-columns:132px minmax(0,1fr);gap:0;
+  background:var(--gs-surface);border:1px solid var(--gs-line);border-radius:var(--gs-radius);
+  overflow:hidden;cursor:pointer;
+  transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;
 }
+.shop:hover{border-color:var(--gs-green-line);box-shadow:var(--gs-shadow-md);transform:translateY(-2px)}
+.shop:focus-visible{outline:2px solid var(--gs-green);outline-offset:3px}
+/* 店家圖多半是方形 logo，用 contain 才不會把招牌裁掉一半 */
+.shop-figure{position:relative;background:var(--gs-surface-alt);overflow:hidden;border-right:1px solid var(--gs-line-soft)}
+.shop-figure img{width:100%;height:100%;object-fit:contain;padding:10px}
+.shop-figure .ph{width:100%;height:100%;display:grid;place-items:center}
+.shop-views{
+  position:absolute;left:7px;bottom:7px;display:inline-flex;align-items:center;gap:4px;
+  padding:3px 7px;border-radius:var(--gs-radius-pill);
+  background:rgba(28,40,34,.62);color:#fff;font:600 11px/1 var(--gs-font-num);
+}
+.shop-body{padding:14px 16px 13px;display:flex;flex-direction:column;min-width:0}
+.shop-name{font-size:17px;font-weight:800;line-height:1.4;letter-spacing:-.015em}
+.shop:hover .shop-name{color:var(--gs-green)}
+.shop-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:700}
+.tag-brand{border:1px solid transparent}
+.shop-lines{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.shop-line{display:flex;align-items:flex-start;gap:7px;color:var(--gs-muted);font-size:12.5px;line-height:1.6}
+.shop-line svg{flex-shrink:0;margin-top:3px;color:var(--gs-faint)}
+.shop-line span{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.shop-offer{
+  margin-top:11px;padding:8px 11px;border-left:2px solid var(--gs-green);
+  background:var(--gs-green-soft);color:var(--gs-green-dark);
+  font-size:12.5px;line-height:1.65;font-weight:600;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.shop-offer b{display:block;margin-bottom:2px;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--gs-green)}
+.shop-actions{display:flex;gap:8px;margin-top:auto;padding-top:12px}
+.act{
+  flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:34px;border:1px solid var(--gs-line);border-radius:var(--gs-radius-sm);
+  color:var(--gs-ink-soft);font-size:12.5px;font-weight:700;
+  transition:border-color .18s ease,color .18s ease,background .18s ease;
+}
+.act:hover{border-color:var(--gs-green);color:var(--gs-green);background:var(--gs-green-soft)}
 
-/* ── Store card ── */
-.store-card{
-  position: relative;
-  background: var(--card);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  display: flex; flex-direction: column;
-  border-left: 4px solid var(--primary);
-  transition: transform .15s, box-shadow .15s;
-}
-.store-card:hover{
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
+/* 熱門 */
+.hot{padding:22px 0 4px}
+.hot-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}
+.hot-item{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--gs-surface);border:1px solid var(--gs-line);border-radius:var(--gs-radius);cursor:pointer;transition:border-color .18s ease}
+.hot-item:hover{border-color:var(--gs-green-line)}
+.hot-item:hover .hot-name{color:var(--gs-green)}
+.hot-num{width:21px;height:21px;flex-shrink:0;display:grid;place-items:center;border-radius:2px;background:var(--gs-surface-alt);color:var(--gs-ink-soft);font:700 11px/1 var(--gs-font-num)}
+.hot-num.r1{background:var(--gs-green);color:#fff}
+.hot-num.r2{background:var(--gs-green-mid);color:#fff}
+.hot-num.r3{background:var(--gs-surface-deep);color:var(--gs-green-dark)}
+.hot-name{font-size:13px;font-weight:700;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-.card-thumb{
-  width: 100%; aspect-ratio: 16/9;
-  background: var(--divider);
-  overflow: hidden; flex-shrink: 0; position: relative;
-}
-.card-thumb img{
-  width: 100%; height: 100%; object-fit: cover;
-  transition: transform .3s;
-}
-.store-card:hover .card-thumb img{ transform: scale(1.04); }
-.card-thumb-placeholder{
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #DCEEFF 0%, #C8E2F8 100%);
-}
-.thumb-view-badge{
-  position: absolute; top: 8px; right: 8px; z-index: 2;
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 8px; border-radius: 999px;
-  background: rgba(255,255,255,.92);
-  border: 1px solid rgba(226,217,207,.9);
-  color: var(--lbl); font-size: 11px; font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,.12);
-}
-.thumb-view-badge svg{ width: 12px; height: 12px; opacity: .72; }
+/* 骨架與狀態 */
+.skel{background:linear-gradient(90deg,var(--gs-line-soft) 25%,var(--gs-surface-alt) 50%,var(--gs-line-soft) 75%);background-size:300% 100%;animation:shimmer 1.5s infinite;border-radius:2px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.skel-shop{display:grid;grid-template-columns:132px minmax(0,1fr);background:var(--gs-surface);border:1px solid var(--gs-line);border-radius:var(--gs-radius);overflow:hidden;min-height:168px}
+.state{padding:78px 20px;text-align:center;color:var(--gs-muted);grid-column:1/-1}
+.state h3{margin-top:16px;font-size:18px;color:var(--gs-ink)}
+.state p{margin-top:8px;font-size:14px}
+.state svg{margin:0 auto;stroke:var(--gs-line-strong)}
 
-.card-body{
-  padding: 9px 11px 11px;
-  flex: 1; display: flex; flex-direction: column;
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:24px;align-items:start}
+  .hero-figures{gap:28px;padding-bottom:0}
+  .shops{grid-template-columns:1fr}
+  .hot-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-.cate-badge{
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: 5px;
-  font-size: 11px; font-weight: 700;
+@media(max-width:600px){
+  .shell{width:calc(100% - 32px)}
+  .hero-inner{padding:24px 0 22px}
+  .hero h1{font-size:40px}
+  .hero-lead{font-size:13.5px;margin-top:12px}
+  .figure-n{font-size:27px}
+  .figure-l{font-size:11px}
+  .hero-figures{gap:22px}
+  .browse-inner{padding:11px 0}
+  .search-input{min-height:44px;font-size:14px}
+  .tile{min-height:36px;padding:0 13px;font-size:13px}
+  .directory{padding:20px 0 48px}
+  .shop{grid-template-columns:104px minmax(0,1fr)}
+  .shop-body{padding:12px 13px 12px}
+  .shop-name{font-size:15.5px}
+  .shop-line{font-size:12px}
+  .shop-offer{font-size:12px;padding:7px 10px}
+  .act{font-size:12px;min-height:32px}
+  .hot-list{grid-template-columns:1fr}
 }
-.brand-tag{
-  display: inline-flex; align-items: center;
-  padding: 2px 8px; border-radius: 999px;
-  background: #FFF3E0; color: #B75D00;
-  font-size: 11px; font-weight: 700;
-}
-.card-name{
-  font-size: 14px; font-weight: 700;
-  color: var(--heading); line-height: 1.35;
-  margin-bottom: 7px;
-}
-.card-phone{
-  display: flex; align-items: center; gap: 4px;
-  font-size: 12px; line-height: 1.45; color: var(--lbl);
-  margin-bottom: 7px;
-}
-.card-phone svg{ width: 11px; height: 11px; flex-shrink: 0; }
-.card-address{
-  display: flex; align-items: center; gap: 4px;
-  font-size: 12px; line-height: 1.45; color: var(--lbl);
-  margin-bottom: 7px;
-  min-width: 0;
-}
-.card-address svg{ width: 11px; height: 11px; flex-shrink: 0; }
-.card-address-text{
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.card-meta{ display: flex; flex-wrap: wrap; gap: 6px; }
-.card-desc{
-  font-size: 12px; color: var(--lbl);
-  line-height: 1.45;
-  display: -webkit-box; -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical; overflow: hidden;
-}
-.card-offer-divider{ height: 1px; background: var(--divider); margin-top: 10px; margin-bottom: 8px; }
-.card-offer-label{
-  display: inline-flex; align-items: center; align-self: flex-start;
-  padding: 2px 7px; border-radius: 999px;
-  background: var(--primary-light); color: var(--primary-dark);
-  font-size: 11px; font-weight: 700; margin-bottom: 5px;
-}
-
-/* ── 區塊標題 ── */
-.section-header {
-  grid-column: 1 / -1;
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 2px 1px;
-}
-.section-header-label {
-  font-size: 12px; font-weight: 700; color: var(--lbl);
-  display: flex; align-items: center; gap: 6px;
-}
-.section-header-line { flex: 1; height: 1px; background: var(--divider); }
-
-/* ── Empty / Loading ── */
-.state-wrap{
-  grid-column: 1 / -1;
-  text-align: center; padding: 60px 24px;
-  color: var(--lbl);
-}
-.state-wrap svg{ margin: 0 auto 16px; opacity: .4; }
-.state-wrap h3{ font-size: 16px; color: var(--heading); margin-bottom: 6px; }
-.state-wrap p{ font-size: 13px; }
-
-.skel{
-  background: linear-gradient(90deg,var(--divider) 25%,#b4d0ea 50%,var(--divider) 75%);
-  background-size: 300% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: 5px;
-}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-card{
-  background: var(--card); border-radius: var(--radius);
-  border: 1px solid var(--border); overflow: hidden;
-}
-
-@media(max-width: 480px){
-  .card-grid{ grid-template-columns: 1fr; padding: 4px 10px 80px; }
-
-  /* 手機改橫向緊湊列：縮圖左 90px、文字右，一頁可見 6~7 筆 */
-  .store-card{ flex-direction: row; }
-  .card-thumb{ width: 90px; height: 90px; flex-shrink: 0; aspect-ratio: auto; }
-  .card-body{ padding: 7px 10px; min-width: 0; }
-  .card-name{ font-size: 13px; margin-bottom: 4px; }
-  .card-phone, .card-address{ margin-bottom: 4px; }
-  .card-desc{ -webkit-line-clamp: 1; }
-  .card-offer-divider{ margin-top: 7px; margin-bottom: 6px; }
-}
-
-/* ── 瀏覽統計 ── */
-.stats-row{
-  padding:2px 16px 8px;
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:12px;color:var(--lbl);
-}
-.stats-btn{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:4px 11px;border-radius:999px;border:none;
-  background:var(--primary-light);font-size:12px;font-weight:700;
-  color:var(--primary-dark);cursor:pointer;transition:background .15s;
-}
-.stats-btn:hover{background:var(--divider)}
-.vm-backdrop{
-  display:none;position:fixed;inset:0;
-  background:rgba(14,32,56,.38);z-index:500;
-  align-items:center;justify-content:center;padding:20px;
-  backdrop-filter:blur(5px);
-}
-.vm-backdrop.open{display:flex}
-.vm-box{
-  background:#fff;border-radius:16px;
-  width:min(100%,360px);max-height:80vh;overflow:auto;
-  box-shadow:0 12px 40px rgba(20,60,100,.18);
-}
-.vm-head{
-  padding:16px 16px 12px;border-bottom:1px solid var(--divider);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.vm-title{font-size:15px;font-weight:700;color:var(--heading)}
-.vm-close{
-  width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--muted);transition:background .15s;
-}
-.vm-close:hover{background:var(--divider)}
-.vm-body{padding:10px 16px 16px}
-.vm-empty{text-align:center;color:var(--muted);padding:24px 0;font-size:13px}
-.rank-row{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--divider);
-}
-.rank-row:last-child{border-bottom:none}
-.rank-num{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--primary);color:#fff;
-  font-size:11px;font-weight:700;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
-.rank-num.r1{background:#e9a21b}
-.rank-num.r2{background:#8a8a8a}
-.rank-num.r3{background:#a06432}
-.rank-name{flex:1;font-size:13px;color:var(--val);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rank-cnt{font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:2px}
 </style>
 </head>
 <body>
 
-<!-- ── Page header ── -->
-<div class="page-header">
-  <div style="width:60px"></div>
-  <div class="header-title">
-    <div>美食地圖</div>
-    <div class="header-subtitle" id="headerSubtitle">舊社里・里民小幫手</div>
-  </div>
-  <div style="width:60px" aria-hidden="true"></div>
-</div>
-
-<!-- ── Filter bar ── -->
-<div class="filter-wrap">
-  <div class="filter-bar">
-    <div class="search-wrap">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input type="text" class="search-input" id="searchInput" placeholder="搜尋商店名稱、優惠、地址…" oninput="applyFilters()">
-    </div>
-  </div>
-  <div class="cate-chips" id="cateChips">
-    <span class="cate-chip active" data-cate="all" onclick="selectCate(this)">全部類別</span>
+<div class="shell">
+  <div class="topbar">
+    <a class="back-home" href="./index.html">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      回首頁
+    </a>
+    <span class="topbar-stat" id="pageViews" hidden>
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="pageViewCount">–</span> 次瀏覽
+    </span>
   </div>
 </div>
 
-<!-- ── Result bar ── -->
-<div class="result-bar" id="resultBar">載入中…</div>
+<header class="hero">
+  <div class="shell hero-inner">
+    <div>
+      <div class="hero-kicker" id="heroKicker">舊社里 里民小幫手</div>
+      <h1>舊社商圈</h1>
+      <p class="hero-lead">走路就到的在地店家。每一家都提供舊社里民專屬優惠，出示里民身分即可使用；點開店家可看完整介紹、營業時間與導航。</p>
+    </div>
+    <div class="hero-figures">
+      <div>
+        <div class="figure-n" id="figShops">–</div>
+        <div class="figure-l">特約商家</div>
+      </div>
+      <div>
+        <div class="figure-n" id="figCates">–</div>
+        <div class="figure-l">服務類別</div>
+      </div>
+      <div>
+        <div class="figure-n" id="figOffers">–</div>
+        <div class="figure-l">提供里民優惠</div>
+      </div>
+    </div>
+  </div>
+</header>
 
-<div class="stats-row" id="statsRow" style="display:none">
-  <span style="display:inline-flex;align-items:center;gap:4px">
-    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-    <span id="pageViewCount">–</span> 次瀏覽
-  </span>
-  <button class="stats-btn" onclick="openVmModal()">🔥 熱門排行</button>
-</div>
-<div class="vm-backdrop" id="vmBackdrop" onclick="closeVmModal(event)">
-  <div class="vm-box">
-    <div class="vm-head">
-      <div class="vm-title">🔥 最多點閱 TOP 5</div>
-      <button class="vm-close" onclick="closeVmModalDirect()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="vm-body" id="vmBody"></div>
+<div class="browse">
+  <div class="shell browse-inner">
+    <label class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="搜尋店名、優惠、地址或服務…" autocomplete="off">
+    </label>
+    <div class="tiles" id="tiles"></div>
   </div>
 </div>
 
-<!-- ── Card grid ── -->
-<div class="card-grid" id="cardGrid">
-  <div class="skel-card" style="height:220px">
-    <div class="skel" style="height:130px;border-radius:0"></div>
-    <div style="padding:12px 14px">
-      <div class="skel" style="height:12px;width:40%;margin-bottom:8px"></div>
-      <div class="skel" style="height:15px;width:80%;margin-bottom:6px"></div>
-      <div class="skel" style="height:12px;width:60%"></div>
-    </div>
-  </div>
-  <div class="skel-card" style="height:220px">
-    <div class="skel" style="height:130px;border-radius:0"></div>
-    <div style="padding:12px 14px">
-      <div class="skel" style="height:12px;width:50%;margin-bottom:8px"></div>
-      <div class="skel" style="height:15px;width:75%;margin-bottom:6px"></div>
-      <div class="skel" style="height:12px;width:65%"></div>
-    </div>
-  </div>
-  <div class="skel-card" style="height:220px">
-    <div class="skel" style="height:130px;border-radius:0"></div>
-    <div style="padding:12px 14px">
-      <div class="skel" style="height:12px;width:45%;margin-bottom:8px"></div>
-      <div class="skel" style="height:15px;width:85%;margin-bottom:6px"></div>
-      <div class="skel" style="height:12px;width:55%"></div>
-    </div>
-  </div>
+<div class="shell hot" id="hotBlock" hidden>
+  <div class="block-head"><h2>里民最常看</h2></div>
+  <div class="hot-list" id="hotList"></div>
 </div>
+
+<main class="directory">
+  <div class="shell">
+    <div class="result-bar" id="resultBar">載入中…</div>
+    <div id="listing">
+      <div class="shops">
+        <div class="skel-shop"><div class="skel"></div><div style="padding:15px 16px"><div class="skel" style="height:16px;width:62%;margin-bottom:12px"></div><div class="skel" style="height:11px;width:40%;margin-bottom:10px"></div><div class="skel" style="height:11px;width:88%;margin-bottom:7px"></div><div class="skel" style="height:11px;width:70%"></div></div></div>
+        <div class="skel-shop"><div class="skel"></div><div style="padding:15px 16px"><div class="skel" style="height:16px;width:54%;margin-bottom:12px"></div><div class="skel" style="height:11px;width:46%;margin-bottom:10px"></div><div class="skel" style="height:11px;width:82%;margin-bottom:7px"></div><div class="skel" style="height:11px;width:64%"></div></div></div>
+        <div class="skel-shop"><div class="skel"></div><div style="padding:15px 16px"><div class="skel" style="height:16px;width:70%;margin-bottom:12px"></div><div class="skel" style="height:11px;width:38%;margin-bottom:10px"></div><div class="skel" style="height:11px;width:90%;margin-bottom:7px"></div><div class="skel" style="height:11px;width:58%"></div></div></div>
+        <div class="skel-shop"><div class="skel"></div><div style="padding:15px 16px"><div class="skel" style="height:16px;width:58%;margin-bottom:12px"></div><div class="skel" style="height:11px;width:44%;margin-bottom:10px"></div><div class="skel" style="height:11px;width:84%;margin-bottom:7px"></div><div class="skel" style="height:11px;width:66%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</main>
 
 <script src="storeconfig.js"></script>
 <script src="utils.js"></script>
-<script src="./shared/storeopenlist.js"></script>
+<script src="./assets/storefront-map.js?v=20260909"></script>
 <script src="./branding-footer.js"></script>
 </body>
 </html>

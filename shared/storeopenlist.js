@@ -1,3 +1,5 @@
+// 註：舊社里的 storeopenlist.html 已改用 assets/storefront-map.js（商圈名錄版面），不再載入這支。
+// 這支保留給其他里的商家清單版面沿用，改動前先確認是哪一里在吃。
 
 // 分類清單各里不同，由該里自己的商家後端（taxonomy）決定，這裡不寫死分類名稱。
 var storeCategories = Array.isArray(CONFIG.STORE_CATEGORIES) ? CONFIG.STORE_CATEGORIES.slice() : [];
@@ -20,13 +22,13 @@ function categoryGroups() {
 }
 // 分類名稱各里不同，顏色按該里清單的順序給，最後一色留給清單外的舊分類。
 var CATE_PALETTE = [
-  { bg:'#E6F7F0', txt:'#0F7A5C' },
-  { bg:'#EFF6FF', txt:'#1D4ED8' },
-  { bg:'#F3EBFF', txt:'#6B28A8' },
-  { bg:'#E0F7FA', txt:'#036672' },
-  { bg:'#FFF3E0', txt:'#B75D00' },
-  { bg:'#FFF1F4', txt:'#B4235A' },
-  { bg:'#F0EEEC', txt:'#7A6E66' },
+  { bg:'#E7EFE6', txt:'#245F49' },
+  { bg:'#E9EFF2', txt:'#35627A' },
+  { bg:'#EFECF4', txt:'#6B5A7D' },
+  { bg:'#E5EFEE', txt:'#2C6660' },
+  { bg:'#F6EFE1', txt:'#8F6218' },
+  { bg:'#F7ECE5', txt:'#8B5336' },
+  { bg:'#EEEFEA', txt:'#6F7A72' },
 ];
 function cateColor(cate) {
   var idx = storeCategories.indexOf(cate);
@@ -37,9 +39,10 @@ function cateColor(cate) {
 function brandTags(d){ var raw = Array.isArray(d.brandTags) && d.brandTags.length ? d.brandTags : [d.brandTag]; return raw.map(function(tag){ return String(tag || '').trim(); }).filter(Boolean).slice(0,3); }
 var storeBrandTagDefs = [];
 var BRAND_TAG_PALETTE = {
-  gold:{ bg:'#FFF3E0', txt:'#B75D00', bd:'#F5D7A2' }, mint:{ bg:'#EAF3EB', txt:'#2F6836', bd:'#CFE2D3' },
-  blue:{ bg:'#EFF6FF', txt:'#2563EB', bd:'#BFDBFE' }, rose:{ bg:'#FFF1F4', txt:'#B4235A', bd:'#F7C1CF' },
-  violet:{ bg:'#F5F0FF', txt:'#6B28A8', bd:'#DCCBFF' }, stone:{ bg:'#F0EEEC', txt:'#7A6E66', bd:'#D8D0C8' }
+  // 色票對齊 assets/theme.css：同一組低彩度暖調，六色仍可辨識但不跳出全站配色
+  gold:{ bg:'#F6EFE1', txt:'#8F6218', bd:'#E0D0AB' }, mint:{ bg:'#E7EFE6', txt:'#245F49', bd:'#C2D3C5' },
+  blue:{ bg:'#E9EFF2', txt:'#35627A', bd:'#CBD8DE' }, rose:{ bg:'#F7ECE5', txt:'#8B5336', bd:'#DDC6B6' },
+  violet:{ bg:'#EFECF4', txt:'#6B5A7D', bd:'#D3CADF' }, stone:{ bg:'#EEEFEA', txt:'#6F7A72', bd:'#D5D8CF' }
 };
 function brandTagStyle(tag) {
   var def = storeBrandTagDefs.find(function(item){ return item.name === tag; }) || { color:'gold' };
@@ -260,7 +263,7 @@ function imgFallback(img) {
   var wrap = img.parentNode;
   var badge = wrap.querySelector('.thumb-view-badge');
   wrap.innerHTML = '<div class="card-thumb-placeholder">' +
-    '<svg width="32" height="32" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".5" viewBox="0 0 24 24">' +
+    '<svg width="32" height="32" fill="none" stroke="#8FA79A" stroke-width="1.5" opacity=".5" viewBox="0 0 24 24">' +
     '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>' +
     (badge ? badge.outerHTML : '');
 }
@@ -269,7 +272,7 @@ function renderCard(d) {
   var thumb = d.photo1
     ? '<div class="card-thumb"><img src="' + esc(d.photo1) + '" alt="" loading="lazy" onerror="imgFallback(this)">' + viewBadgeHtml(d.storeId) + '</div>'
     : '<div class="card-thumb"><div class="card-thumb-placeholder">' +
-      '<svg width="32" height="32" fill="none" stroke="#4A92C4" stroke-width="1.5" opacity=".5" viewBox="0 0 24 24">' +
+      '<svg width="32" height="32" fill="none" stroke="#8FA79A" stroke-width="1.5" opacity=".5" viewBox="0 0 24 24">' +
       '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>' +
       viewBadgeHtml(d.storeId) + '</div>';
 

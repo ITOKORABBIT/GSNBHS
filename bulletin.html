@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>活動公佈欄 - 舊社里 里民小幫手</title>
+<meta name="theme-color" content="#f8f7f2">
+<title>里刊公佈欄 - 舊社里 里民小幫手</title>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:title" content="活動公佈欄 - 舊社里 里民小幫手">
-<meta property="og:description" content="舊社里活動公佈欄">
+<meta property="og:title" content="里刊公佈欄 - 舊社里 里民小幫手">
+<meta property="og:description" content="舊社里最新消息、政策宣導、里民活動與教育課程。">
 <meta property="og:url" content="https://gsnbhs.pages.dev/bulletin">
 <meta property="og:image" content="https://gsnbhs.pages.dev/圖庫/S__27246628_0.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -18,268 +19,302 @@
 <link rel="apple-touch-icon" href="./圖庫/S__27246628_0.jpg?v=20260816">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/theme.css?v=20260909">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 img{display:block;max-width:100%}
-button{cursor:pointer;font-family:inherit}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
 
-:root{
-  --bg:#EFF8F2; --card:#FFF; --border:#BDD9CA; --divider:#D0E8DA;
-  --lbl:#4E7260; --val:#1A3028; --muted:#86B09E; --heading:#112620;
-  --primary:#5B9B7B; --primary-light:#E6F1EA; --primary-dark:#4A8366;
-  --pin:#F5A623; --pin-bg:#FFF8ED;
-  --shadow-sm:0 1px 3px rgba(30,80,55,.07);
-  --shadow-md:0 2px 8px rgba(30,80,55,.09),0 1px 2px rgba(30,80,55,.05);
-  --radius:10px;
-  --font:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+body{
+  background:var(--gs-paper);
+  color:var(--gs-ink);
+  font-family:var(--gs-font);
+  -webkit-font-smoothing:antialiased;
+}
+.shell{width:min(1180px,calc(100% - 48px));margin-inline:auto}
+
+/* ── 刊頭 ── */
+.masthead{border-bottom:1px solid var(--gs-line)}
+.masthead-top{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  height:60px;border-bottom:1px solid var(--gs-line-soft);
+  font-size:13px;font-weight:600;color:var(--gs-muted);
+}
+.back-home{display:inline-flex;align-items:center;gap:7px;transition:color .18s ease}
+.back-home:hover{color:var(--gs-green)}
+.masthead-stat{display:inline-flex;align-items:center;gap:6px;font-family:var(--gs-font-num)}
+.masthead-main{padding:34px 0 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:28px;flex-wrap:wrap}
+.masthead-kicker{display:flex;align-items:center;gap:12px;color:var(--gs-green);font-size:12px;font-weight:800;letter-spacing:.14em}
+.masthead-kicker::before{content:"";width:36px;height:1px;background:var(--gs-green)}
+.masthead h1{
+  margin-top:14px;font-size:clamp(38px,5.4vw,64px);line-height:1.02;
+  letter-spacing:-.05em;font-weight:900;color:var(--gs-ink-strong);
+}
+.masthead-lead{max-width:420px;color:var(--gs-ink-soft);font-size:14px;line-height:1.85;padding-bottom:6px}
+
+/* ── 分類導覽 ── */
+.cate-nav{position:sticky;top:0;z-index:20;background:var(--gs-paper);border-bottom:1px solid var(--gs-line)}
+.cate-tabs{display:flex;gap:26px;overflow-x:auto;scrollbar-width:none}
+.cate-tabs::-webkit-scrollbar{display:none}
+.cate-tab{
+  flex-shrink:0;padding:16px 0 13px;border-bottom:3px solid transparent;
+  color:var(--gs-muted);font-size:15px;font-weight:700;white-space:nowrap;
+  transition:color .18s ease,border-color .18s ease;
+}
+.cate-tab:hover{color:var(--gs-green)}
+.cate-tab[aria-selected=true]{color:var(--gs-green);border-bottom-color:var(--gs-green)}
+.cate-tab .n{margin-left:6px;font-family:var(--gs-font-num);font-size:12px;color:var(--gs-faint)}
+.cate-tab[aria-selected=true] .n{color:var(--gs-green-mid)}
+
+/* ── 主體 ── */
+.paper{padding:36px 0 64px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:52px;align-items:start}
+
+.kicker-line{
+  display:flex;align-items:center;gap:12px;margin-bottom:18px;
+  color:var(--gs-green);font-size:12px;font-weight:800;letter-spacing:.12em;
+}
+.kicker-line::after{content:"";flex:1;height:1px;background:var(--gs-line)}
+
+/* 頭條 */
+.lead{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:30px;align-items:center;padding-bottom:34px;border-bottom:1px solid var(--gs-line)}
+.lead-figure{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--gs-surface-alt);border-radius:2px}
+.lead-figure img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.lead:hover .lead-figure img{transform:scale(1.03)}
+.lead-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.lead h2{font-size:clamp(26px,3.2vw,40px);line-height:1.22;letter-spacing:-.035em;font-weight:900;color:var(--gs-ink-strong)}
+.lead-excerpt{
+  margin-top:15px;color:var(--gs-ink-soft);font-size:15px;line-height:1.95;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+}
+.lead-more{display:inline-flex;align-items:center;gap:8px;margin-top:20px;color:var(--gs-green);font-size:14px;font-weight:800}
+.lead:hover .lead-more{gap:12px}
+.lead-more span{transition:gap .2s ease}
+
+/* 次條三欄 */
+.subleads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;padding:32px 0 34px;border-bottom:1px solid var(--gs-line)}
+.sublead-figure{aspect-ratio:16/10;overflow:hidden;background:var(--gs-surface-alt);border-radius:2px;margin-bottom:14px}
+.sublead-figure img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.sublead:hover .sublead-figure img{transform:scale(1.04)}
+.sublead h3{margin-top:11px;font-size:18px;line-height:1.5;letter-spacing:-.02em;font-weight:800}
+.sublead:hover h3{color:var(--gs-green)}
+.sublead-excerpt{
+  margin-top:8px;color:var(--gs-muted);font-size:13px;line-height:1.8;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 
-body{font-family:var(--font);background:var(--bg);color:var(--val);font-size:15px;min-height:100vh;-webkit-font-smoothing:antialiased}
+/* 其餘條目 */
+.stories{padding-top:14px}
+.story{
+  display:grid;grid-template-columns:110px minmax(0,1fr);gap:20px;align-items:start;
+  padding:22px 0;border-bottom:1px solid var(--gs-line-soft);
+  transition:background .2s ease,padding-inline .2s ease;
+}
+.story:hover{background:rgba(255,255,255,.7);padding-inline:14px}
+.story-figure{aspect-ratio:1;overflow:hidden;background:var(--gs-surface-alt);border-radius:2px}
+.story-figure img{width:100%;height:100%;object-fit:cover}
+.story h3{font-size:17px;line-height:1.55;letter-spacing:-.015em;font-weight:800}
+.story:hover h3{color:var(--gs-green)}
+.story-excerpt{
+  margin-top:7px;color:var(--gs-muted);font-size:13px;line-height:1.8;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.story-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px}
 
-.page-header{
-  background:var(--card);border-bottom:1px solid var(--border);
-  padding:0 16px;height:54px;
-  display:flex;align-items:center;gap:10px;
-  position:sticky;top:0;z-index:100;
+/* 共用小元件 */
+.tag{
+  display:inline-flex;align-items:center;padding:3px 9px;border-radius:2px;
+  font-size:11px;font-weight:800;letter-spacing:.02em;
 }
-.header-icon{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.header-title{flex:1;font-size:16px;font-weight:700;color:var(--heading)}
-.header-sub{font-size:12px;font-weight:400;color:var(--lbl)}
+.tag-emergency{background:var(--gs-danger-soft);color:var(--gs-danger)}
+.tag-policy{background:var(--gs-info-soft);color:var(--gs-info)}
+.tag-news{background:var(--gs-green-soft);color:var(--gs-green)}
+.tag-course{background:var(--gs-alt-soft);color:var(--gs-alt)}
+.tag-activity{background:var(--gs-warn-soft);color:var(--gs-warn)}
+.tag-pin{background:var(--gs-ink);color:#fff}
+.dateline{font-family:var(--gs-font-num);font-size:12px;font-weight:600;color:var(--gs-faint);letter-spacing:.02em}
+.views{display:inline-flex;align-items:center;gap:4px;font-family:var(--gs-font-num);font-size:12px;color:var(--gs-faint)}
+.clickable{cursor:pointer}
+.clickable:focus-visible{outline:2px solid var(--gs-green);outline-offset:4px}
 
-.list{padding:12px 12px 80px;display:flex;flex-direction:column;gap:10px}
-
-.bull-card{
-  background:var(--card);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow-sm);
-  overflow:hidden;cursor:pointer;
-  transition:transform .15s,box-shadow .15s;
-  border-left:4px solid var(--primary);
-  display:flex;align-items:stretch;
+/* 側欄 */
+.rail{position:sticky;top:74px;display:flex;flex-direction:column;gap:34px}
+.rail-block h4{
+  padding-bottom:11px;border-bottom:2px solid var(--gs-ink);
+  font-size:14px;font-weight:900;letter-spacing:.02em;
 }
-.bull-card.pinned{border-left-color:var(--pin);background:var(--pin-bg)}
-.bull-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-
-.card-thumb{width:88px;flex-shrink:0;overflow:hidden;background:var(--divider)}
-.card-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
-.bull-card:hover .card-thumb img{transform:scale(1.03)}
-
-.card-body{padding:13px 14px 14px;flex:1;min-width:0}
-.card-meta{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
-.pin-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:2px 8px;border-radius:999px;
-  font-size:11px;font-weight:700;
-  background:var(--pin);color:#fff;
-}
-.date-lbl{font-size:12px;color:var(--muted)}
-.card-title{font-size:15px;font-weight:700;color:var(--heading);line-height:1.4;margin-bottom:6px}
-.card-preview{font-size:13px;color:var(--lbl);line-height:1.55;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-/* Modal */
-.modal-backdrop{
-  display:none;position:fixed;inset:0;
-  background:rgba(17,38,32,.38);z-index:200;
-  align-items:center;justify-content:center;
-  padding:20px;
-  backdrop-filter:blur(5px);
-}
-.modal-backdrop.open{display:flex}
-.modal{
-  width:min(100%,560px);max-height:88vh;
-  background:var(--card);border-radius:18px;
-  display:flex;flex-direction:column;
-  box-shadow:0 24px 60px rgba(17,38,32,.18);
-  animation:popIn .2s ease;
-}
-@keyframes popIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-header{padding:16px 16px 14px;border-bottom:1px solid var(--divider);display:flex;align-items:center;gap:10px}
-.modal-close{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
-.modal-close:hover{background:var(--divider)}
-.modal-title{flex:1;font-size:16px;font-weight:700;color:var(--heading);line-height:1.4}
-.modal-scroll{overflow-y:auto;flex:1}
-.modal-body{padding:16px 16px 8px}
-.modal-gallery{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:0 16px 20px;
-}
-.modal-gallery img{
-  width:100%;
-  height:auto;
-  border-radius:10px;
-  cursor:zoom-in;
-  display:block;
-}
-.modal-date{font-size:12px;color:var(--muted);margin-bottom:12px}
-.modal-content{font-size:15px;color:var(--val);line-height:1.85;word-break:break-word}
-.modal-content h2,.modal-content h3{margin:0 0 .7em;color:var(--heading)}
-.modal-content p{margin:0 0 1em}
-.modal-content ul,.modal-content ol{margin:0 0 1em;padding-left:1.4em}
-.modal-content blockquote{margin:0 0 1em;padding-left:12px;border-left:3px solid var(--divider);color:var(--lbl)}
-.modal-content a{color:var(--primary-dark)}
-
-/* Empty */
-.empty{text-align:center;padding:64px 24px;color:var(--muted)}
-.empty svg{margin:0 auto 16px;opacity:.35}
-.empty p{font-size:14px}
-
-/* Skeleton */
-.skel-list{padding:12px 12px;display:flex;flex-direction:column;gap:10px}
-.skel-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:4px solid var(--divider);padding:14px;overflow:hidden}
-.skel-line{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--divider) 25%,#c5e5d5 50%,var(--divider) 75%);background-size:300% 100%;animation:shimmer 1.5s infinite;margin-bottom:10px}
-.skel-line.short{width:40%}
-.skel-line.title{height:15px;width:75%;margin-bottom:8px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-.pin-icon{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
-.cate-header{
-  padding:14px 4px 6px;
-  font-size:13px;font-weight:700;color:var(--lbl);letter-spacing:.03em;
-}
-.cate-header:first-child{padding-top:4px}
-.cate-badge{
-  display:inline-flex;align-items:center;
-  padding:2px 8px;border-radius:999px;
-  font-size:11px;font-weight:700;
-}
-.cate-emergency{background:#fee2e2;color:#b91c1c}
-.cate-policy{background:#dbeafe;color:#1d4ed8}
-.cate-activity{background:var(--primary-light);color:var(--primary-dark)}
-.cate-news{background:#fef3c7;color:#b45309}
-.cate-course{background:#ede9fe;color:#6d28d9}
-
-/* ── 瀏覽統計 ── */
-.stats-row{
-  padding:6px 16px 4px;
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:12px;color:var(--lbl);
-  border-bottom:1px solid var(--divider);
-  background:var(--card);
-}
-.stats-btn{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:4px 11px;border-radius:999px;border:none;
-  background:var(--primary-light);font-size:12px;font-weight:700;
-  color:var(--primary-dark);cursor:pointer;transition:background .15s;
-}
-.stats-btn:hover{background:var(--divider)}
-.vc-badge{display:inline-flex;align-items:center;gap:2px;font-size:11px;color:var(--muted);margin-top:4px}
-.vm-backdrop{
-  display:none;position:fixed;inset:0;
-  background:rgba(17,38,32,.38);z-index:300;
-  align-items:center;justify-content:center;padding:20px;
-  backdrop-filter:blur(5px);
-}
-.vm-backdrop.open{display:flex}
-.vm-box{
-  background:#fff;border-radius:16px;
-  width:min(100%,360px);max-height:80vh;overflow:auto;
-  box-shadow:0 12px 40px rgba(17,38,32,.18);
-}
-.vm-head{
-  padding:16px 16px 12px;border-bottom:1px solid var(--divider);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.vm-title{font-size:15px;font-weight:700;color:var(--heading)}
-.vm-close{
-  width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--muted);transition:background .15s;
-}
-.vm-close:hover{background:var(--divider)}
-.vm-body{padding:10px 16px 16px}
-.vm-empty{text-align:center;color:var(--muted);padding:24px 0;font-size:13px}
-.rank-row{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--divider);
-}
-.rank-row:last-child{border-bottom:none}
+.rank-row{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:11px;align-items:center;padding:13px 0;border-bottom:1px solid var(--gs-line-soft);cursor:pointer}
+.rank-row:hover .rank-name{color:var(--gs-green)}
 .rank-num{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--primary);color:#fff;
-  font-size:11px;font-weight:700;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
+  width:22px;height:22px;display:grid;place-items:center;border-radius:2px;
+  background:var(--gs-surface-alt);color:var(--gs-ink-soft);
+  font-family:var(--gs-font-num);font-size:12px;font-weight:700;
 }
-.rank-num.r1{background:#e9a21b}
-.rank-num.r2{background:#8a8a8a}
-.rank-num.r3{background:#a06432}
-.rank-name{flex:1;font-size:13px;color:var(--val);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rank-cnt{font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:2px}
+.rank-num.r1{background:var(--gs-green);color:#fff}
+.rank-num.r2{background:var(--gs-green-mid);color:#fff}
+.rank-num.r3{background:var(--gs-surface-deep);color:var(--gs-green-dark)}
+.rank-name{font-size:13px;line-height:1.6;font-weight:600;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rail-empty{padding:18px 0;color:var(--gs-faint);font-size:13px}
+.rail-links{display:flex;flex-direction:column}
+.rail-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--gs-line-soft);font-size:14px;font-weight:700}
+.rail-link:hover{color:var(--gs-green)}
+.rail-link .arrow{color:var(--gs-green);transition:transform .2s ease}
+.rail-link:hover .arrow{transform:translateX(4px)}
+
+/* 骨架與狀態 */
+.skel{background:linear-gradient(90deg,var(--gs-line-soft) 25%,var(--gs-surface-alt) 50%,var(--gs-line-soft) 75%);background-size:300% 100%;animation:shimmer 1.5s infinite;border-radius:2px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.skel-lead{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:30px;align-items:center}
+.skel-lead .skel-img{aspect-ratio:4/3}
+.state{padding:80px 20px;text-align:center;color:var(--gs-muted)}
+.state h3{margin-top:16px;font-size:18px;color:var(--gs-ink)}
+.state p{margin-top:8px;font-size:14px}
+.state svg{margin:0 auto;stroke:var(--gs-line-strong)}
+
+/* 全文彈窗 */
+.modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(28,40,34,.55);display:none;align-items:center;justify-content:center;padding:24px}
+.modal-backdrop.open{display:flex}
+.modal{width:min(760px,100%);max-height:88vh;background:var(--gs-surface);border-radius:4px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(28,40,34,.28)}
+.modal-header{display:flex;align-items:flex-start;gap:16px;padding:26px 28px 18px;border-bottom:1px solid var(--gs-line)}
+.modal-title{flex:1;font-size:clamp(21px,2.6vw,29px);line-height:1.35;letter-spacing:-.03em;font-weight:900;color:var(--gs-ink-strong)}
+.modal-close{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;color:var(--gs-muted);transition:background .18s ease,color .18s ease}
+.modal-close:hover{background:var(--gs-surface-alt);color:var(--gs-ink)}
+.modal-scroll{overflow-y:auto;overscroll-behavior:contain}
+.modal-body{padding:20px 28px 26px}
+.modal-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.modal-content{color:var(--gs-ink);font-size:15.5px;line-height:2.05;overflow-wrap:anywhere}
+.modal-content p{margin-bottom:14px}
+.modal-content h2,.modal-content h3{margin:22px 0 10px;line-height:1.5}
+.modal-content ul,.modal-content ol{margin:0 0 14px 22px}
+.modal-content li{margin-bottom:6px}
+.modal-content a{color:var(--gs-green);text-decoration:underline;text-underline-offset:3px}
+.modal-content blockquote{margin:0 0 14px;padding:12px 16px;border-left:2px solid var(--gs-green);background:var(--gs-green-soft)}
+.modal-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding:0 28px 28px}
+.modal-gallery img{width:100%;border-radius:2px;background:var(--gs-surface-alt)}
+
+@media(max-width:1000px){
+  .layout{grid-template-columns:1fr;gap:44px}
+  .rail{position:static}
+  .rail-block{padding-top:6px}
+}
+@media(max-width:820px){
+  .lead,.skel-lead{grid-template-columns:1fr;gap:18px}
+  .lead-figure{aspect-ratio:16/10}
+  .subleads{grid-template-columns:1fr;gap:0;padding:8px 0 12px}
+  .sublead{display:grid;grid-template-columns:110px minmax(0,1fr);gap:20px;align-items:start;padding:20px 0;border-bottom:1px solid var(--gs-line-soft)}
+  .sublead-figure{aspect-ratio:1;margin-bottom:0}
+  .sublead h3{margin-top:0;font-size:17px}
+  .sublead-excerpt{-webkit-line-clamp:2}
+}
+@media(max-width:600px){
+  .shell{width:calc(100% - 32px)}
+  .masthead-main{padding:24px 0 20px}
+  .masthead h1{font-size:38px}
+  .masthead-lead{font-size:13px;max-width:none}
+  .cate-tabs{gap:18px}
+  .cate-tab{font-size:14px;padding:14px 0 11px}
+  .paper{padding:26px 0 48px}
+  .lead h2{font-size:25px}
+  .lead-excerpt{font-size:14px;-webkit-line-clamp:3}
+  .story,.sublead{grid-template-columns:88px minmax(0,1fr);gap:14px;padding:18px 0}
+  .story:hover,.sublead:hover{padding-inline:0;background:transparent}
+  .story h3,.sublead h3{font-size:15.5px}
+  .story-excerpt,.sublead-excerpt{font-size:12.5px;-webkit-line-clamp:2}
+  .modal-backdrop{padding:0;align-items:flex-end}
+  .modal{max-height:92vh;border-radius:4px 4px 0 0}
+  .modal-header{padding:20px 20px 14px}
+  .modal-body{padding:16px 20px 22px}
+  .modal-gallery{padding:0 20px 22px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
 </style>
 </head>
 <body>
 
-<header class="page-header">
-  <div class="header-icon">
-    <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-      <rect x="9" y="3" width="6" height="4" rx="1"/>
-      <path d="M9 12h6M9 16h4"/>
-    </svg>
-  </div>
-  <div>
-    <div class="header-title">公佈欄</div>
-    <div class="header-sub" id="villageLabel"></div>
+<header class="masthead">
+  <div class="shell">
+    <div class="masthead-top">
+      <a class="back-home" href="./index.html">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        回首頁
+      </a>
+      <span class="masthead-stat" id="pageViews" hidden>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="pageViewCount">–</span> 次瀏覽
+      </span>
+    </div>
+    <div class="masthead-main">
+      <div>
+        <div class="masthead-kicker" id="mastheadKicker">舊社里 里民小幫手</div>
+        <h1>里刊公佈欄</h1>
+      </div>
+      <p class="masthead-lead">里內最新消息、政策宣導、活動與課程，都在這裡。<br><span class="dateline" id="todayLine"></span></p>
+    </div>
   </div>
 </header>
 
-<div class="stats-row" id="statsRow" style="display:none">
-  <span style="display:inline-flex;align-items:center;gap:4px">
-    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-    <span id="pageViewCount">–</span> 次瀏覽
-  </span>
-  <button class="stats-btn" onclick="openVmModal()">🔥 熱門排行</button>
-</div>
-<div class="vm-backdrop" id="vmBackdrop" onclick="closeVmModal(event)">
-  <div class="vm-box">
-    <div class="vm-head">
-      <div class="vm-title">🔥 最多點閱 TOP 5</div>
-      <button class="vm-close" onclick="closeVmModalDirect()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="vm-body" id="vmBody"></div>
+<nav class="cate-nav">
+  <div class="shell">
+    <div class="cate-tabs" id="cateTabs" role="tablist" aria-label="公告分類"></div>
   </div>
-</div>
+</nav>
 
-<div id="loadingEl" class="skel-list">
-  <div class="skel-card"><div class="skel-line short"></div><div class="skel-line title"></div><div class="skel-line"></div></div>
-  <div class="skel-card"><div class="skel-line short"></div><div class="skel-line title"></div><div class="skel-line"></div></div>
-  <div class="skel-card"><div class="skel-line short"></div><div class="skel-line title"></div><div class="skel-line"></div></div>
-</div>
-<div id="listEl" class="list" style="display:none"></div>
-<div id="emptyEl" class="empty" style="display:none">
-  <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-    <rect x="9" y="3" width="6" height="4" rx="1"/>
-  </svg>
-  <p>目前尚無公告</p>
-</div>
+<main class="paper">
+  <div class="shell layout">
+    <div>
+      <div id="feed">
+        <div class="skel-lead">
+          <div class="skel skel-img"></div>
+          <div>
+            <div class="skel" style="height:13px;width:34%;margin-bottom:16px"></div>
+            <div class="skel" style="height:30px;width:92%;margin-bottom:10px"></div>
+            <div class="skel" style="height:30px;width:64%;margin-bottom:20px"></div>
+            <div class="skel" style="height:12px;width:100%;margin-bottom:9px"></div>
+            <div class="skel" style="height:12px;width:88%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- Modal -->
+    <aside class="rail">
+      <div class="rail-block">
+        <h4>最多人看</h4>
+        <div id="rankBody"><div class="rail-empty">統計載入中…</div></div>
+      </div>
+      <div class="rail-block">
+        <h4>其他服務</h4>
+        <div class="rail-links">
+          <a class="rail-link" href="./report.html">案件通報<span class="arrow">→</span></a>
+          <a class="rail-link" href="./storeopenlist.html">舊社商圈<span class="arrow">→</span></a>
+          <a class="rail-link" href="./consult.html">里民諮詢<span class="arrow">→</span></a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
-  <div class="modal" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-header">
-      <button class="modal-close" onclick="closeModalDirect()" aria-label="關閉">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
       <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModalDirect()" aria-label="關閉">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
     <div class="modal-scroll">
       <div class="modal-body">
-        <div class="modal-date" id="modalDate"></div>
+        <div class="modal-meta" id="modalMeta"></div>
         <div class="modal-content" id="modalContent"></div>
       </div>
-      <div class="modal-gallery" id="modalGallery" style="display:none"></div>
+      <div class="modal-gallery" id="modalGallery" hidden></div>
     </div>
   </div>
 </div>
 
 <script src="config.js"></script>
 <script src="utils.js"></script>
-<script src="./shared/bulletin.js"></script>
+<script src="./assets/bulletin-news.js?v=20260909"></script>
 <script src="./branding-footer.js"></script>
 </body>
 </html>
