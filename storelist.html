@@ -357,6 +357,11 @@ body{ font-family: var(--font); background: var(--bg); color: var(--val); font-s
   .card-grid{ grid-template-columns: 1fr; padding: 4px 10px 80px; }
   .stats-sidebar{ width:100%; max-width:100%; border-right:none; }
   .group-cards{ grid-template-columns: 1fr; }
+  /* 手機一列塞五樣東西會把標題壓成三行：標題獨佔第一列置中，按鈕排到下一列 */
+  .page-header{ position: static; height: auto; flex-wrap: wrap; justify-content: center; padding: 10px 12px; gap: 8px; }
+  .header-title{ order: -1; flex: 0 0 100%; }
+  .page-header button{ padding: 6px 10px; font-size: 12px; }
+  .filter-wrap{ top: 0; }
 }
 
 /* ── Multi-select / bulk status ── */

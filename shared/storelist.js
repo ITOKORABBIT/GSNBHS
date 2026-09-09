@@ -21,18 +21,18 @@ function showLogin(message) {
   }
 }
 function enterApp() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appShell').style.display = 'block';
   var redirect = new URLSearchParams(location.search).get('redirect') || '';
   if (redirect) {
     try {
       var url = new URL(redirect, location.origin);
       if (url.origin === location.origin && url.pathname !== location.pathname) {
-        location.href = redirect;
+        location.replace(redirect);
         return;
       }
     } catch (e) {}
   }
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
   renderCachedStores();
   loadStoreBrandTagDefs();
   loadAll();

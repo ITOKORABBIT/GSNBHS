@@ -1,7 +1,7 @@
 
 // 僅供已登入的里長／管理者使用
 if (!getSession()) {
-  location.href = 'admin.html?redirect=' + encodeURIComponent(location.href);
+  location.replace('admin.html?redirect=' + encodeURIComponent(location.href));
 }
 
 var FORM_STARTED_AT = Date.now();
@@ -237,7 +237,7 @@ async function uploadOneReportPhoto(file) {
     });
     var json;
     try { json = await res.json(); } catch(pe) { throw new Error('照片上傳回應格式錯誤 (HTTP ' + res.status + ')'); }
-    if (json.code === 401) { clearSession(); location.href = 'admin.html?redirect=' + encodeURIComponent(location.href); throw new Error('登入已逾時'); }
+    if (json.code === 401) { clearSession(); location.replace('admin.html?redirect=' + encodeURIComponent(location.href)); throw new Error('登入已逾時'); }
     if (!res.ok || !json.success || !json.url) throw new Error((json && json.error) || ('照片上傳失敗 (HTTP ' + res.status + ')'));
     return json.url;
   } catch(e) {
@@ -382,7 +382,7 @@ document.getElementById('reportForm').addEventListener('submit', async function(
     });
     var json;
     try { json = await res.json(); } catch(pe) { throw new Error('伺服器回應格式錯誤 (HTTP ' + res.status + ')'); }
-    if (json.code === 401) { clearSession(); location.href = 'admin.html?redirect=' + encodeURIComponent(location.href); throw new Error('登入已逾時'); }
+    if (json.code === 401) { clearSession(); location.replace('admin.html?redirect=' + encodeURIComponent(location.href)); throw new Error('登入已逾時'); }
     if (!res.ok || !json.success) throw new Error((json && json.error) || ('HTTP ' + res.status));
 
     // 4. 顯示成功

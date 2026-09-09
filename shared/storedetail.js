@@ -10,7 +10,7 @@
 })();
 
 var _sess = getSession();
-if (!_sess) { location.href = 'storelist.html?redirect=' + encodeURIComponent(location.href); }
+if (!_sess) { location.replace('storelist.html?redirect=' + encodeURIComponent(location.href)); }
 var gName  = _sess ? _sess.name  : '';
 var gEmail = _sess ? _sess.email : '';
 
@@ -30,7 +30,7 @@ function apiCall(action, extra) {
   .then(function(r){ return r.text(); })
   .then(function(t){ return JSON.parse(t); })
   .then(function(json){
-    if (json.code === 401) { clearSession(); location.href = 'storelist.html?redirect=' + encodeURIComponent(location.href); }
+    if (json.code === 401) { clearSession(); location.replace('storelist.html?redirect=' + encodeURIComponent(location.href)); }
     return json;
   });
 }

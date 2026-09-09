@@ -10,7 +10,7 @@
 })();
 
 (function(){
-  if (!getSession()) { location.href = 'admin.html?redirect=' + encodeURIComponent(location.href); }
+  if (!getSession()) { location.replace('admin.html?redirect=' + encodeURIComponent(location.href)); }
 })();
 
 // ──────────────────────────────────────────
@@ -35,7 +35,7 @@ function apiCall(action, extra) {
   })
   .then(function(r){ return r.json(); })
   .then(function(json){
-    if (json.code === 401) { clearSession(); location.href = 'admin.html?redirect=' + encodeURIComponent(location.href); }
+    if (json.code === 401) { clearSession(); location.replace('admin.html?redirect=' + encodeURIComponent(location.href)); }
     return json;
   });
 }
