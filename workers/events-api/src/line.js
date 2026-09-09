@@ -2319,13 +2319,21 @@ async function buildEmergencyContactFlex(env) {
   };
 }
 
+const MAX_STORE_BUBBLES = 10;
+
 export function buildStoreCarousel(category, stores) {
   const info = LINE_CATEGORY_INFO[category] || { title: category, emoji: "🏪", subtitle: "", color: "#3B82F6" };
   const bubbles = [];
-  for (let i = 0; i < stores.length; i += 3) {
-    bubbles.push(buildStoreBubble(info, stores.slice(i, i + 3)));
-    if (bubbles.length >= 10) break;
+  let shown = 0;
+  for (let i = 0; i < stores.length && bubbles.length < MAX_STORE_BUBBLES; i += 3) {
+    const group = stores.slice(i, i + 3);
+    bubbles.push(buildStoreBubble(info, group));
+    shown += group.length;
   }
+  // 這個分類還有沒排進來的商家時，才在最後補一張「更多商家」，
+  // 全部都列出來了就不必多這一張。
+  const remaining = stores.length - shown;
+  if (remaining > 0) bubbles.push(buildMoreStoresBubble(info, remaining));
   return {
     type: "flex",
     altText: `${info.title}：美食地圖商家清單（${stores.length} 間）`,
@@ -2353,7 +2361,32 @@ export function buildStoreBubble(info, stores) {
       type: "box", layout: "vertical", spacing: "sm",
       contents: [
         { type: "button", style: "primary", color: "#5B9B7B", action: { type: "uri", label: "出示里民憑證", uri: VOUCHER_URL } },
-        { type: "button", style: "secondary", action: { type: "uri", label: "更多商家", uri: STORE_LIST_URL } },
+      ],
+    },
+  };
+}
+
+export function buildMoreStoresBubble(info, remaining) {
+  const color = info.color || "#3B82F6";
+  return {
+    type: "bubble", size: "mega",
+    header: {
+      type: "box", layout: "vertical", backgroundColor: color, paddingAll: "16px",
+      contents: [
+        { type: "text", text: info.title + " " + info.emoji, size: "xl", color: "#FFFFFF", weight: "bold" },
+      ],
+    },
+    body: {
+      type: "box", layout: "vertical", paddingAll: "16px", spacing: "md",
+      contents: [
+        { type: "text", text: "這個分類還有 " + remaining + " 間商家", weight: "bold", size: "lg", wrap: true },
+        { type: "text", text: "點下面的按鈕看完整清單。", size: "sm", color: "#5A7090", wrap: true },
+      ],
+    },
+    footer: {
+      type: "box", layout: "vertical", spacing: "sm",
+      contents: [
+        { type: "button", style: "primary", color: color, action: { type: "uri", label: "更多商家", uri: STORE_LIST_URL } },
       ],
     },
   };

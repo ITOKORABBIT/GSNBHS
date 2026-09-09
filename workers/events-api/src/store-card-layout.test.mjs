@@ -35,17 +35,47 @@ test("LINE store bubble keeps store rows compact", () => {
   assert.equal(bubble.body.contents[1].margin, "md");
 });
 
-test("LINE store carousel shows up to ten cards with three stores each", () => {
-  const stores = Array.from({ length: 35 }, (_, index) => ({
+function fakeStores(count) {
+  return Array.from({ length: count }, (_, index) => ({
     storeId: `STORE-${index + 1}`,
     pubName: `商家 ${index + 1}`,
   }));
-  const carousel = buildStoreCarousel("美食地圖", stores);
+}
 
-  assert.equal(carousel.contents.contents.length, 10);
-  for (const bubble of carousel.contents.contents) {
+test("LINE store carousel shows up to ten cards with three stores each", () => {
+  const carousel = buildStoreCarousel("美食地圖", fakeStores(35));
+  const storeBubbles = carousel.contents.contents.slice(0, 10);
+
+  assert.equal(storeBubbles.length, 10);
+  for (const bubble of storeBubbles) {
     const storeRows = bubble.body.contents.filter((item) => item.type === "box");
     assert.equal(storeRows.length, 3);
+  }
+});
+
+test("商家卡片上不再各掛一顆「更多商家」", () => {
+  const carousel = buildStoreCarousel("美食地圖", fakeStores(3));
+  const [bubble] = carousel.contents.contents;
+  const labels = bubble.footer.contents.map((item) => item.action.label);
+
+  assert.deepEqual(labels, ["出示里民憑證"]);
+});
+
+test("這個分類還有沒列出來的商家時，最後才補一張「更多商家」", () => {
+  const carousel = buildStoreCarousel("美食地圖", fakeStores(35));
+  const last = carousel.contents.contents.at(-1);
+
+  assert.equal(carousel.contents.contents.length, 11);
+  assert.match(last.body.contents[0].text, /還有 5 間商家/);
+  assert.equal(last.footer.contents[0].action.label, "更多商家");
+  assert.equal(last.footer.contents[0].action.uri, "https://gsnbhs.pages.dev/storeopenlist.html");
+});
+
+test("商家全部列得完就不多一張「更多商家」", () => {
+  for (const count of [1, 3, 30]) {
+    const carousel = buildStoreCarousel("美食地圖", fakeStores(count));
+    const labels = carousel.contents.contents.flatMap((bubble) => bubble.footer.contents.map((item) => item.action.label));
+    assert.ok(!labels.includes("更多商家"), count + " 間商家不該出現「更多商家」卡片");
   }
 });
 
