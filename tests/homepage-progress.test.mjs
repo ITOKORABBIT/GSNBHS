@@ -46,7 +46,7 @@ test("demo mode uses labeled sample progress without changing the default data p
 });
 
 test("public cases stay local while personal case lookup remains available through LINE", () => {
-  for (const path of ["report.html", "bulletin.html", "storeopenlist.html", "consult.html"]) {
+  for (const path of ["report.html", "bulletin.html", "eventopenlist.html", "storeopenlist.html", "consult.html"]) {
     assert.match(page, new RegExp(`href="\\./${path}"`));
   }
   assert.equal(page.split(`href="${lineCaseUrl}"`).length - 1, 2);
