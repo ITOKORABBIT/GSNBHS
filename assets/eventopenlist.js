@@ -59,15 +59,28 @@ function regTimeText(e) {
 // 只有「報名中」才開放報名，其餘一律當成結束，未來新增狀態也不會誤開。
 function stateOf(e) {
   if (String(e.status || '') !== '報名中') return 'closed';
+  var now = Date.now();
+  var start = registrationTime(e.registrationStart, -Infinity);
+  var end = registrationTime(e.registrationEnd, Infinity);
+  if (Number.isNaN(start) || Number.isNaN(end) || now > end) return 'closed';
+  if (now < start) return 'upcoming';
   if (e.isFull) return 'full';
   return 'open';
 }
-var STATE_TAG = { open: 'tag-open', full: 'tag-full', closed: 'tag-closed' };
+// 與後端相同：沒有時區的日期時間以台灣時間解讀，不使用瀏覽器所在地。
+function registrationTime(value, fallback) {
+  if (!value) return fallback;
+  var m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 8, +m[5]) : Date.parse(value);
+}
+var STATE_TAG = { open: 'tag-open', full: 'tag-full', upcoming: 'tag-closed', closed: 'tag-closed' };
 
 function stateLabel(e) {
   var st = stateOf(e);
   if (st === 'open') return '報名中';
   if (st === 'full') return '已額滿';
+  if (st === 'upcoming') return '尚未開放';
+  if (e.status === '報名中') return '報名已截止';
   return String(e.status || '') || '已結束';   // 結束的直接顯示後台設定的字
 }
 
@@ -128,8 +141,8 @@ function figureHtml(e, cls) {
 function figureClass(e) {
   return e.imageUrl ? '' : ' no-figure';
 }
-function openAttrs(id) {
-  return 'class="clickable" role="button" tabindex="0" data-id="' + esc(id) + '"';
+function openAttrs(id, classes) {
+  return 'class="clickable' + (classes ? ' ' + classes : '') + '" role="button" tabindex="0" data-id="' + esc(id) + '"';
 }
 
 /* ── 版面 ── */
@@ -165,7 +178,7 @@ function renderFeed(list) {
   if (subs.length) {
     html += '<div class="subleads">';
     subs.forEach(function (e) {
-      html += '<article class="sublead' + figureClass(e) + '" ' + openAttrs(e.eventId) + '>' +
+      html += '<article ' + openAttrs(e.eventId, 'sublead' + figureClass(e)) + '>' +
         figureHtml(e, 'sublead-figure') +
         '<div><div class="story-meta">' + metaHtml(e) + '</div>' +
         '<h3>' + esc(e.eventName) + '</h3>' +
@@ -177,7 +190,7 @@ function renderFeed(list) {
   if (rest.length) {
     html += '<div class="stories"><div class="kicker-line">更多活動</div>';
     rest.forEach(function (e) {
-      html += '<article class="story' + figureClass(e) + '" ' + openAttrs(e.eventId) + '>' +
+      html += '<article ' + openAttrs(e.eventId, 'story' + figureClass(e)) + '>' +
         figureHtml(e, 'story-figure') +
         '<div><div class="story-meta">' + metaHtml(e) + '</div>' +
         '<h3>' + esc(e.eventName) + '</h3>' +
@@ -190,11 +203,12 @@ function renderFeed(list) {
 }
 
 function buildTabs() {
-  var counts = { open: 0, full: 0, closed: 0 };
+  var counts = { open: 0, full: 0, upcoming: 0, closed: 0 };
   allEvents.forEach(function (e) { counts[stateOf(e)]++; });
   var tabs = [{ key: 'all', label: '全部', n: allEvents.length }];
   if (counts.open) tabs.push({ key: 'open', label: '報名中', n: counts.open });
   if (counts.full) tabs.push({ key: 'full', label: '已額滿', n: counts.full });
+  if (counts.upcoming) tabs.push({ key: 'upcoming', label: '尚未開放', n: counts.upcoming });
   if (counts.closed) tabs.push({ key: 'closed', label: '已結束', n: counts.closed });
 
   document.getElementById('cateTabs').innerHTML = tabs.map(function (t) {
@@ -255,10 +269,12 @@ function openById(id) {
   if (st === 'open') {
     cta.innerHTML = '<a class="evt-cta" href="' + esc(lineUrl('我要報名')) + '" target="_blank" rel="noopener">' +
       ICON.line + ' 我要報名</a>' +
-      '<p class="evt-note">會開啟舊社里官方 LINE，跟著訊息選擇活動並填寫資料即可完成報名。</p>';
+      '<p class="evt-note">會開啟' + esc(CONFIG.VILLAGE_NAME) + '官方 LINE，跟著訊息選擇活動並填寫資料即可完成報名。</p>';
   } else if (st === 'full') {
     cta.innerHTML = '<span class="evt-cta disabled">名額已滿</span>' +
       '<p class="evt-note">仍想參加可洽官方 LINE 詢問候補。</p>';
+  } else if (st === 'upcoming') {
+    cta.innerHTML = '<span class="evt-cta disabled">尚未開放報名</span>';
   } else {
     cta.innerHTML = '<span class="evt-cta disabled">報名已結束</span>';
   }
@@ -317,9 +333,13 @@ function load() {
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ action: 'getPublicEvents' })
   })
-    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      if (!r.ok) throw new Error('活動服務暫時無法使用');
+      return r.json();
+    })
     .then(function (d) {
-      if (!d.success || !Array.isArray(d.events) || !d.events.length) {
+      if (!d.success || !Array.isArray(d.events)) throw new Error('活動資料無法讀取');
+      if (!d.events.length) {
         document.getElementById('cateTabs').innerHTML = '';
         renderFeed([]);
         return;

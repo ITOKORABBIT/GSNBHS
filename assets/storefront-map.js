@@ -327,6 +327,7 @@ document.addEventListener('click', function (e) {
 
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.target.closest('[data-stop], a, button, input, select, textarea')) return;
   var item = e.target.closest && e.target.closest('.shop[data-id]');
   if (item) { e.preventDefault(); openStore(item.dataset.id); }
 });

@@ -114,8 +114,8 @@ function figureClass(b) {
   return hasFigure(b) ? '' : ' no-figure';
 }
 
-function openAttrs(id) {
-  return 'class="clickable" role="button" tabindex="0" data-id="' + esc(id) + '"';
+function openAttrs(id, classes) {
+  return 'class="clickable' + (classes ? ' ' + classes : '') + '" role="button" tabindex="0" data-id="' + esc(id) + '"';
 }
 
 /* ── 版面 ── */
@@ -151,7 +151,7 @@ function renderFeed(list) {
   if (subs.length) {
     html += '<div class="subleads">';
     subs.forEach(function (b) {
-      html += '<article class="sublead' + figureClass(b) + '" ' + openAttrs(b.bulletinId) + '>' +
+      html += '<article ' + openAttrs(b.bulletinId, 'sublead' + figureClass(b)) + '>' +
         figureHtml(b, 'sublead-figure') +
         '<div><div class="story-meta">' + metaHtml(b, true) + '</div>' +
         '<h3>' + esc(b.title) + '</h3>' +
@@ -163,7 +163,7 @@ function renderFeed(list) {
   if (rest.length) {
     html += '<div class="stories"><div class="kicker-line">更多消息</div>';
     rest.forEach(function (b) {
-      html += '<article class="story' + figureClass(b) + '" ' + openAttrs(b.bulletinId) + '>' +
+      html += '<article ' + openAttrs(b.bulletinId, 'story' + figureClass(b)) + '>' +
         figureHtml(b, 'story-figure') +
         '<div><div class="story-meta">' + metaHtml(b, true) + '</div>' +
         '<h3>' + esc(b.title) + '</h3>' +
