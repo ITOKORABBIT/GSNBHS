@@ -174,6 +174,22 @@ body{
 .modal-content li{margin-bottom:6px}
 .modal-content a{color:var(--gs-green);text-decoration:underline;text-underline-offset:3px}
 .modal-content blockquote{margin:0 0 14px;padding:12px 16px;border-left:2px solid var(--gs-green);background:var(--gs-green-soft)}
+/* 原始連結（多半是臉書貼文）：次要動作，用外框不跟主要內容搶 */
+.modal-source{padding:0 28px 26px}
+.modal-source:empty{display:none}
+.source-link{
+  display:inline-flex;align-items:center;gap:9px;
+  min-height:44px;padding:0 18px;
+  border:1px solid var(--gs-green-line);border-radius:var(--gs-radius-sm);
+  background:var(--gs-surface);color:var(--gs-green);
+  font-size:14px;font-weight:700;
+  transition:background .18s ease,border-color .18s ease;
+}
+.source-link:hover{background:var(--gs-green-soft);border-color:var(--gs-green)}
+.source-link:focus-visible{outline:2px solid var(--gs-green);outline-offset:3px}
+.source-link svg{flex-shrink:0}
+.source-link-arrow{font-size:12px;opacity:.7}
+
 .modal-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding:0 28px 28px}
 .modal-gallery img{width:100%;border-radius:2px;background:var(--gs-surface-alt)}
 
@@ -212,4 +228,6 @@ body{
   .modal-header{padding:20px 20px 14px}
   .modal-body{padding:16px 20px 22px}
   .modal-gallery{padding:0 20px 22px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .modal-source{padding:0 20px 22px}
+  .source-link{width:100%;justify-content:center;font-size:13.5px}
 }
